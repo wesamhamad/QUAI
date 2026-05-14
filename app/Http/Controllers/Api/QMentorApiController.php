@@ -20,16 +20,25 @@ use Illuminate\Support\Facades\Auth;
 class QMentorApiController extends Controller
 {
     /**
+     * The three featured demo students surfaced by the SPA's student switcher.
+     * Any signed-in user may view these via ?as=<id> so the demo can walk
+     * through the healthy / follow-up / dismissal-risk cases side by side.
+     */
+    private const FEATURED_STUDENT_IDS = ['443211517', '443100021', '443100022'];
+
+    /**
      * Resolve which student to show data for. Faculty can pass ?as=<student_id>
-     * to impersonate any student; everyone else sees their own (or the first
-     * demo student if they're not a student themselves).
+     * to impersonate any student; in this demo every signed-in user may also
+     * pass ?as=<id> for one of the three featured students. Otherwise the
+     * caller sees their own data (or the first demo student).
      */
     private function resolveStudentId(Request $request): string
     {
         $impersonate = $request->query('as');
         if (is_string($impersonate) && $impersonate !== '') {
             $user = Auth::user();
-            if ($user instanceof User && ($user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']))) {
+            $isPrivileged = $user instanceof User && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
+            if ($isPrivileged || \in_array($impersonate, self::FEATURED_STUDENT_IDS, true)) {
                 return $impersonate;
             }
         }
@@ -42,6 +51,53 @@ class QMentorApiController extends Controller
         return DemoData::students()[0]['student_id'];
     }
 
+    /**
+     * Whether the request actually has a student to operate on — either a valid
+     * ?as=<student_id> override, or the signed-in user is themselves a student.
+     * Faculty/Admin browsing QMentor without impersonating anyone do NOT have a
+     * student context, so {@see resolveStudentId} would fall back to the first
+     * demo student for them — which is wrong for self-facing views like the
+     * settings profile.
+     */
+    private function hasStudentContext(Request $request): bool
+    {
+        $impersonate = $request->query('as');
+        $user = Auth::user();
+
+        if (is_string($impersonate) && $impersonate !== '') {
+            $isPrivileged = $user instanceof User && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
+            if ($isPrivileged || \in_array($impersonate, self::FEATURED_STUDENT_IDS, true)) {
+                return true;
+            }
+        }
+
+        return $user instanceof User && !empty($user->student_id);
+    }
+
+    /**
+     * Profile payload for the signed-in user themselves (faculty/admin) when no
+     * student is being impersonated. Mirrors the shape of
+     * {@see DemoData::studentProfile} so the SPA settings page renders it the
+     * same way — just without student-only fields.
+     */
+    private function ownProfile(): array
+    {
+        $user = Auth::user();
+        $name = $user instanceof User ? (string) $user->name : '—';
+
+        return [
+            'profile' => [
+                'student_id' => null,
+                'name'       => $name,
+                'name_en'    => $name,
+                'email'      => $user instanceof User ? (string) $user->email : null,
+                'major'      => null,
+                'faculty'    => null,
+                'status'     => 'active',
+            ],
+        ];
+    }
+
     private function ok(array $data): JsonResponse
     {
         // SPA's useApiWithFallback only trusts source === 'api'. In demo mode the
@@ -51,7 +107,17 @@ class QMentorApiController extends Controller
         return response()->json(['data' => $data, 'source' => 'api']);
     }
 
-    public function profile(Request $r): JsonResponse       { return $this->ok(DemoData::studentProfile($this->resolveStudentId($r))); }
+    public function profile(Request $r): JsonResponse
+    {
+        // Faculty/Admin browsing without impersonating a student have no student
+        // record — return their own account so the settings page shows them,
+        // not the first demo student.
+        if (!$this->hasStudentContext($r)) {
+            return $this->ok($this->ownProfile());
+        }
+
+        return $this->ok(DemoData::studentProfile($this->resolveStudentId($r)));
+    }
     public function courses(Request $r): JsonResponse       { return $this->ok(DemoData::currentCourses($this->resolveStudentId($r))); }
     public function transactions(Request $r): JsonResponse  { return $this->ok(DemoData::transactions($this->resolveStudentId($r))); }
     public function timetable(Request $r): JsonResponse     { return $this->ok(DemoData::timetable($this->resolveStudentId($r))); }
@@ -214,21 +280,25 @@ class QMentorApiController extends Controller
 
     public function academicAdvisor(Request $r): JsonResponse
     {
-        $a = DemoData::advisor($this->resolveStudentId($r));
-        $name = $a['instructor_name'];
-        $parts = explode(' ', trim($name));
+        $studentId = $this->resolveStudentId($r);
+        $a = DemoData::advisor($studentId);
+        $s = DemoData::findStudent($studentId) ?? DemoData::students()[0];
+        $name = trim($a['instructor_name']);
+        $parts = explode(' ', $name);
         $initials = mb_substr($parts[0] ?? '', 0, 1) . mb_substr($parts[array_key_last($parts)] ?? '', 0, 1);
-        return response()->json([
-            'data' => [
-                'nameAr' => $name, 'nameEn' => $name,
-                'titleAr' => 'مرشد أكاديمي', 'titleEn' => 'Academic Advisor',
-                'departmentAr' => '', 'departmentEn' => '',
-                'officeAr' => $a['office'], 'officeEn' => $a['office'],
-                'officeHoursAr' => $a['office_hours'], 'officeHoursEn' => $a['office_hours'],
-                'email' => $a['work_email'],
-                'initials' => $initials,
-            ],
-            'source' => 'demo',
+
+        // The advisor always belongs to the student's own department and college.
+        $departmentAr = 'قسم ' . $s['major'] . ' — ' . $s['faculty'];
+        $departmentEn = ($s['major_en'] ?? $s['major']) . ' Dept. — ' . ($s['faculty_en'] ?? $s['faculty']);
+
+        return $this->ok([
+            'nameAr' => $name, 'nameEn' => $name,
+            'titleAr' => 'مرشد أكاديمي', 'titleEn' => 'Academic Advisor',
+            'departmentAr' => $departmentAr, 'departmentEn' => $departmentEn,
+            'officeAr' => $a['office'], 'officeEn' => $a['office'],
+            'officeHoursAr' => $a['office_hours'], 'officeHoursEn' => $a['office_hours'],
+            'email' => $a['work_email'],
+            'initials' => $initials,
         ]);
     }
 }

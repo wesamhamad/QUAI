@@ -9,33 +9,43 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
+  // QSpark+ is a tabbed, single-surface experience — it ships without the
+  // QMentor side menu, so the nav (and its mobile toggle) are dropped here.
+  const isQSparkPlus = typeof window !== 'undefined'
+    && window.location.pathname.startsWith('/qspark-plus');
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {!isQSparkPlus && (
+        <>
+          {/* Mobile overlay */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+            )}
+          </AnimatePresence>
 
-      <Sidebar
-        collapsed={!sidebarOpen}
-        mobileOpen={mobileMenuOpen}
-        onToggle={() => setSidebarOpen(prev => !prev)}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
+          <Sidebar
+            collapsed={!sidebarOpen}
+            mobileOpen={mobileMenuOpen}
+            onToggle={() => setSidebarOpen(prev => !prev)}
+            onMobileClose={() => setMobileMenuOpen(false)}
+          />
+        </>
+      )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar
           onMenuClick={() => setMobileMenuOpen(true)}
           sidebarCollapsed={!sidebarOpen}
+          hideMenuButton={isQSparkPlus}
         />
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           <AnimatePresence mode="wait">

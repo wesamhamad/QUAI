@@ -468,13 +468,13 @@
                         <input type="radio" name="language" value="ar" checked>
                         <div class="toggle-option-title">العربية</div>
                         <div class="toggle-option-desc">تُطوِّر هذه المبادرة مساعدًا ذكيًا باللغة العربية لجامعة القصيم (QU LLM Assistant)، مُدرَّبًا على البيانات العامة للجامعة — السياسات والأخبار والبرامج الأكاديمية واللوائح والخدمات الإدارية.</div>
-                        <span class="toggle-option-badge badge-green">علام</span>
+                        <span class="toggle-option-badge badge-green">QU LLM</span>
                     </label>
                     <label class="toggle-option" data-value="en">
                         <input type="radio" name="language" value="en">
                         <div class="toggle-option-title">English</div>
                         <div class="toggle-option-desc">This initiative develops an Arabic-language AI assistant for Qassim University (QU LLM Assistant), trained on the university's own public data—policies, news, academic programs, regulations, and administrative services.</div>
-                        <span class="toggle-option-badge badge-green">علام</span>
+                        <span class="toggle-option-badge badge-green">QU LLM</span>
                     </label>
                 </div>
             </div>

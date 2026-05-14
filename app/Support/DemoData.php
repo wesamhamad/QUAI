@@ -98,21 +98,21 @@ class DemoData
     {
         return [
             'acct' => [
-                ['course_code' => 'ACCT401', 'course_name' => 'محاسبة مالية متقدمة',  'course_name_s' => 'Advanced Financial Accounting', 'instructor' => 'د. عبدالله سعد القحطاني', 'credit_hours' => 3, 'section' => '20451'],
+                ['course_code' => 'ACCT401', 'course_name' => 'محاسبة مالية متقدمة',  'course_name_s' => 'Advanced Financial Accounting', 'instructor' => 'د. عبدالله سعد  ', 'credit_hours' => 3, 'section' => '20451'],
                 ['course_code' => 'ACCT421', 'course_name' => 'المراجعة والتدقيق',    'course_name_s' => 'Auditing',                       'instructor' => 'د. خالد عبدالله العتيبي', 'credit_hours' => 3, 'section' => '20452'],
                 ['course_code' => 'FIN401',  'course_name' => 'الإدارة المالية المتقدمة','course_name_s' => 'Advanced Financial Management','instructor' => 'د. منى عبدالعزيز السهلي', 'credit_hours' => 3, 'section' => '20453'],
                 ['course_code' => 'TAX410',  'course_name' => 'المحاسبة الضريبية',    'course_name_s' => 'Tax Accounting',                 'instructor' => 'د. فهد عبدالرحمن البراك', 'credit_hours' => 3, 'section' => '20454'],
                 ['course_code' => 'BUSN320', 'course_name' => 'نظم معلومات إدارية',    'course_name_s' => 'Management Information Systems', 'instructor' => 'د. ريم محمد العبدالكريم', 'credit_hours' => 3, 'section' => '20455'],
             ],
             'cs' => [
-                ['course_code' => 'CS401',  'course_name' => 'هندسة البرمجيات',       'course_name_s' => 'Software Engineering',      'instructor' => 'د. سارة عبدالله القحطاني', 'credit_hours' => 3, 'section' => '30451'],
+                ['course_code' => 'CS401',  'course_name' => 'هندسة البرمجيات',       'course_name_s' => 'Software Engineering',      'instructor' => 'د. سارة عبدالله  ', 'credit_hours' => 3, 'section' => '30451'],
                 ['course_code' => 'CS421',  'course_name' => 'الذكاء الاصطناعي',      'course_name_s' => 'Artificial Intelligence',   'instructor' => 'د. عبدالله ناصر العتيبي',  'credit_hours' => 3, 'section' => '30452'],
                 ['course_code' => 'CS433',  'course_name' => 'شبكات الحاسب',         'course_name_s' => 'Computer Networks',          'instructor' => 'د. فهد عبدالعزيز العنزي',  'credit_hours' => 3, 'section' => '30453'],
                 ['course_code' => 'CS311',  'course_name' => 'نظرية الحوسبة',         'course_name_s' => 'Theory of Computation',     'instructor' => 'د. خالد عبدالله الشمري',    'credit_hours' => 3, 'section' => '30454'],
                 ['course_code' => 'ARAB301','course_name' => 'الكتابة والتعبير',      'course_name_s' => 'Arabic Writing',             'instructor' => 'د. هند عبدالرحمن الزهراني', 'credit_hours' => 2, 'section' => '30455'],
             ],
             'ee' => [
-                ['course_code' => 'EE320', 'course_name' => 'أنظمة القوى الكهربائية', 'course_name_s' => 'Electric Power Systems',     'instructor' => 'د. عمر عبدالله القحطاني',  'credit_hours' => 3, 'section' => '40451'],
+                ['course_code' => 'EE320', 'course_name' => 'أنظمة القوى الكهربائية', 'course_name_s' => 'Electric Power Systems',     'instructor' => 'د. عمر عبدالله  ',  'credit_hours' => 3, 'section' => '40451'],
                 ['course_code' => 'EE340', 'course_name' => 'الإلكترونيات الرقمية',    'course_name_s' => 'Digital Electronics',        'instructor' => 'د. فهد عبدالعزيز السهلي',  'credit_hours' => 3, 'section' => '40452'],
                 ['course_code' => 'EE360', 'course_name' => 'نظرية التحكم',           'course_name_s' => 'Control Theory',             'instructor' => 'د. خالد عبدالله العنزي',   'credit_hours' => 3, 'section' => '40453'],
                 ['course_code' => 'EE380', 'course_name' => 'الاتصالات التماثلية',     'course_name_s' => 'Analog Communications',      'instructor' => 'د. ريم محمد البراك',         'credit_hours' => 3, 'section' => '40454'],
@@ -287,7 +287,7 @@ class DemoData
             'acct' => [
                 ['course_code' => 'ACCT301', 'course_name' => 'محاسبة مالية متوسطة (1)', 'letter_grade' => 'A+', 'numeric_grade' => 96, 'semester' => '465', 'credit_hours' => 3],
                 ['course_code' => 'ACCT311', 'course_name' => 'محاسبة التكاليف',         'letter_grade' => 'A',  'numeric_grade' => 92, 'semester' => '465', 'credit_hours' => 3],
-                ['course_code' => 'BUSN330', 'course_name' => 'قانون تجاري',             'letter_grade' => 'A-', 'numeric_grade' => 89, 'semester' => '465', 'credit_hours' => 3],
+                ['course_code' => 'BUSN330', 'course_name' => 'قانون تجاري',             'letter_grade' => 'A',  'numeric_grade' => 89, 'semester' => '465', 'credit_hours' => 3],
                 ['course_code' => 'STAT302', 'course_name' => 'إحصاء تطبيقي للأعمال',    'letter_grade' => 'A',  'numeric_grade' => 91, 'semester' => '465', 'credit_hours' => 3],
                 ['course_code' => 'ISLM301', 'course_name' => 'أخلاقيات المهنة',         'letter_grade' => 'A',  'numeric_grade' => 94, 'semester' => '465', 'credit_hours' => 3],
             ],
@@ -302,7 +302,7 @@ class DemoData
                 ['course_code' => 'EE220', 'course_name' => 'الدوائر الكهربائية (2)',  'letter_grade' => 'B+', 'numeric_grade' => 86, 'semester' => '465', 'credit_hours' => 3],
                 ['course_code' => 'EE240', 'course_name' => 'الإلكترونيات (1)',         'letter_grade' => 'A',  'numeric_grade' => 93, 'semester' => '465', 'credit_hours' => 3],
                 ['course_code' => 'EE260', 'course_name' => 'الإشارات والنظم',         'letter_grade' => 'B',  'numeric_grade' => 82, 'semester' => '465', 'credit_hours' => 3],
-                ['course_code' => 'MATH301','course_name' => 'المعادلات التفاضلية',     'letter_grade' => 'A-', 'numeric_grade' => 89, 'semester' => '465', 'credit_hours' => 3],
+                ['course_code' => 'MATH301','course_name' => 'المعادلات التفاضلية',     'letter_grade' => 'A',  'numeric_grade' => 89, 'semester' => '465', 'credit_hours' => 3],
             ],
         ][self::bundleKey($studentId)];
     }
@@ -477,14 +477,14 @@ class DemoData
     {
         return [
             'acct' => [
-                'instructor_name' => 'د. عبدالعزيز محمد القحطاني',
+                'instructor_name' => 'د. عبدالعزيز محمد  ',
                 'work_email'      => 'a.qahtani@qu.edu.sa',
                 'phone'           => '0163800123',
                 'office'          => 'مبنى C2 - مكتب 142',
                 'office_hours'    => 'الأحد والثلاثاء 10:00-12:00',
             ],
             'cs' => [
-                'instructor_name' => 'د. سارة عبدالله القحطاني',
+                'instructor_name' => 'د. سارة عبدالله  ',
                 'work_email'      => 's.qahtani@qu.edu.sa',
                 'phone'           => '0163800234',
                 'office'          => 'مبنى B6 - مكتب 318',
@@ -571,7 +571,7 @@ class DemoData
         ], fn ($g) => !empty($g['skills']))) ]]];
     }
 
-    /** Mimics: pre-computed labor-market alignment that OpenAI used to generate. */
+    /** Mimics: pre-computed labor-market alignment that the AI provider used to generate. */
     public static function marketAnalysis(string $studentId): array
     {
         return [
@@ -615,6 +615,11 @@ class DemoData
                 ['title' => 'SAP S/4HANA Financial Accounting', 'platform' => 'Udemy', 'why' => 'مهارة ERP مطلوبة بقوة (وزن 82).',       'url' => 'https://www.udemy.com/topic/sap/', 'live' => true],
                 ['title' => 'Python for Financial Analysts',    'platform' => 'edX', 'why' => 'يدعم التحليل الكمي وأتمتة التقارير.',     'url' => 'https://www.edx.org/search?q=python+finance', 'live' => true],
             ],
+            'jobs' => [
+                ['title' => 'محلل بيانات مالية', 'why' => 'يستثمر إتقانك لتحليل البيانات وExcel، مع فرصة لسدّ فجوة Power BI.', 'url' => 'https://www.google.com/search?q=محلل+بيانات+مالية+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'محاسب IFRS معتمد',  'why' => 'تطابق مباشر مع إتقانك لمعايير IFRS وإعداد التقارير المالية.',     'url' => 'https://www.google.com/search?q=محاسب+IFRS+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'مدقق داخلي',        'why' => 'مرشّحة لسدّ فجوة المراجعة الداخلية المطلوبة (وزن 70).',          'url' => 'https://www.google.com/search?q=مدقق+داخلي+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+            ],
         ];
     }
 
@@ -652,6 +657,11 @@ class DemoData
                 ['title' => 'Docker & Kubernetes — DevOps Path','platform' => 'Coursera',     'why' => 'يفتح أبواب وظائف SRE/DevOps.','url' => 'https://www.coursera.org/search?query=kubernetes', 'live' => true],
                 ['title' => 'Cybersecurity Fundamentals',       'platform' => 'edX',          'why' => 'متطلب توظيف نامٍ بسرعة في القطاعين العام والخاص.', 'url' => 'https://www.edx.org/search?q=cybersecurity', 'live' => true],
             ],
+            'jobs' => [
+                ['title' => 'مهندس سحابة (Cloud Engineer)', 'why' => 'يسدّ فجوة AWS الأعلى طلباً في السوق (وزن 88).',          'url' => 'https://www.google.com/search?q=cloud+engineer+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'مطوّر Full-Stack',              'why' => 'تطابق مع إتقانك لـ React وهياكل البيانات وSQL.',         'url' => 'https://www.google.com/search?q=full+stack+developer+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'محلل بيانات',                   'why' => 'يستثمر مهاراتك في Python وSQL وتحليل البيانات.',         'url' => 'https://www.google.com/search?q=محلل+بيانات+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+            ],
         ];
     }
 
@@ -686,6 +696,11 @@ class DemoData
                 ['title' => 'PLC Programming Fundamentals',  'platform' => 'Udemy',   'why' => 'يسدّ أعلى فجوة (وزن 82).',                'url' => 'https://www.udemy.com/topic/plc/', 'live' => true],
                 ['title' => 'Renewable Energy Systems',      'platform' => 'Coursera','why' => 'مجال نامٍ بسرعة في السعودية.',           'url' => 'https://www.coursera.org/search?query=renewable+energy', 'live' => true],
                 ['title' => 'Python for Engineers',          'platform' => 'edX',     'why' => 'يدعم أتمتة الحسابات وتحليل البيانات.', 'url' => 'https://www.edx.org/search?q=python+engineers', 'live' => true],
+            ],
+            'jobs' => [
+                ['title' => 'مهندس أتمتة صناعية', 'why' => 'مرشّحة لسدّ فجوة PLC والأتمتة الصناعية المطلوبة (وزن 82).', 'url' => 'https://www.google.com/search?q=مهندس+أتمتة+صناعية+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'مهندس طاقة متجددة',  'why' => 'مجال نامٍ ضمن رؤية 2030 ويسدّ فجوة مهارية لديك.',          'url' => 'https://www.google.com/search?q=مهندس+طاقة+متجددة+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
+                ['title' => 'مهندس أنظمة مدمجة',  'why' => 'تطابق مع إتقانك للإلكترونيات الرقمية وتصميم PCB.',         'url' => 'https://www.google.com/search?q=embedded+systems+engineer+وظائف+السعودية&ibp=htl;jobs', 'live' => true],
             ],
         ];
     }
@@ -746,10 +761,87 @@ class DemoData
         ];
     }
 
-    /** Mimics: GET https://api.qu.edu.sa/api/v3/students/{id}/warnings */
+    /**
+     * Mimics: GET https://api.qu.edu.sa/api/v3/students/{id}/warnings
+     *
+     * Academic-standing warnings per student. The three featured demo cases
+     * are deliberately spread across the risk spectrum so the QMentor SPA's
+     * student switcher can demo each state:
+     *   • 443211517 (فيصل)  — سليم: لا إنذارات.
+     *   • 443100021 (نوره)  — متابعة: إنذار أكاديمي واحد.
+     *   • 443100022 (محمد)  — حرج: إنذاران، الإنذار الثالث = فصل أكاديمي،
+     *     فتُحجز جلسة إرشادية تلقائيًا مع المرشد لمعالجة الوضع.
+     */
     public static function warnings(string $studentId): array
     {
-        return [];
+        $advisor = self::advisor($studentId);
+
+        $packs = [
+            // سليم — لا إنذارات على السجل.
+            '443211517' => [
+                'student_id'    => '443211517',
+                'warning_count' => 0,
+                'warnings'      => [],
+            ],
+
+            // متابعة — إنذار أكاديمي واحد، تنبيه مبكّر دون حجز تلقائي.
+            '443100021' => [
+                'student_id'    => '443100021',
+                'warning_count' => 1,
+                'warnings'      => [
+                    [
+                        'semester'   => '462',
+                        'reason_ar'  => 'انخفاض المعدل التراكمي دون 2.00',
+                        'reason_en'  => 'Cumulative GPA fell below 2.00',
+                        'entry_date' => '2026-02-12',
+                    ],
+                ],
+                'escalation'    => [
+                    'level'       => 'follow_up',
+                    'headline_ar' => 'متابعة أكاديمية',
+                    'headline_en' => 'Academic Follow-up',
+                    'message_ar'  => 'لديك إنذار أكاديمي واحد. رفع المعدل التراكمي فوق 2.00 هذا الفصل يلغي الإنذار — تابِع خطة المعالجة قبل تصاعد الوضع.',
+                    'message_en'  => 'You have one academic warning. Raising your cumulative GPA above 2.00 this term clears it — follow the action plan before it escalates.',
+                ],
+            ],
+
+            // حرج — إنذاران، الإنذار الثالث يؤدي إلى الفصل الأكاديمي.
+            '443100022' => [
+                'student_id'    => '443100022',
+                'warning_count' => 2,
+                'warnings'      => [
+                    [
+                        'semester'   => '461',
+                        'reason_ar'  => 'انخفاض المعدل التراكمي دون 2.00',
+                        'reason_en'  => 'Cumulative GPA fell below 2.00',
+                        'entry_date' => '2025-06-03',
+                    ],
+                    [
+                        'semester'   => '462',
+                        'reason_ar'  => 'استمرار انخفاض المعدل التراكمي لفصل ثانٍ',
+                        'reason_en'  => 'Cumulative GPA remained below 2.00 for a second term',
+                        'entry_date' => '2026-02-12',
+                    ],
+                ],
+                'escalation'    => [
+                    'level'        => 'dismissal_risk',
+                    'headline_ar'  => 'خطر الفصل الأكاديمي',
+                    'headline_en'  => 'Academic Dismissal Risk',
+                    'message_ar'   => 'لديك إنذاران أكاديميان. الإنذار الثالث يؤدي إلى الفصل الأكاديمي — حجزت المنصة جلسة إرشادية تلقائيًا مع مرشدك الأكاديمي لمعالجة الوضع.',
+                    'message_en'   => 'You have two academic warnings. A third leads to academic dismissal — the platform has auto-booked an advising session with your academic advisor to address it.',
+                    'auto_session' => [
+                        'advisor_name' => trim($advisor['instructor_name']),
+                        'date'         => now()->addWeekday()->format('Y-m-d'),
+                        'time'         => '10:00 - 10:30',
+                        'location'     => $advisor['office'],
+                        'status_ar'    => 'مؤكدة تلقائيًا',
+                        'status_en'    => 'Auto-confirmed',
+                    ],
+                ],
+            ],
+        ];
+
+        return $packs[$studentId] ?? $packs['443211517'];
     }
 
     // ─── Academic plan (per-major; SPA mapApiToCourses/mapPlanToElectives shape)
@@ -993,11 +1085,11 @@ class DemoData
 
         $defaults = [
             'acct' => [
-                'instructors' => ['د. عبدالله سعد القحطاني', 'د. خالد عبدالله العتيبي', 'د. منى عبدالعزيز السهلي'],
+                'instructors' => ['د. عبدالله سعد  ', 'د. خالد عبدالله العتيبي', 'د. منى عبدالعزيز السهلي'],
                 'rooms'       => ['C2-105', 'C2-204', 'C1-310', 'C2-118', 'C3-401'],
             ],
             'cs' => [
-                'instructors' => ['د. سارة عبدالله القحطاني', 'د. عبدالله ناصر العتيبي', 'د. فهد عبدالعزيز العنزي'],
+                'instructors' => ['د. سارة عبدالله  ', 'د. عبدالله ناصر العتيبي', 'د. فهد عبدالعزيز العنزي'],
                 'rooms'       => ['B6-201', 'B6-304', 'B6-220', 'B6-118', 'B2-110'],
             ],
             'ee' => [
@@ -1208,6 +1300,12 @@ class DemoData
     }
 
     // ── Chatbot (Smart Advisor) demo data ────────────────────────────────
+    //
+    // In production the QMentor chatbot is backed by the fine-tuned ALLaM model
+    // hosted on Hugging Face: https://huggingface.co/wesam3/qu-llm-assistant-allam
+    // The methods below are dummy data — a realistic conversation list, message
+    // history, and keyword-matched answers — so the chat experience can be
+    // explored end-to-end without that model being wired up.
 
     /** Conversation list for the QMentor chatbot sidebar. */
     public static function chatbotConversations(string $studentId): array

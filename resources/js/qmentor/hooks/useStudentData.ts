@@ -37,16 +37,16 @@ function useApiWithFallback<T>(
   };
 }
 
-export function useStudentProfile<T>(mockData: T) {
-  return useApiWithFallback(['qmentor', 'profile'], () => apiClient.getStudentProfile(), mockData);
+export function useStudentProfile<T>(mockData: T, studentId?: string | null) {
+  return useApiWithFallback(['qmentor', 'profile', studentId ?? 'self'], () => apiClient.getStudentProfile(studentId), mockData);
 }
 
-export function useCurrentCourses<T>(mockData: T) {
-  return useApiWithFallback(['qmentor', 'courses'], () => apiClient.getCurrentCourses(), mockData);
+export function useCurrentCourses<T>(mockData: T, studentId?: string | null) {
+  return useApiWithFallback(['qmentor', 'courses', studentId ?? 'self'], () => apiClient.getCurrentCourses(studentId), mockData);
 }
 
-export function useAcademicTransactions<T>(mockData: T) {
-  return useApiWithFallback(['qmentor', 'transactions'], () => apiClient.getAcademicTransactions(), mockData);
+export function useAcademicTransactions<T>(mockData: T, studentId?: string | null) {
+  return useApiWithFallback(['qmentor', 'transactions', studentId ?? 'self'], () => apiClient.getAcademicTransactions(studentId), mockData);
 }
 
 export function useStudentPlan<T>(mockData: T) {
@@ -57,8 +57,8 @@ export function useTimetable<T>(mockData: T) {
   return useApiWithFallback(['qmentor', 'timetable'], () => apiClient.getTimetable(), mockData);
 }
 
-export function useAbsences<T>(mockData: T) {
-  return useApiWithFallback(['qmentor', 'absences'], () => apiClient.getAbsences(), mockData);
+export function useAbsences<T>(mockData: T, studentId?: string | null) {
+  return useApiWithFallback(['qmentor', 'absences', studentId ?? 'self'], () => apiClient.getAbsences(studentId), mockData);
 }
 
 export function useAllCourseGrades<T>(mockData: T) {

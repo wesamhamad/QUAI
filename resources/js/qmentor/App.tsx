@@ -1,5 +1,5 @@
-import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Suspense, lazy, useEffect, type ComponentType } from 'react';
+import { Routes, Route, useSearchParams } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import Dashboard from './pages/Dashboard';
 import ErrorBoundary, { SectionErrorBoundary } from './components/shared/ErrorBoundary';
@@ -9,26 +9,50 @@ import { useLanguage } from './contexts/LanguageContext';
 import { canAccess } from './lib/rolePermissions';
 import type { ReactNode } from 'react';
 
+// Wraps lazy() so that a chunk-load failure (typically a stale main.js
+// referencing a hash that was replaced by a rebuild/deploy) triggers a
+// single page reload instead of surfacing a permanent ErrorBoundary state.
+function lazyWithRetry<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+  return lazy(async () => {
+    const key = 'qmentor:chunk-reload';
+    const alreadyReloaded = sessionStorage.getItem(key) === '1';
+    try {
+      const mod = await factory();
+      sessionStorage.removeItem(key);
+      return mod;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const isChunkError = /dynamically imported module|Failed to fetch|Loading chunk|ChunkLoadError|Importing a module script failed/i.test(msg);
+      if (isChunkError && !alreadyReloaded) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+        return new Promise<{ default: T }>(() => {});
+      }
+      throw err;
+    }
+  });
+}
+
 // Lazy-load pages for code splitting
-const DigitalTwin = lazy(() => import('./pages/DigitalTwin/index'));
-const AdvisorDashboard = lazy(() => import('./pages/AdvisorDashboard/index'));
-const RiskAnalytics = lazy(() => import('./pages/RiskAnalytics/index'));
-const StudyPlan = lazy(() => import('./pages/StudyPlan/index'));
-const Chatbot = lazy(() => import('./pages/Chatbot/index'));
-const Alerts = lazy(() => import('./pages/Alerts/index'));
-const Faculty = lazy(() => import('./pages/Faculty/index'));
-const PeerTutoring = lazy(() => import('./pages/PeerTutoring/index'));
-const Recovery = lazy(() => import('./pages/Recovery/index'));
-const Benchmarking = lazy(() => import('./pages/Benchmarking/index'));
-const Settings = lazy(() => import('./pages/Settings/index'));
-const Mobile = lazy(() => import('./pages/Mobile/index'));
-const AgentActivity = lazy(() => import('./pages/AgentActivity/index'));
-const StudentDashboard = lazy(() => import('./pages/StudentDashboard/index'));
-const IndicatorDetail = lazy(() => import('./pages/StudentDashboard/IndicatorDetail'));
-const ActionPlan = lazy(() => import('./pages/StudentDashboard/ActionPlan'));
-const Schedule = lazy(() => import('./pages/StudentDashboard/Schedule'));
-const ContactAdvisor = lazy(() => import('./pages/StudentDashboard/ContactAdvisor'));
-const Grades = lazy(() => import('./pages/Grades/index'));
+const DigitalTwin = lazyWithRetry(() => import('./pages/DigitalTwin/index'));
+const AdvisorDashboard = lazyWithRetry(() => import('./pages/AdvisorDashboard/index'));
+const RiskAnalytics = lazyWithRetry(() => import('./pages/RiskAnalytics/index'));
+const StudyPlan = lazyWithRetry(() => import('./pages/StudyPlan/index'));
+const Chatbot = lazyWithRetry(() => import('./pages/Chatbot/index'));
+const Alerts = lazyWithRetry(() => import('./pages/Alerts/index'));
+const Faculty = lazyWithRetry(() => import('./pages/Faculty/index'));
+const PeerTutoring = lazyWithRetry(() => import('./pages/PeerTutoring/index'));
+const Recovery = lazyWithRetry(() => import('./pages/Recovery/index'));
+const Benchmarking = lazyWithRetry(() => import('./pages/Benchmarking/index'));
+const Settings = lazyWithRetry(() => import('./pages/Settings/index'));
+const Mobile = lazyWithRetry(() => import('./pages/Mobile/index'));
+const AgentActivity = lazyWithRetry(() => import('./pages/AgentActivity/index'));
+const StudentDashboard = lazyWithRetry(() => import('./pages/StudentDashboard/index'));
+const IndicatorDetail = lazyWithRetry(() => import('./pages/StudentDashboard/IndicatorDetail'));
+const ActionPlan = lazyWithRetry(() => import('./pages/StudentDashboard/ActionPlan'));
+const Schedule = lazyWithRetry(() => import('./pages/StudentDashboard/Schedule'));
+const ContactAdvisor = lazyWithRetry(() => import('./pages/StudentDashboard/ContactAdvisor'));
+const Grades = lazyWithRetry(() => import('./pages/Grades/index'));
 
 function RoleGuard({ path, children }: { path: string; children: ReactNode }) {
   const { role } = useRole();
@@ -58,6 +82,34 @@ function RoleGuard({ path, children }: { path: string; children: ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * Keeps the active student-impersonation id (?as=<id>) pinned to the URL.
+ * react-router <NavLink>/<Link> drop the query string on navigation, which
+ * would silently revert every API call back to the logged-in user. We mirror
+ * ?as= into sessionStorage and re-append it whenever a navigation strips it,
+ * so the student switcher's selection survives across the whole SPA session.
+ */
+function ImpersonationPin() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('as');
+    if (fromUrl) {
+      try { sessionStorage.setItem('qmentor:as', fromUrl); } catch { /* ignore */ }
+      return;
+    }
+    let stored: string | null = null;
+    try { stored = sessionStorage.getItem('qmentor:as'); } catch { /* ignore */ }
+    if (stored) {
+      const next = new URLSearchParams(searchParams);
+      next.set('as', stored);
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  return null;
+}
+
 /** Wraps a lazy-loaded page with error boundary and Suspense fallback */
 function PageRoute({ path, children, fallback }: { path: string; children: ReactNode; fallback: ReactNode }) {
   return (
@@ -74,6 +126,7 @@ function PageRoute({ path, children, fallback }: { path: string; children: React
 export default function App() {
   return (
     <ErrorBoundary>
+      <ImpersonationPin />
       <AppShell>
         <Routes>
           <Route path="/" element={<Dashboard />} />

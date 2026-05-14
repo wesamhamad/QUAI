@@ -37,7 +37,7 @@
             <span class="q-nav-label">QMentor</span>
         </a>
 
-        <a href="{{ route('qspark.index') }}"
+        <a href="{{ route('qspark-plus') }}"
            class="q-nav-item {{ request()->is('qspark') || request()->is('qspark-plus*') ? 'active' : '' }}">
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
@@ -65,14 +65,18 @@
         @endif
 
         @if($isAdmin)
+        @php($dashCatalog = \App\Http\Controllers\QDecisionController::dashboardCatalog())
         <div class="q-nav-divider"></div>
-        <a href="{{ route('q-decision.self-report') }}"
-           class="q-nav-item {{ request()->routeIs('q-decision.self-report') ? 'active' : '' }}">
-            <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 14l4-4 4 4 5-5"/>
-            </svg>
-            <span class="q-nav-label">التقرير الذاتي</span>
-        </a>
+        <div class="q-nav-section-label">Dashboards</div>
+        @foreach($dashCatalog as $dashItem)
+            <a href="{{ $dashItem['url'] }}"
+               class="q-nav-item {{ $dashItem['active'] ? 'active' : '' }}">
+                <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $dashItem['icon'] }}"/>
+                </svg>
+                <span class="q-nav-label">{{ $dashItem['title'] }}</span>
+            </a>
+        @endforeach
         <a href="{{ route('q-decision.digital-advisor') }}"
            class="q-nav-item {{ request()->routeIs('q-decision.digital-advisor') ? 'active' : '' }}">
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">

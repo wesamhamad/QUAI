@@ -2,7 +2,10 @@
 // HTTP status, JS console errors, and uncaught page errors.
 import puppeteer from 'puppeteer';
 
-const BASE = 'http://localhost:8077';
+// Defaults to the local dev server; in production it targets https://quailab.dev.
+// Override explicitly with SMOKE_BASE_URL if needed.
+const BASE = process.env.SMOKE_BASE_URL
+    || (process.env.APP_ENV === 'production' ? 'https://quailab.dev' : 'http://localhost:8077');
 
 // Each page entry is either a string (expect 2xx) or {url, expectStatus} for negative checks.
 const USERS = [

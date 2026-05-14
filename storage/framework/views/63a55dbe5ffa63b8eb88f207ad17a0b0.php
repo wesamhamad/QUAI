@@ -9,10 +9,16 @@
     // In demo mode every authenticated user sees all three apps; faculty also
     // gets a "Students" card on top to switch into any student's data.
     $showQMentor = true;
-    $showQSpark = true;
     $showDigitalRecord = true;
     $showQSparkSystem = true;
     $showQDecisionSystem = $isAdmin;
+
+    // Map the QUAI session role onto QSPARK's demo quick-login route so the
+    // standalone Q SPARK app (./QSPARK, served on :8001) signs the user in
+    // with the matching role and shows aligned identity/data on every page.
+    $qsparkRole = $isAdmin ? 'admin' : ($isFaculty ? 'faculty' : 'student');
+    $qsparkBaseUrl = config('quai.qspark_demo_url', 'http://127.0.0.1:8001');
+    $qsparkUrl = rtrim($qsparkBaseUrl, '/') . '/dev/' . $qsparkRole;
 ?>
 
 <div class="q-fade-in q-home" style="max-width: var(--q-content-max); margin: 0 auto;">
@@ -111,8 +117,8 @@
                 </a>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showQSpark): ?>
-                <a href="<?php echo e(route('qspark.index')); ?>" class="q-sub-card" data-tone="green">
+                
+                <a href="<?php echo e(route('qspark-demo')); ?>" class="q-sub-card" data-tone="green">
                     <div class="q-sub-card-icon" style="position: relative;">
                         <span style="font-weight: 800; font-size: 1.25rem; color: var(--q-primary); line-height: 1;">Q</span>
                         <svg width="11" height="13" viewBox="0 0 24 24" fill="var(--q-primary)" stroke="var(--q-primary)" stroke-width="1.5" stroke-linejoin="round" style="position: absolute; top: 4px; inset-inline-end: 4px;">
@@ -123,9 +129,9 @@
                     <div class="q-sub-card-subtitle">QSpark</div>
                     <p class="q-sub-card-desc">
                         محتوى تعليمي ذكي، تجارب تعلم تفاعلية، اختبارات وتقييمات ذكية، ومجتمع تعلم تفاعلي.
+                        ستدخل تلقائيًا بنفس صلاحيتك الحالية (<?php echo e($qsparkRole); ?>).
                     </p>
                 </a>
-                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
             </div>
         </section>

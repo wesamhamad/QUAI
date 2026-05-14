@@ -16,6 +16,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * The SPA's useSmartAdvisor hook calls /api/v1/smart-advisor/*. In the real
  * product these endpoints proxied an LLM; here every response is served from
  * {@see DemoData} so the chatbot works without any sidecar service.
+ *
+ * The production model is the fine-tuned ALLaM assistant hosted on Hugging Face:
+ * https://huggingface.co/wesam3/qu-llm-assistant-allam — in this demo build the
+ * conversations, history, and streamed answers are all canned dummy data so the
+ * chat feature can be understood end-to-end without that model running.
  */
 class SmartAdvisorController extends Controller
 {

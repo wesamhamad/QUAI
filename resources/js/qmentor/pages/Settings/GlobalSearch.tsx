@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { SearchResult } from './types';
+import { dropdownItemBase, dropdownItemActive, dropdownItemInactive } from '../../components/ui/dropdownStyles';
 import {
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -135,25 +136,24 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
               const Icon = typeIcons[type as SearchResult['type']];
               return (
                 <div key={type}>
-                  <div className="px-4 py-1.5 text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <div className="px-4 py-2 text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                     {t(typeLabels[type as SearchResult['type']].ar, typeLabels[type as SearchResult['type']].en)}
                   </div>
                   {items.map(item => {
                     flatIndex++;
                     const idx = flatIndex;
+                    const isActive = selectedIndex === idx;
                     return (
                       <button
                         key={item.id}
                         onClick={() => { navigate(item.href); onClose(); }}
                         onMouseEnter={() => setSelectedIndex(idx)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-start transition-colors ${
-                          selectedIndex === idx
-                            ? 'bg-sa-50 dark:bg-sa-950/30'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        className={`${dropdownItemBase} items-center px-4 text-start ${
+                          isActive ? dropdownItemActive : dropdownItemInactive
                         }`}
                       >
                         <Icon className={`w-4 h-4 shrink-0 ${
-                          selectedIndex === idx ? 'text-sa-500' : 'text-gray-400'
+                          isActive ? 'text-sa-600 dark:text-sa-400' : 'text-gray-400 dark:text-gray-500'
                         }`} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-gray-900 dark:text-white truncate">

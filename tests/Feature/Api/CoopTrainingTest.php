@@ -102,7 +102,6 @@ class CoopTrainingTest extends TestCase
         $this->assertArrayHasKey('timeout', $config);
         $this->assertArrayHasKey('max_history_messages', $config);
         $this->assertArrayHasKey('scrape_urls', $config);
-        $this->assertArrayHasKey('groq', $config);
     }
 
     public function test_coop_training_config_has_reasonable_defaults(): void
@@ -111,17 +110,6 @@ class CoopTrainingTest extends TestCase
         $this->assertEquals(0.2, config('quai.coop_training.temperature'));
         $this->assertEquals(60, config('quai.coop_training.timeout'));
         $this->assertLessThanOrEqual(20, config('quai.coop_training.max_history_messages'));
-    }
-
-    public function test_coop_training_groq_config_structure(): void
-    {
-        $groq = config('quai.coop_training.groq');
-
-        $this->assertArrayHasKey('enabled', $groq);
-        $this->assertArrayHasKey('api_key', $groq);
-        $this->assertArrayHasKey('model', $groq);
-        $this->assertArrayHasKey('max_tokens', $groq);
-        $this->assertArrayHasKey('timeout', $groq);
     }
 
     // ── Provision API Tests ──

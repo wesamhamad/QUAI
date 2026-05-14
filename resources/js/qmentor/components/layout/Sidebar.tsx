@@ -68,6 +68,12 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
     && searchParams.get('solo') !== '1';
   const isRtl = dir === 'rtl';
   const visibleItems = navItems.filter(item => canAccess(role, item.path));
+  // The "Q" brand mark leaves the SPA and returns to the QUAI platform home.
+  const homeUrl = (window as { __qmentor_links?: { home?: string } })
+    .__qmentor_links?.home ?? '/';
+  // Carry the active student-impersonation id onto every nav link so switching
+  // students survives sidebar navigation (react-router otherwise drops ?as=).
+  const asParam = searchParams.get('as');
 
   const CollapseIcon = isRtl
     ? (collapsed ? ChevronDoubleLeftIcon : ChevronDoubleRightIcon)
@@ -85,22 +91,30 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
         ${collapsed ? 'w-[68px]' : 'w-64'}
       `}
     >
-      {/* Header */}
+      {/* Header — the brand mark links back to the QUAI platform home. */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
         {!collapsed && (
-          <div className="flex items-center gap-2">
+          <a
+            href={homeUrl}
+            title={t('العودة إلى الرئيسية', 'Back to home')}
+            className="flex items-center gap-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sa-500"
+          >
             <div className="w-8 h-8 rounded-lg bg-sa-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm">Q</span>
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-lg">
               {isQSparkBrand ? '+QSpark' : t('QMentor', 'QMentor')}
             </span>
-          </div>
+          </a>
         )}
         {collapsed && (
-          <div className="mx-auto w-8 h-8 rounded-lg bg-sa-500 flex items-center justify-center">
+          <a
+            href={homeUrl}
+            title={t('العودة إلى الرئيسية', 'Back to home')}
+            className="mx-auto w-8 h-8 rounded-lg bg-sa-500 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sa-500"
+          >
             <span className="text-white font-bold text-sm">Q</span>
-          </div>
+          </a>
         )}
 
         {/* Mobile close */}
@@ -117,7 +131,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
         {visibleItems.map(item => (
           <NavLink
             key={item.path}
-            to={item.path}
+            to={asParam ? `${item.path}?as=${encodeURIComponent(asParam)}` : item.path}
             end={item.path === '/'}
             onClick={onMobileClose}
             className={({ isActive }) =>

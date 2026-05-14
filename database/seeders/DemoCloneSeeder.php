@@ -23,7 +23,7 @@ class DemoCloneSeeder extends Seeder
 
         $this->makeUser('w.aljuraysh', 'وسام عبدالله الجريش', 'Super Admin', 'staff');
         $this->makeUser('admin',       'هدى محمد العبدالعزيز',   'Admin',       'staff');
-        $this->makeUser('faculty',     'د. عبدالعزيز محمد القحطاني', 'Faculty', 'staff');
+        $this->makeUser('faculty',     'د. عبدالعزيز محمد', 'Faculty', 'staff');
 
         foreach (DemoData::students() as $s) {
             $username = 'student.' . substr($s['student_id'], -4);

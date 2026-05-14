@@ -10,14 +10,14 @@ export const mockStudentList: StudentListItem[] = [
     isLive: true,
     profile: {
       id: '443211517',
-      name: 'ليان حمد الجريش',
-      nameEn: 'Layan Hamad Aljuraysh',
+      name: 'فيصل خالد محمد',
+      nameEn: 'Faisal Khalid Mohammed',
       studentId: '443211517',
-      department: 'نظم المعلومات',
-      departmentEn: 'Information Systems',
-      college: 'كلية الحاسب',
-      collegeEn: 'College of Computer',
-      gpa: 4.12,
+      department: 'محاسبة',
+      departmentEn: 'Accounting',
+      college: 'كلية إدارة الأعمال',
+      collegeEn: 'College of Business Administration',
+      gpa: 4.32,
       gpaScale: 5.0,
       creditHoursCompleted: 85,
       creditHoursRequired: 136,
@@ -422,9 +422,9 @@ export const mockStudentList: StudentListItem[] = [
   },
 ];
 
-// Advisor sees a subset (8-10 students), always includes Layan
+// Advisor sees a subset (8-10 students), always includes Faisal
 export const advisorStudentIds = new Set([
-  '443211517', // Layan
+  '443211517', // Faisal
   '442103567', // Abdulrahman
   '443108765', // Sarah
   '443415543', // Hind

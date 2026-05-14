@@ -2,22 +2,117 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\DecisionDashboards;
 use Illuminate\Http\Request;
 
 class QDecisionController extends Controller
 {
-    public function selfReport(Request $request)
+    /**
+     * The six decision dashboards, keyed by URL slug.
+     * Each maps to a DecisionDashboards data key + a sections() id + sidebar metadata.
+     */
+    public const DASHBOARDS = [
+        'service-tasks' => [
+            'data' => 'serviceTasks',
+            'title' => 'لوحة مهام تقنية المعلومات (نظام ساعد)',
+            'accent' => '#1B8354',
+            'icon' => 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z',
+        ],
+        'complaints' => [
+            'data' => 'complaints',
+            'title' => 'لوحة الشكاوى والمقترحات',
+            'accent' => '#7C3AED',
+            'icon' => 'M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z',
+        ],
+        'service-evaluations' => [
+            'data' => 'serviceEvaluations',
+            'title' => 'لوحة تقييم الخدمات',
+            'accent' => '#0891B2',
+            'icon' => 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+        ],
+        'reviews' => [
+            'data' => 'reviews',
+            'title' => 'لوحة التقييمات الخارجية',
+            'accent' => '#D97706',
+            'icon' => 'M11.05 3.69l2.36 4.78 5.27.77a1 1 0 01.56 1.7l-3.82 3.72.9 5.25a1 1 0 01-1.45 1.06L9.99 18.5l-4.72 2.48a1 1 0 01-1.45-1.06l.9-5.25-3.82-3.72a1 1 0 01.56-1.7l5.27-.77 2.36-4.78a1 1 0 011.79 0z',
+        ],
+        'clarity' => [
+            'data' => 'clarity',
+            'title' => 'لوحة Microsoft Clarity',
+            'accent' => '#1B8354',
+            'icon' => 'M3 13h2l2 5 4-13 3 8 2-4h5',
+        ],
+        'feedback' => [
+            'data' => 'feedback',
+            'title' => 'لوحة الأفكار — تطبيق MyQU',
+            'accent' => '#1B8354',
+            'icon' => 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
+        ],
+    ];
+
+    /**
+     * Ordered catalogue for the sidebar "Dashboards" group (recommendations first).
+     * Each item ships a resolved url + active flag so the Blade partial needs no logic.
+     */
+    public static function dashboardCatalog(): array
     {
-        return view('q-decision.self-report', [
-            'priorityMeta' => self::priorityMeta(),
-            'sections'     => $this->sections(),
+        $currentSlug = request()->route('dashboard');
+
+        $catalog = [[
+            'url' => route('q-decision.recommendations'),
+            'title' => 'توصيات الذكاء الاصطناعي',
+            'icon' => 'M5 3v4M3 5h4M6 17v4M4 19h4M13 3l1.5 4.5L19 9l-4.5 1.5L13 15l-1.5-4.5L7 9l4.5-1.5L13 3z',
+            'active' => request()->routeIs('q-decision.recommendations'),
+        ]];
+
+        foreach (self::DASHBOARDS as $slug => $meta) {
+            $catalog[] = [
+                'url' => route('q-decision.dashboard', ['dashboard' => $slug]),
+                'title' => $meta['title'],
+                'icon' => $meta['icon'],
+                'active' => request()->routeIs('q-decision.dashboard') && $currentSlug === $slug,
+            ];
+        }
+
+        return $catalog;
+    }
+
+    public function recommendations(Request $request)
+    {
+        $quarter = DecisionDashboards::normalizeQuarter($request->query('q'));
+
+        return view('q-decision.recommendations', [
+            'priorityMeta'  => self::priorityMeta(),
+            'sections'      => $this->sections(),
+            'quarters'      => DecisionDashboards::quarters(),
+            'activeQuarter' => $quarter,
+        ]);
+    }
+
+    public function dashboard(Request $request, string $dashboard)
+    {
+        abort_unless(isset(self::DASHBOARDS[$dashboard]), 404);
+
+        $quarter = DecisionDashboards::normalizeQuarter($request->query('q'));
+        $meta = self::DASHBOARDS[$dashboard];
+        $data = DecisionDashboards::all($quarter)[$meta['data']];
+        $section = collect($this->sections())->firstWhere('id', $dashboard);
+
+        return view('q-decision.dashboard', [
+            'priorityMeta'  => self::priorityMeta(),
+            'dashboardSlug' => $dashboard,
+            'meta'          => $meta,
+            'data'          => $data,
+            'section'       => $section,
+            'quarters'      => DecisionDashboards::quarters(),
+            'activeQuarter' => $quarter,
         ]);
     }
 
     public function digitalAdvisor(Request $request)
     {
         return view('q-decision.digital-advisor', [
-            'providerName' => 'QU AI Cloud',
+            'providerName' => 'QU LLM Assistant',
             'demoAgents'   => $this->demoAgents(),
         ]);
     }

@@ -249,6 +249,13 @@ function getDigitalRecordUrl(): string {
  */
 function buildQsparkCourseLink(idOrCode?: number | string | null): string {
   const base = getQsparkBaseUrl().replace(/\/$/, '');
+  // Same-origin hub (e.g. /qspark): no per-course route — land on the hub and
+  // jump to the course card anchor when we have a code.
+  if (base.startsWith('/')) {
+    const code = typeof idOrCode === 'string' ? idOrCode.trim() : '';
+    return code ? `${base}#course-${encodeURIComponent(code)}` : `${base}`;
+  }
+  // External QSpark: resolves /courses/{id} by 1-based index, ?search= by code.
   if (idOrCode === null || idOrCode === undefined || idOrCode === '') return base + '/';
   if (typeof idOrCode === 'number' && Number.isFinite(idOrCode) && idOrCode > 0) {
     return `${base}/courses/${idOrCode}`;
@@ -855,9 +862,10 @@ function LearningPlatformTab({ t }: { t: (a: string, e: string) => string }) {
             const isOpen = openCourse === courseId;
             const courseCode = course.course_code || '';
             const isLowGrade = lowGradeCodeSet.has(courseCode);
-            // QSpark resolves /courses/{id} by array index + 1 of the same
-            // /api/v2/student/courses payload — keep ordering in sync.
-            const qsparkId = idx + 1;
+            // Prefer the course code so the in-app QSpark hub can anchor to the
+            // matching card; fall back to the 1-based index that the external
+            // QSpark resolves against its /api/v2/student/courses payload.
+            const qsparkRef = courseCode || idx + 1;
             return (
               <article key={courseId || course.course_code} className={`rounded-2xl border ${isLowGrade ? 'border-amber-300 dark:border-amber-700/60' : 'border-gray-200 dark:border-gray-700'} bg-white dark:bg-gray-800 overflow-hidden`}>
                 <div className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
@@ -887,7 +895,7 @@ function LearningPlatformTab({ t }: { t: (a: string, e: string) => string }) {
                   </button>
                   <div className="flex items-center gap-2 shrink-0">
                     <a
-                      href={buildQsparkCourseLink(qsparkId)}
+                      href={buildQsparkCourseLink(qsparkRef)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${isLowGrade

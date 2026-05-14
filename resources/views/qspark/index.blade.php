@@ -72,7 +72,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--q-space-4);">
             @foreach($courses as $c)
             @php($t = $toneMap[$c['tone']] ?? $toneMap['green'])
-            <article style="border: 1px solid var(--q-border-color); border-radius: var(--q-radius-xl); padding: var(--q-space-4); display: flex; flex-direction: column; gap: var(--q-space-3); background: var(--q-surface);">
+            <article id="course-{{ $c['code'] }}" style="scroll-margin-top: var(--q-space-6); border: 1px solid var(--q-border-color); border-radius: var(--q-radius-xl); padding: var(--q-space-4); display: flex; flex-direction: column; gap: var(--q-space-3); background: var(--q-surface);">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span style="font-size: var(--q-font-xs); font-weight: 700; padding: 4px 10px; border-radius: 999px; background: {{ $t['bg'] }}; color: {{ $t['fg'] }};">{{ $c['category'] }}</span>
                     <span style="font-size: var(--q-font-xs); color: var(--q-text-secondary); font-weight: 600;">{{ $c['code'] }}</span>

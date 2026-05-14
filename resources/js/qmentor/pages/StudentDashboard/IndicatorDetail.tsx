@@ -406,9 +406,37 @@ interface TransactionSemester {
   semester_gpa?: number | string;
 }
 
+interface WarningRecord {
+  semester?: string;
+  reason_ar?: string;
+  reason_en?: string;
+  entry_date?: string;
+}
+
+interface WarningAutoSession {
+  advisor_name?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  status_ar?: string;
+  status_en?: string;
+}
+
+interface WarningEscalation {
+  /** 'follow_up' → amber early-warning; 'dismissal_risk' → red, with auto session. */
+  level?: 'follow_up' | 'dismissal_risk' | string;
+  headline_ar?: string;
+  headline_en?: string;
+  message_ar?: string;
+  message_en?: string;
+  auto_session?: WarningAutoSession;
+}
+
 interface WarningsResponse {
   student_id?: string;
   warning_count?: number;
+  warnings?: WarningRecord[];
+  escalation?: WarningEscalation;
 }
 
 interface HaltRecord {
@@ -572,6 +600,15 @@ function overrideWarningsIndicator(
     count >= 3 ? 'critical' : count === 2 ? 'high' : count === 1 ? 'medium' : 'low';
 
   const events: ContextualEvent[] = [];
+
+  for (const w of warnings?.warnings ?? []) {
+    const date = String(w.entry_date ?? '').slice(0, 10) || (w.semester ? `الفصل ${w.semester}` : '—');
+    events.push({
+      date,
+      descriptionAr: `إنذار أكاديمي${w.semester ? ` (الفصل ${w.semester})` : ''}: ${w.reason_ar ?? ''}`,
+      descriptionEn: `Academic warning${w.semester ? ` (Term ${w.semester})` : ''}: ${w.reason_en ?? ''}`,
+    });
+  }
 
   for (const h of halts ?? []) {
     const date = String(h.entry_date ?? '').slice(0, 10) || '—';
@@ -737,6 +774,98 @@ function overrideGpaIndicator(
   };
 }
 
+// ── Academic-standing escalation banner ───────────────────────────────
+//
+// Surfaced above the indicator tabs whenever the active student has an
+// academic-standing escalation. 'follow_up' (1 warning) shows an amber
+// early-warning; 'dismissal_risk' (2 warnings) shows a red banner plus the
+// advising session the platform auto-booked to head off a third warning.
+function EscalationBanner({
+  escalation,
+  t,
+  Chevron,
+}: {
+  escalation: WarningEscalation;
+  t: (ar: string, en: string) => string;
+  Chevron: typeof ChevronRight;
+}) {
+  const isCritical = escalation.level === 'dismissal_risk';
+  const session = escalation.auto_session;
+
+  const tone = isCritical
+    ? {
+        border: 'border-red-300 dark:border-red-700',
+        bg: 'bg-red-50 dark:bg-red-950/40',
+        icon: 'text-red-600 dark:text-red-400',
+        title: 'text-red-800 dark:text-red-300',
+        body: 'text-red-700 dark:text-red-300/90',
+      }
+    : {
+        border: 'border-amber-300 dark:border-amber-700',
+        bg: 'bg-amber-50 dark:bg-amber-950/40',
+        icon: 'text-amber-600 dark:text-amber-400',
+        title: 'text-amber-800 dark:text-amber-300',
+        body: 'text-amber-700 dark:text-amber-300/90',
+      };
+
+  return (
+    <div className={`mb-6 rounded-xl border ${tone.border} ${tone.bg} p-5`}>
+      <div className="flex items-start gap-3">
+        {isCritical
+          ? <ShieldAlert className={`w-6 h-6 shrink-0 mt-0.5 ${tone.icon}`} />
+          : <AlertTriangle className={`w-6 h-6 shrink-0 mt-0.5 ${tone.icon}`} />}
+        <div className="flex-1 min-w-0">
+          <h3 className={`text-base font-bold ${tone.title}`}>
+            {t(escalation.headline_ar ?? '', escalation.headline_en ?? '')}
+          </h3>
+          <p className={`mt-1 text-sm leading-relaxed ${tone.body}`}>
+            {t(escalation.message_ar ?? '', escalation.message_en ?? '')}
+          </p>
+
+          {session && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-red-500" />
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  {t('جلسة إرشادية محجوزة تلقائيًا', 'Auto-booked advising session')}
+                </span>
+              </div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                {[session.advisor_name, session.date, session.time].filter(Boolean).join(' · ')}
+              </span>
+              {session.location && (
+                <span className="text-sm text-gray-500 dark:text-gray-400">{session.location}</span>
+              )}
+              <span className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+                {t(session.status_ar ?? 'مؤكدة', session.status_en ?? 'Confirmed')}
+              </span>
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              to="/contact-advisor"
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-white transition-colors ${isCritical ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}
+            >
+              <MessageCircle className="w-4 h-4" />
+              {t('تواصل مع المرشد', 'Contact Advisor')}
+              <Chevron className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/action-plan"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+            >
+              <Lightbulb className="w-4 h-4" />
+              {t('عرض خطة المعالجة', 'View Action Plan')}
+              <Chevron className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function IndicatorDetail() {
   const { t, dir } = useLanguage();
   const [selectedId, setSelectedId] = useState(mockIndicators[0].id);
@@ -842,6 +971,12 @@ export default function IndicatorDetail() {
   const trend = getTrendDirection(selected.weeklyData);
   const Chevron = dir === 'rtl' ? ChevronLeft : ChevronRight;
 
+  // Academic-standing escalation for the active student — drives the banner
+  // shown above the indicator tabs (early-warning at 1, dismissal-risk at 2).
+  const escalation = warningsResult.source === 'api'
+    ? (warningsResult.data?.escalation ?? null)
+    : null;
+
   return (
     <div>
       <PageHeader
@@ -858,6 +993,9 @@ export default function IndicatorDetail() {
         accentColor="bg-sa-500"
         actions={<DataSourceBadge source={overallSource} />}
       />
+
+      {/* ── Academic-standing escalation banner ─────────────── */}
+      {escalation && <EscalationBanner escalation={escalation} t={t} Chevron={Chevron} />}
 
       {/* ── Indicator Selector Tabs ─────────────────────────── */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-8 overflow-x-auto scrollbar-hide">

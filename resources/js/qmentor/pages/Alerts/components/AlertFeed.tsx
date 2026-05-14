@@ -10,6 +10,10 @@ import {
   XMarkIcon,
   ArrowUpCircleIcon,
   FunnelIcon,
+  CpuChipIcon,
+  Cog6ToothIcon,
+  UserGroupIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import type { Alert, AlertType, AlertSeverity, AlertStatus } from '../types';
@@ -29,6 +33,10 @@ const typeIcons: Record<AlertType, typeof BellAlertIcon> = {
   academic_warning: ExclamationTriangleIcon,
   registration: BellAlertIcon,
   financial: CurrencyDollarIcon,
+  agent_action: CpuChipIcon,
+  system: Cog6ToothIcon,
+  caseload: UserGroupIcon,
+  intervention: WrenchScrewdriverIcon,
 };
 
 const severityColors: Record<AlertSeverity, string> = {
@@ -68,6 +76,10 @@ export default function AlertFeed({ alerts, selectedAlerts, onToggleSelect, onSt
     academic_warning: t('إنذار أكاديمي', 'Academic Warning'),
     registration: t('التسجيل', 'Registration'),
     financial: t('المالية', 'Financial'),
+    agent_action: t('إجراء الوكيل', 'Agent Action'),
+    system: t('النظام', 'System'),
+    caseload: t('عبء الحالات', 'Caseload'),
+    intervention: t('تدخل', 'Intervention'),
   };
 
   const severityLabels: Record<AlertSeverity | 'all', string> = {
@@ -164,7 +176,7 @@ export default function AlertFeed({ alerts, selectedAlerts, onToggleSelect, onSt
       {/* Alert List */}
       <div className="space-y-3">
         {filtered.map(alert => {
-          const Icon = typeIcons[alert.type];
+          const Icon = typeIcons[alert.type] ?? BellAlertIcon;
           const isSelected = selectedAlerts.has(alert.id);
           return (
             <div

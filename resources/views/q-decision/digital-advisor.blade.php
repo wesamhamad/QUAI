@@ -152,6 +152,102 @@
     .success-message { display: none; padding: 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; color: #059669; margin-bottom: 1.5rem; text-align: center; }
     .success-message.visible { display: block; }
 
+    /* --- Demo chat modal --- */
+    .chat-modal-overlay {
+        display: none;
+        position: fixed; inset: 0; z-index: 1000;
+        background: rgba(15, 23, 42, 0.55);
+        align-items: center; justify-content: center;
+        padding: 1.5rem;
+    }
+    .chat-modal-overlay.visible { display: flex; }
+    .chat-modal {
+        background: var(--q-card-bg, #fff);
+        border-radius: 18px;
+        width: 100%; max-width: 640px;
+        max-height: 85vh;
+        display: flex; flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .chat-modal-header {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--q-border-color, #e5e7eb);
+        background: var(--q-bg-secondary, #fafafa);
+    }
+    .chat-modal-avatar {
+        width: 40px; height: 40px; border-radius: 10px;
+        background: rgba(0, 108, 53, 0.1); color: var(--q-primary, #006C35);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .chat-modal-title { font-weight: 700; font-size: 0.9375rem; color: var(--q-text-primary, #0f172a); }
+    .chat-modal-sub { font-size: 0.75rem; color: var(--q-text-secondary, #64748b); margin-top: 0.125rem; }
+    .chat-modal-close {
+        margin-inline-start: auto;
+        width: 32px; height: 32px; border-radius: 8px;
+        border: 1px solid var(--q-border-color, #e5e7eb);
+        background: var(--q-card-bg, #fff); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--q-text-secondary, #64748b);
+    }
+    .chat-modal-close:hover { border-color: #EF4444; color: #EF4444; }
+    .chat-modal-body {
+        padding: 1.25rem; overflow-y: auto; flex: 1;
+        display: flex; flex-direction: column; gap: 1rem;
+        background: var(--q-bg, #fff);
+    }
+    .chat-day-divider {
+        text-align: center; font-size: 0.6875rem; color: var(--q-text-secondary, #94a3b8);
+        margin: 0.25rem 0;
+    }
+    .chat-msg { display: flex; flex-direction: column; max-width: 82%; }
+    .chat-msg.user { align-self: flex-start; align-items: flex-start; }
+    .chat-msg.bot  { align-self: flex-end; align-items: flex-end; }
+    .chat-bubble {
+        padding: 0.75rem 0.9375rem; border-radius: 14px;
+        font-size: 0.875rem; line-height: 1.7; white-space: pre-line;
+    }
+    .chat-msg.user .chat-bubble {
+        background: var(--q-primary, #006C35); color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .chat-msg.bot .chat-bubble {
+        background: var(--q-bg-secondary, #f1f5f9); color: var(--q-text-primary, #0f172a);
+        border-bottom-left-radius: 4px;
+    }
+    .chat-msg-meta { font-size: 0.6875rem; color: var(--q-text-secondary, #94a3b8); margin-top: 0.25rem; }
+    .chat-sources {
+        display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.5rem;
+    }
+    .chat-source-chip {
+        display: inline-flex; align-items: center; gap: 0.25rem;
+        padding: 0.1875rem 0.5rem; border-radius: 9999px;
+        background: rgba(0, 108, 53, 0.08); color: var(--q-primary, #006C35);
+        font-size: 0.6875rem; font-weight: 600;
+    }
+    .chat-modal-footer {
+        padding: 0.875rem 1.25rem;
+        border-top: 1px solid var(--q-border-color, #e5e7eb);
+        background: var(--q-bg-secondary, #fafafa);
+    }
+    .chat-input-fake {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--q-border-color, #e5e7eb);
+        border-radius: 10px; background: var(--q-card-bg, #fff);
+        color: var(--q-text-secondary, #94a3b8); font-size: 0.8125rem;
+    }
+    .chat-input-fake .send-btn {
+        margin-inline-start: auto;
+        width: 30px; height: 30px; border-radius: 8px;
+        background: var(--q-border-color, #e5e7eb);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; flex-shrink: 0;
+    }
+    .chat-demo-note { font-size: 0.6875rem; color: var(--q-text-secondary, #94a3b8); text-align: center; margin-top: 0.5rem; }
+    .chat-empty { text-align: center; color: var(--q-text-secondary, #94a3b8); padding: 2rem 1rem; font-size: 0.875rem; }
+
     @media (max-width: 640px) {
         .bp-checkboxes,
         .strategy-toggle,
@@ -244,13 +340,13 @@
                             <input type="radio" name="language" value="ar" checked>
                             <div class="toggle-option-title">العربية</div>
                             <div class="toggle-option-desc">مساعد ذكي باللغة العربية لجامعة القصيم (QU LLM Assistant)، مدرَّب على البيانات العامة للجامعة — السياسات والأخبار والبرامج الأكاديمية واللوائح والخدمات الإدارية.</div>
-                            <span class="toggle-option-badge badge-green">علام</span>
+                            <span class="toggle-option-badge badge-green">QU LLM</span>
                         </label>
                         <label class="toggle-option" data-value="en">
                             <input type="radio" name="language" value="en">
                             <div class="toggle-option-title">English</div>
                             <div class="toggle-option-desc">Arabic-language AI assistant for Qassim University (QU LLM Assistant), trained on the university's own public data — policies, news, academic programs, regulations, and administrative services.</div>
-                            <span class="toggle-option-badge badge-green">علام</span>
+                            <span class="toggle-option-badge badge-green">QU LLM</span>
                         </label>
                     </div>
                 </div>
@@ -339,6 +435,40 @@
             <div class="loading-spinner"></div>
             <p style="color: var(--q-text-primary, #0f172a); font-weight: 600;">جاري إنشاء الوكيل...</p>
             <p style="color: var(--q-text-secondary, #64748b); font-size: 0.875rem; margin-top: 0.5rem;">يرجى الانتظار</p>
+        </div>
+    </div>
+
+    {{-- Demo chat modal --}}
+    <div class="chat-modal-overlay" id="chatModalOverlay">
+        <div class="chat-modal" dir="rtl">
+            <div class="chat-modal-header">
+                <div class="chat-modal-avatar">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="chat-modal-title" id="chatModalTitle">الوكيل</div>
+                    <div class="chat-modal-sub" id="chatModalSub"></div>
+                </div>
+                <button type="button" class="chat-modal-close" onclick="closeAgentChat()" title="إغلاق">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="chat-modal-body" id="chatModalBody"></div>
+            <div class="chat-modal-footer">
+                <div class="chat-input-fake">
+                    <span>اكتب رسالتك...</span>
+                    <span class="send-btn">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="chat-demo-note">وضع العرض التجريبي — هذه محادثة سابقة للاطلاع فقط، والإرسال معطّل في هذا الإصدار.</div>
+            </div>
         </div>
     </div>
 </div>
@@ -482,7 +612,7 @@
                         </button>
                     </div>
                     <div class="agent-card-actions">
-                        <button type="button" class="btn-agent-action" onclick="alert('وضع العرض التجريبي — المحادثة معطّلة في هذا الإصدار.')">
+                        <button type="button" class="btn-agent-action" onclick="openAgentChat('${agent.id}')">
                             فتح المحادثة
                         </button>
                         <button type="button" class="btn-agent-action danger" onclick="archiveAgent('${agent.id}')">أرشفة</button>
@@ -555,6 +685,77 @@
         div.textContent = String(str ?? '');
         return div.innerHTML;
     }
+
+    // --- Demo chat history (sample conversation so users understand the experience) ---
+    const chatHistory = {
+        'demo-1': {
+            day: 'الأحد 11 مايو 2026',
+            messages: [
+                { role: 'user', time: '10:12 ص',
+                  text: 'السلام عليكم، كم عدد ساعات العبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك؟' },
+                { role: 'bot', time: '10:12 ص',
+                  text: 'وعليكم السلام. وفقاً للائحة تنظيم شؤون منسوبي الجامعات السعوديين، يبلغ الحد الأدنى للعبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك ١٠ ساعات أسبوعياً.\nويجوز لمجلس القسم تخفيضه إلى ٨ ساعات لمن يكلَّف بأعمال إدارية أو إشرافية معتمدة.',
+                  sources: ['لائحة شؤون المنسوبين — مادة ٤١', 'دليل الأعباء التدريسية ١٤٤٧'] },
+                { role: 'user', time: '10:14 ص',
+                  text: 'وما هي مدة الإجازة العلمية وشروط التقدم لها؟' },
+                { role: 'bot', time: '10:14 ص',
+                  text: 'مدة الإجازة العلمية سنة قابلة للتمديد فصلاً دراسياً واحداً بموافقة مجلس الجامعة.\nأبرز الشروط:\n• أمضى عضو هيئة التدريس ثلاث سنوات على الأقل في الخدمة بعد التعيين أو الترقية.\n• تقديم خطة بحثية معتمدة من مجلس القسم والكلية.\n• ألا يكون قد حصل على إجازة علمية خلال السنوات الثلاث السابقة.',
+                  sources: ['لائحة شؤون المنسوبين — مادة ٦٣', 'دليل الإجازات العلمية'] },
+                { role: 'user', time: '10:17 ص',
+                  text: 'هل يمكنني الجمع بين الإجازة العلمية والتفرغ العلمي في نفس العام؟' },
+                { role: 'bot', time: '10:17 ص',
+                  text: 'لا يمكن الجمع بينهما في نفس الفترة. التفرغ العلمي يُمنح داخل الجامعة لإنجاز بحث محدد دون الإخلال بالحد الأدنى من العبء، بينما الإجازة العلمية تتطلب التفرغ الكامل خارج العمل.\nيمكن التقدم للتفرغ العلمي في عام لاحق بعد انتهاء الإجازة العلمية وعودتك للخدمة الفعلية.',
+                  sources: ['لائحة شؤون المنسوبين — مادة ٦٥'] },
+                { role: 'user', time: '10:19 ص',
+                  text: 'ممتاز، شكراً جزيلاً.' },
+                { role: 'bot', time: '10:19 ص',
+                  text: 'العفو، سعدت بخدمتك. إن احتجت أي توضيح إضافي حول اللوائح أو إجراءات التقديم فأنا متاح.' },
+            ],
+        },
+    };
+
+    const overlay = document.getElementById('chatModalOverlay');
+
+    window.openAgentChat = function(agentId) {
+        const agent = agents.find(a => a.id === agentId);
+        if (!agent) return;
+        const history = chatHistory[agentId];
+
+        document.getElementById('chatModalTitle').textContent = agent.name;
+        document.getElementById('chatModalSub').textContent = agent.role;
+
+        const body = document.getElementById('chatModalBody');
+        if (!history || !history.messages.length) {
+            body.innerHTML = '<div class="chat-empty">لا توجد محادثات سابقة لهذا الوكيل بعد.<br>في النسخة الكاملة يمكنك بدء محادثة جديدة من هنا.</div>';
+        } else {
+            const rows = history.messages.map(m => {
+                const sources = (m.sources && m.sources.length)
+                    ? `<div class="chat-sources">${m.sources.map(s => `
+                        <span class="chat-source-chip">
+                            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/></svg>
+                            ${escapeHtml(s)}
+                        </span>`).join('')}</div>`
+                    : '';
+                return `
+                    <div class="chat-msg ${m.role === 'user' ? 'user' : 'bot'}">
+                        <div class="chat-bubble">${escapeHtml(m.text)}</div>
+                        ${sources}
+                        <div class="chat-msg-meta">${escapeHtml(m.time)}</div>
+                    </div>`;
+            }).join('');
+            body.innerHTML = `<div class="chat-day-divider">${escapeHtml(history.day)}</div>${rows}`;
+        }
+
+        overlay.classList.add('visible');
+        body.scrollTop = body.scrollHeight;
+    };
+
+    window.closeAgentChat = function() {
+        overlay.classList.remove('visible');
+    };
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAgentChat(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAgentChat(); });
 
     renderAgentsList();
 })();

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('total_tokens')->default(0);
             $table->boolean('cache_hit')->default(false);
             $table->unsignedInteger('response_time_ms')->default(0);
-            $table->string('source', 50)->default('groq_primary'); // groq_primary, groq_fallback, ollama_local, semantic_cache
+            $table->string('source', 50)->default('ollama_local'); // ollama_local, semantic_cache
             $table->timestamp('created_at')->useCurrent();
 
             $table->index('agent_id');

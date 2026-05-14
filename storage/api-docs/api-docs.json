@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "QUAI API - OpenAI Compatible",
-    "description": "QUAI API provides OpenAI-compatible endpoints for chat completions using Ollama with ALLaM Arabic model",
+    "title": "QUAI API",
+    "description": "QUAI API provides chat completion endpoints using Ollama with ALLaM Arabic model",
     "version": "1.0.0",
     "contact": {
       "name": "QUAI Support",

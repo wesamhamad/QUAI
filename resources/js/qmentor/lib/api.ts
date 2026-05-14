@@ -5,6 +5,33 @@ export interface ApiResponse<T = unknown> {
   source: 'api' | 'unavailable';
 }
 
+/**
+ * Resolve the active student-impersonation id. The TopBar switcher puts it in
+ * the URL (?as=<id>) and does a full reload; we mirror it into sessionStorage
+ * so it survives client-side navigation, where react-router <Link>s drop the
+ * query string. Every API request then re-appends it.
+ */
+function getImpersonationId(): string | null {
+  if (typeof window === 'undefined') return null;
+  const fromUrl = new URLSearchParams(window.location.search).get('as');
+  if (fromUrl) {
+    try { sessionStorage.setItem('qmentor:as', fromUrl); } catch { /* ignore */ }
+    return fromUrl;
+  }
+  try { return sessionStorage.getItem('qmentor:as'); } catch { return null; }
+}
+
+/**
+ * Append ?as=<id> (or &as=) to a path when a student is being impersonated.
+ * An explicit `studentId` (e.g. the student picked in the Digital Twin list)
+ * takes precedence over the page-level impersonation id.
+ */
+function withImpersonation(path: string, studentId?: string | null): string {
+  const as = studentId ?? getImpersonationId();
+  if (!as) return path;
+  return `${path}${path.includes('?') ? '&' : '?'}as=${encodeURIComponent(as)}`;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -12,8 +39,8 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private async request<T>(path: string, options?: RequestInit): Promise<T> {
-    const url = `${this.baseUrl}${path}`;
+  private async request<T>(path: string, options?: RequestInit, studentId?: string | null): Promise<T> {
+    const url = `${this.baseUrl}${withImpersonation(path, studentId)}`;
     const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
 
     const res = await fetch(url, {
@@ -34,25 +61,25 @@ class ApiClient {
     return res.json();
   }
 
-  get<T>(path: string) {
-    return this.request<T>(path, { method: 'GET' });
+  get<T>(path: string, studentId?: string | null) {
+    return this.request<T>(path, { method: 'GET' }, studentId);
   }
 
   post<T>(path: string, body?: unknown) {
     return this.request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined });
   }
 
-  // Student endpoints
-  getStudentProfile() {
-    return this.get<ApiResponse>('/student/profile');
+  // Student endpoints — an optional studentId overrides the page-level ?as= id.
+  getStudentProfile(studentId?: string | null) {
+    return this.get<ApiResponse>('/student/profile', studentId);
   }
 
-  getCurrentCourses() {
-    return this.get<ApiResponse>('/student/courses');
+  getCurrentCourses(studentId?: string | null) {
+    return this.get<ApiResponse>('/student/courses', studentId);
   }
 
-  getAcademicTransactions() {
-    return this.get<ApiResponse>('/student/transactions');
+  getAcademicTransactions(studentId?: string | null) {
+    return this.get<ApiResponse>('/student/transactions', studentId);
   }
 
   getStudentPlan() {
@@ -67,8 +94,8 @@ class ApiClient {
     return this.get<ApiResponse>('/student/exams');
   }
 
-  getAbsences() {
-    return this.get<ApiResponse>('/student/absences');
+  getAbsences(studentId?: string | null) {
+    return this.get<ApiResponse>('/student/absences', studentId);
   }
 
   getAllCourseGrades() {
@@ -81,7 +108,7 @@ class ApiClient {
 
   async getAcademicAdvisor(): Promise<ApiResponse> {
     const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
-    const res = await fetch('/api/v2/academic-advisor', {
+    const res = await fetch(withImpersonation('/api/v2/academic-advisor'), {
       credentials: 'same-origin',
       headers: { 'Accept': 'application/json', ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}) },
     });

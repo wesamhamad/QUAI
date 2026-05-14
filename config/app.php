@@ -52,7 +52,12 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    // In production the app is served from the public site (https://quailab.dev).
+    // Locally it falls back to the dev server. An explicit APP_URL in .env still
+    // wins in either environment.
+    'url' => env('APP_ENV') === 'production'
+        ? env('APP_URL', 'https://quailab.dev')
+        : env('APP_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------

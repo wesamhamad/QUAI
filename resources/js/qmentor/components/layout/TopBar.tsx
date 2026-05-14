@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Bars3Icon, SunIcon, MoonIcon, LanguageIcon, MagnifyingGlassIcon, ChevronDownIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, SunIcon, MoonIcon, LanguageIcon, MagnifyingGlassIcon, ChevronDownIcon, UsersIcon, HomeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Bot, GraduationCap, Shield, User, type LucideIcon } from 'lucide-react';
 
 interface DemoStudent {
@@ -16,6 +16,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useRole, type Role } from '../../contexts/RoleContext';
 import GlobalSearch from '../../pages/Settings/GlobalSearch';
+import { dropdownTrigger, dropdownPanel, dropdownHeader, dropdownItem } from '../ui/dropdownStyles';
 
 const roleConfig: { value: Role; ar: string; en: string; icon: LucideIcon }[] = [
   { value: 'student', ar: 'طالب', en: 'Student', icon: User },
@@ -27,12 +28,14 @@ const roleConfig: { value: Role; ar: string; en: string; icon: LucideIcon }[] = 
 interface TopBarProps {
   onMenuClick: () => void;
   sidebarCollapsed: boolean;
+  /** Hide the mobile nav toggle when there is no side menu (e.g. QSpark+). */
+  hideMenuButton?: boolean;
 }
 
-export default function TopBar({ onMenuClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
-  const { role, setRole, canSwitchRole } = useRole();
+  const { role, setRole, canSwitchRole, viewOnly } = useRole();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const isQSparkBrand = typeof window !== 'undefined'
@@ -46,15 +49,33 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
   const currentRoleConfig = roleConfig.find(r => r.value === role)!;
   const CurrentRoleIcon = currentRoleConfig.icon;
 
-  // Student-impersonation dropdown — faculty/admin can flip between the three
-  // featured demo cases. The roster is injected by the Blade layout.
-  const qmentorUser = (window as { __qmentor_user?: { is_faculty?: boolean; is_super_admin?: boolean; student_id?: string | null } }).__qmentor_user;
-  const showStudentSwitcher = !!(qmentorUser?.is_faculty || qmentorUser?.is_super_admin);
+  // Student-switcher dropdown — flips between the three featured demo cases.
+  // The roster is injected by the Blade layout for every signed-in user, so
+  // the switcher is available to students too (not just faculty/admin).
+  const qmentorUser = (window as { __qmentor_user?: { is_faculty?: boolean; is_admin?: boolean; is_super_admin?: boolean; student_id?: string | null } }).__qmentor_user;
+  // Faculty (who aren't super admins) only switch between the agent and advisor
+  // views — the student and admin roles are reserved for super admins. The plain
+  // admin account is handled separately (pinned to the read-only مدير view).
+  const isFacultyOnly = !!qmentorUser?.is_faculty && !qmentorUser?.is_super_admin && !qmentorUser?.is_admin;
+  const availableRoles = isFacultyOnly
+    ? roleConfig.filter(r => r.value !== 'student' && r.value !== 'admin')
+    : roleConfig;
   const studentRoster = ((window as { __qmentor_students?: DemoStudent[] }).__qmentor_students) ?? [];
-  const activeStudentId = searchParams.get('as') ?? qmentorUser?.student_id ?? null;
+  // Faculty (non-super-admin) don't get the student-case switcher — it's a
+  // demo/admin affordance, not part of the faculty view.
+  const showStudentSwitcher = studentRoster.length > 0 && !isFacultyOnly;
+  // ?as= is the source of truth, but react-router navigation strips it; fall
+  // back to the sessionStorage mirror so the switcher label stays correct.
+  const storedAs = typeof window !== 'undefined'
+    ? (() => { try { return sessionStorage.getItem('qmentor:as'); } catch { return null; } })()
+    : null;
+  const activeStudentId = searchParams.get('as') ?? storedAs ?? qmentorUser?.student_id ?? null;
   const activeStudent = studentRoster.find(s => s.student_id === activeStudentId) ?? studentRoster[0];
 
   const selectStudent = (sid: string) => {
+    // Persist the choice before reloading so every API call (and the label)
+    // picks it up even on pages that navigate away from the ?as= URL.
+    try { sessionStorage.setItem('qmentor:as', sid); } catch { /* ignore */ }
     const url = new URL(window.location.href);
     url.searchParams.set('as', sid);
     // Drop cached SPA state from the previous student so each page re-fetches.
@@ -79,12 +100,14 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
       <header className="flex items-center justify-between h-16 px-4 lg:px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         {/* Left: Mobile menu + Title */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={onMenuClick}
-            className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Bars3Icon className="w-5 h-5" />
-          </button>
+          {!hideMenuButton && (
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Bars3Icon className="w-5 h-5" />
+            </button>
+          )}
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">
             {isQSparkBrand
               ? t('منصة +QSpark', '+QSpark Platform')
@@ -119,7 +142,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
             <div className="relative">
               <button
                 onClick={() => setStudentMenuOpen(prev => !prev)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className={dropdownTrigger}
                 title={t('عرض كطالب', 'View as student')}
               >
                 <UsersIcon className="w-4 h-4 text-sa-600 dark:text-sa-400" />
@@ -131,8 +154,8 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
               {studentMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setStudentMenuOpen(false)} />
-                  <div className="absolute end-0 top-full mt-1 z-50 w-72 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1">
-                    <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                  <div className={`absolute end-0 top-full mt-1 z-50 w-72 ${dropdownPanel}`}>
+                    <div className={`${dropdownHeader} border-b border-gray-100 dark:border-gray-700`}>
                       {t('حالات الطلاب', 'Student cases')}
                     </div>
                     {studentRoster.map(s => {
@@ -141,11 +164,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                         <button
                           key={s.student_id}
                           onClick={() => { setStudentMenuOpen(false); selectStudent(s.student_id); }}
-                          className={`w-full flex items-start gap-2.5 px-3 py-2.5 text-sm transition-colors ${
-                            isActive
-                              ? 'bg-sa-50 dark:bg-sa-950'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          className={dropdownItem(isActive, 'start')}
                         >
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0 ${isActive ? 'bg-sa-600' : 'bg-gray-400 dark:bg-gray-500'}`}>
                             {(lang === 'ar' ? s.name : (s.name_en ?? s.name)).split(' ')[0]?.[0] ?? 'S'}
@@ -170,12 +189,27 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
             </div>
           )}
 
+          {/* Read-only role badge — the admin account is pinned to the مدير
+              view with no role switcher. */}
+          {!canSwitchRole && viewOnly && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-300"
+              title={t('عرض للقراءة فقط', 'Read-only view')}
+            >
+              <CurrentRoleIcon className="w-4 h-4 text-sa-600 dark:text-sa-400" />
+              <span className="hidden sm:inline">{t(currentRoleConfig.ar, currentRoleConfig.en)}</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                {t('للعرض فقط', 'View only')}
+              </span>
+            </div>
+          )}
+
           {/* Role switcher — visible only to super admins (testing). Students are pinned. */}
           {canSwitchRole && (
             <div className="relative">
               <button
                 onClick={() => setRoleMenuOpen(prev => !prev)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className={dropdownTrigger}
                 title={t('تبديل الدور', 'Switch role')}
               >
                 <CurrentRoleIcon className="w-4 h-4 text-sa-600 dark:text-sa-400" />
@@ -185,19 +219,15 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
               {roleMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setRoleMenuOpen(false)} />
-                  <div className="absolute end-0 top-full mt-1 z-50 w-48 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1">
-                    {roleConfig.map(r => {
+                  <div className={`absolute end-0 top-full mt-1 z-50 w-48 ${dropdownPanel}`}>
+                    {availableRoles.map(r => {
                       const Icon = r.icon;
                       const isActive = r.value === role;
                       return (
                         <button
                           key={r.value}
                           onClick={() => { setRole(r.value); setRoleMenuOpen(false); }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                            isActive
-                              ? 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-300 font-medium'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          className={dropdownItem(isActive)}
                         >
                           <Icon className={`w-4 h-4 ${isActive ? 'text-sa-600 dark:text-sa-400' : 'text-gray-400 dark:text-gray-500'}`} />
                           <span>{t(r.ar, r.en)}</span>

@@ -22,7 +22,15 @@
             $impersonate = request()->query('as');
             $canImpersonate = $u && method_exists($u, 'hasAnyRole')
                 && $u->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
-            $effectiveStudentId = ($canImpersonate && is_string($impersonate) && $impersonate !== '')
+
+            // Three featured demo cases the student switcher cycles through.
+            // In this demo build every signed-in user (students included) may
+            // switch between these three via ?as=<id> to walk through the
+            // healthy / follow-up / dismissal-risk cases side by side.
+            $featuredIds = ['443211517', '443100021', '443100022'];
+            $wantsFeatured = is_string($impersonate) && in_array($impersonate, $featuredIds, true);
+
+            $effectiveStudentId = (($canImpersonate && is_string($impersonate) && $impersonate !== '') || $wantsFeatured)
                 ? $impersonate
                 : ($u->student_id ?? null);
 
@@ -40,18 +48,32 @@
                 'user_type' => $u->user_type ?? null,
                 'is_student' => $hasStudentContext,
                 'is_faculty' => $canImpersonate && !$u->isStudent(),
+                // The plain "Admin" role (not Super Admin) is pinned to the
+                // read-only مدير view in QMentor.
+                'is_admin' => $u->hasRole('Admin'),
                 'is_super_admin' => $u->isSuperAdmin(),
-                'impersonating' => $canImpersonate && $impersonate ? $impersonate : null,
+                'impersonating' => ($canImpersonate || $wantsFeatured) && $impersonate ? $impersonate : null,
             ];
-            // Three featured demo cases the faculty/admin switcher cycles through.
-            $featuredIds = ['443211517', '443100021', '443100022'];
-            $studentRoster = $canImpersonate
-                ? array_values(array_filter(\App\Support\DemoData::students(), fn ($s) => in_array($s['student_id'], $featuredIds, true)))
-                : [];
+            // The roster is always exposed so the switcher renders for every
+            // signed-in user — not just faculty/admin.
+            $studentRoster = array_values(array_filter(
+                \App\Support\DemoData::students(),
+                fn ($s) => in_array($s['student_id'], $featuredIds, true)
+            ));
         @endphp
         window.__qmentor_user = {!! json_encode($userData) !!};
         window.__qmentor_students = {!! json_encode($studentRoster) !!};
-        window.__qmentor_links = {!! json_encode(['qspark' => '/qspark-plus', 'digitalRecord' => route('digital-record.index')]) !!};
+        {{-- 'qspark' points at the real QSpark learning hub — NOT /qspark-plus,
+             which is just the QMentor SPA rebranded. The "Study on QSpark"
+             buttons deep-link here. 'home' / 'logout' let the SPA shell return
+             to the QUAI platform home and sign out from any page. --}}
+        window.__qmentor_links = {!! json_encode([
+            'qspark' => route('qspark.index'),
+            'digitalRecord' => route('digital-record.index'),
+            'home' => route('home'),
+            'logout' => route('demo.logout'),
+        ]) !!};
+        window.__qmentor_csrf = @json(csrf_token());
     </script>
     @endauth
 </body>

@@ -745,9 +745,12 @@
                 }
                 if (empty($charts['gradesDistribution'] ?? [])) {
                     $charts['gradesDistribution'] = [
-                        ['label' => 'A+', 'count' => 2], ['label' => 'A', 'count' => 4], ['label' => 'A-', 'count' => 2],
-                        ['label' => 'B+', 'count' => 2], ['label' => 'B', 'count' => 1], ['label' => 'B-', 'count' => 0],
-                        ['label' => 'C+', 'count' => 0], ['label' => 'C', 'count' => 0], ['label' => 'D', 'count' => 0], ['label' => 'F', 'count' => 0],
+                        ['label' => 'محاسبة مالية متوسطة (1)', 'grade' => 'A+', 'score' => 96],
+                        ['label' => 'محاسبة التكاليف',          'grade' => 'A',  'score' => 92],
+                        ['label' => 'إحصاء تطبيقي للأعمال',     'grade' => 'A',  'score' => 91],
+                        ['label' => 'نظم معلومات إدارية',        'grade' => 'A+', 'score' => 95],
+                        ['label' => 'أخلاقيات المهنة',           'grade' => 'A',  'score' => 94],
+                        ['label' => 'قانون تجاري',               'grade' => 'B+', 'score' => 89],
                     ];
                 }
             @endphp
@@ -829,14 +832,14 @@
                             data-chart='@json($charts['skillsByCategory'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
                 </div>
 
-                {{-- Grade distribution bar --}}
+                {{-- Course grades bar --}}
                 <div class="dr-chart-card">
                     <h3 class="dr-chart-title">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#166A45;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 19V6h13v13H9zm0 0L3 13l6-7"/>
                         </svg>
-                        توزيع الدرجات الحرفية
+                        درجاتك حسب المقررات
                     </h3>
                     <canvas id="dr-grades-chart" class="dr-chart-canvas-tall"
                             data-chart='@json($charts['gradesDistribution'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -1090,18 +1093,41 @@
     {{-- === Skills list grouped by semester === --}}
     @php
         $semesters = data_get($skills, 'data.data.semesters', data_get($skills, 'data.semesters', []));
-        $hasError = $skills && ! data_get($skills, 'ok');
+
+        // بيانات تجريبية تُعرض في حال تعذّر جلب البيانات من النظام
+        if (! is_array($semesters) || empty($semesters)) {
+            $semesters = [
+                [
+                    'semester_name' => 'الفصل الأول 1446هـ',
+                    'total_hours' => 24,
+                    'skills' => [
+                        ['skill_name' => 'تحليل البيانات المالية', 'category_name' => 'المهارات التحليلية', 'hours' => 8, 'status' => 'accepted'],
+                        ['skill_name' => 'إعداد التقارير المالية', 'category_name' => 'المحاسبة', 'hours' => 6, 'status' => 'accepted'],
+                        ['skill_name' => 'Excel متقدم', 'category_name' => 'المهارات التقنية', 'hours' => 10, 'status' => 'accepted'],
+                    ],
+                ],
+                [
+                    'semester_name' => 'الفصل الثاني 1446هـ',
+                    'total_hours' => 18,
+                    'skills' => [
+                        ['skill_name' => 'لغة إنجليزية مهنية', 'category_name' => 'المهارات اللغوية', 'hours' => 8, 'status' => 'accepted'],
+                        ['skill_name' => 'إدارة المشاريع', 'category_name' => 'المهارات الإدارية', 'hours' => 6, 'status' => 'pending'],
+                        ['skill_name' => 'Power BI', 'category_name' => 'المهارات التقنية', 'hours' => 4, 'status' => 'pending'],
+                    ],
+                ],
+                [
+                    'semester_name' => 'الفصل الصيفي 1446هـ',
+                    'total_hours' => 12,
+                    'skills' => [
+                        ['skill_name' => 'مبادئ المراجعة الداخلية', 'category_name' => 'المحاسبة', 'hours' => 7, 'status' => 'accepted'],
+                        ['skill_name' => 'أساسيات IFRS', 'category_name' => 'المحاسبة', 'hours' => 5, 'status' => 'accepted'],
+                    ],
+                ],
+            ];
+        }
     @endphp
 
-    @if($hasError)
-        <div class="dr-alert">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
-            </svg>
-            <div>تعذر جلب بيانات سجلك الرقمي حالياً. الرجاء المحاولة لاحقاً.</div>
-        </div>
-    @elseif(! is_array($semesters) || empty($semesters))
+    @if(! is_array($semesters) || empty($semesters))
         <div class="dr-section">
             <div class="dr-empty">
                 <div class="dr-empty-icon">
@@ -1393,28 +1419,40 @@
         var data = readChartData('dr-grades-chart');
         if (!data || !Array.isArray(data) || !data.length || typeof Chart !== 'function') return;
         var canvas = document.getElementById('dr-grades-chart');
-        // Drop trailing zero buckets so the chart focuses on actual grades.
-        var trimmed = data.slice();
-        while (trimmed.length && (trimmed[trimmed.length - 1].count || 0) === 0) trimmed.pop();
+        // One horizontal bar per course; highest score sits at the top.
+        var ordered = data.slice().sort(function (a, b) { return (a.score || 0) - (b.score || 0); });
         new Chart(canvas, {
             type: 'bar',
             data: {
-                labels: trimmed.map(function (d) { return d.label; }),
+                labels: ordered.map(function (d) { return d.label; }),
                 datasets: [{
-                    label: 'عدد المقررات',
-                    data: trimmed.map(function (d) { return d.count; }),
+                    label: 'الدرجة',
+                    data: ordered.map(function (d) { return d.score; }),
                     backgroundColor: '#25935F',
                     borderRadius: 6,
-                    barThickness: 22,
+                    barThickness: 16,
                 }],
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { rtl: true, textDirection: 'rtl' } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        rtl: true,
+                        textDirection: 'rtl',
+                        callbacks: {
+                            label: function (ctx) {
+                                var row = ordered[ctx.dataIndex] || {};
+                                return ' الدرجة: ' + ctx.parsed.x + '  · التقدير: ' + (row.grade || '—');
+                            },
+                        },
+                    },
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 12, weight: '700' } } },
-                    y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#6B7280' } },
+                    y: { grid: { display: false }, ticks: { color: '#374151', font: { weight: '600' } } },
                 },
             },
         });

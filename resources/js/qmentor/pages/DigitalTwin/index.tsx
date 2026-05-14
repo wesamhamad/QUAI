@@ -182,7 +182,7 @@ export default function DigitalTwinPage() {
                   العودة لقائمة الطلاب
                 </button>
                 {selectedStudent.isLive ? (
-                  <LiveDigitalTwin />
+                  <LiveDigitalTwin key={selectedStudent.profile.studentId} student={selectedStudent} />
                 ) : (
                   <MockDigitalTwin studentProfile={selectedStudent.profile} />
                 )}
@@ -210,21 +210,25 @@ export default function DigitalTwinPage() {
   );
 }
 
-/** Twin view that fetches real API data (for Layan / live students) */
-function LiveDigitalTwin() {
+/** Twin view that fetches real API data for the selected live student. */
+function LiveDigitalTwin({ student }: { student: StudentListItem }) {
   const [activeTab, setActiveTab] = useState<TabKey>('academic');
+  const studentId = student.profile.studentId;
 
-  const profileResult = useStudentProfile(mockStudent.profile);
-  const coursesResult = useCurrentCourses(mockStudent.currentCourses);
-  const transactionsResult = useAcademicTransactions(mockStudent.semesterGPAs);
-  const absencesResult = useAbsences(mockStudent.behavioral);
+  // Fetch each dataset for the *selected* student (?as=<studentId>), falling
+  // back to that student's list profile / shared demo data when the API is
+  // unavailable — never to an unrelated student.
+  const profileResult = useStudentProfile(student.profile, studentId);
+  const coursesResult = useCurrentCourses(mockStudent.currentCourses, studentId);
+  const transactionsResult = useAcademicTransactions(mockStudent.semesterGPAs, studentId);
+  const absencesResult = useAbsences(mockStudent.behavioral, studentId);
 
   const sources = [profileResult.source, coursesResult.source, transactionsResult.source];
   const overallSource = sources.includes('api') ? 'api' as const : 'mock' as const;
 
   const profile = profileResult.source === 'api'
     ? mapApiProfile(profileResult.data as Record<string, unknown>)
-    : mockStudent.profile;
+    : student.profile;
 
   const semesterGPAs = transactionsResult.source === 'api'
     ? mapApiTransactions(transactionsResult.data as unknown[])

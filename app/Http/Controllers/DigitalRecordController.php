@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 /**
  * Digital Record — demo build.
  *
- * Every external integration (skill.qu.edu.sa, api.qu.edu.sa, OpenAI labor-
+ * Every external integration (skill.qu.edu.sa, api.qu.edu.sa, AI labor-
  * market analysis) has been replaced with {@see DemoData}. Faculty can pass
  * ?student_id=<id> to view any student's record; everyone else sees their own.
  */
@@ -19,12 +19,35 @@ class DigitalRecordController extends Controller
     {
         $user = $request->user();
 
+        $isFaculty = $user instanceof User
+            && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
+
         // Faculty/Admin can preview any student's record via ?student_id=...
         // Students always see their own. Fallback to the first demo student.
         $impersonate = $request->query('student_id');
-        if (is_string($impersonate) && $impersonate !== ''
-            && $user instanceof User
-            && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin'])) {
+        $hasImpersonation = is_string($impersonate) && $impersonate !== '';
+
+        // Faculty land on a roster of all their students rather than a single
+        // record — they pick a student to drill into their digital record.
+        if ($isFaculty && !$hasImpersonation) {
+            $needle   = trim((string) $request->query('q', ''));
+            $students = DemoData::students();
+
+            if ($needle !== '') {
+                $needleLower = mb_strtolower($needle);
+                $students = array_values(array_filter($students, fn ($s) =>
+                    mb_strpos(mb_strtolower($s['name']), $needleLower) !== false
+                    || mb_strpos((string) $s['student_id'], $needle) !== false
+                    || mb_strpos(mb_strtolower($s['major']), $needleLower) !== false));
+            }
+
+            return view('digital-record.students', [
+                'students' => $students,
+                'query'    => $needle,
+            ]);
+        }
+
+        if ($hasImpersonation && $isFaculty) {
             $studentId = $impersonate;
         } else {
             $studentId = (string) ($user->student_id ?: DemoData::students()[0]['student_id']);
@@ -140,18 +163,16 @@ class DigitalRecordController extends Controller
             $skillsByCategory[] = ['label' => $label, 'count' => $count];
         }
 
-        // 6) Grade distribution — count of letter grades earned across all semesters.
-        $gradeBuckets = ['A+' => 0, 'A' => 0, 'A-' => 0, 'B+' => 0, 'B' => 0, 'B-' => 0, 'C+' => 0, 'C' => 0, 'D' => 0, 'F' => 0];
-        foreach ($grades as $g) {
-            $letter = (string) ($g['letter_grade'] ?? '');
-            if (isset($gradeBuckets[$letter])) {
-                $gradeBuckets[$letter]++;
-            }
-        }
-        $gradesDistribution = [];
-        foreach ($gradeBuckets as $letter => $count) {
-            $gradesDistribution[] = ['label' => $letter, 'count' => $count];
-        }
+        // 6) Course grades — per-course numeric score with its letter grade.
+        //    Minus grades (A-, B-, …) are normalised away since the scale we use has none.
+        $gradesDistribution = collect($grades)
+            ->map(fn ($g) => [
+                'label' => mb_substr((string) ($g['course_name'] ?? $g['course_code'] ?? '—'), 0, 32),
+                'grade' => str_replace('-', '', (string) ($g['letter_grade'] ?? '—')),
+                'score' => (int) ($g['numeric_grade'] ?? 0),
+            ])
+            ->values()
+            ->all();
 
         return [
             'alignment'    => [

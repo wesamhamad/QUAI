@@ -1,0 +1,107 @@
+
+image: docker-registry.qu.edu.sa/deployer:latest
+
+stages:
+  - staging
+  - production
+
+# Staging Deployment
+staging:
+  stage: staging
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$STAGING_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh $SERVER_USER@$STAGING_SERVER_HOST "
+      cd public_html/ &&
+      git fetch origin main &&
+      git reset --hard origin/main &&
+      composer install --optimize-autoloader &&
+      php artisan migrate --force &&
+      php artisan db:seed --class=RolesAndPermissionsSeeder --force &&
+      php artisan db:seed --class=AdminsSeeder --force &&
+      php artisan storage:link &&
+      php artisan optimize:clear &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
+      php artisan cache:clear &&
+      php artisan queue:restart
+      "
+
+  after_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$STAGING_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ssh $SERVER_USER@$STAGING_SERVER_HOST "
+      cd public_html/ &&
+      echo '=== ls -la storage/logs ===' &&
+      (ls -la storage/logs/ 2>&1 || true) &&
+      echo '=== find storage/logs -name *.log ===' &&
+      (find storage/logs -type f -name '*.log' 2>&1 || true) &&
+      echo '=== tail -n 300 storage/logs/laravel.log ===' &&
+      (tail -n 300 storage/logs/laravel.log 2>&1 || echo 'laravel.log unreadable')
+      "
+
+  environment:
+    name: staging
+  only:
+    - main
+
+# Production Deployment
+production:
+  stage: production
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$PRODUCTION_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh $SERVER_USER@$PRODUCTION_SERVER_HOST "
+      cd public_html/ &&
+      php artisan down &&
+      git fetch origin &&
+      git reset --hard origin/main &&
+      composer install --no-dev --optimize-autoloader &&
+      php artisan migrate --force &&
+      php artisan db:seed --class=RolesAndPermissionsSeeder --force &&
+      php artisan db:seed --class=AdminsSeeder --force &&
+      php artisan cache:clear &&
+      php artisan storage:link &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
+      php artisan queue:restart &&
+      php artisan optimize &&
+      php artisan up"
+
+  after_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$PRODUCTION_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ssh $SERVER_USER@$PRODUCTION_SERVER_HOST "
+      cd public_html/ &&
+      echo '=== ls -la storage/logs ===' &&
+      (ls -la storage/logs/ 2>&1 || true) &&
+      echo '=== find storage/logs -name *.log ===' &&
+      (find storage/logs -type f -name '*.log' 2>&1 || true) &&
+      echo '=== tail -n 300 storage/logs/laravel.log ===' &&
+      (tail -n 300 storage/logs/laravel.log 2>&1 || echo 'laravel.log unreadable')
+      "
+
+  environment:
+    name: production
+  only:
+    - main
+  when: manual
+

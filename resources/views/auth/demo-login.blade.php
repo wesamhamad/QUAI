@@ -143,9 +143,7 @@
                         </button>
                     @endforeach
                 </div>
-                <p class="text-[10px] text-gray-500 mt-3 text-center leading-relaxed">
-                    كلمة المرور الافتراضية للحسابات اليدوية: <span class="font-mono">password</span>
-                </p>
+              
             </div>
 
             <p class="text-[11px] text-gray-400 mt-5 text-center leading-relaxed">

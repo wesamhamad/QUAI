@@ -20,6 +20,9 @@ interface QmentorWindowUser {
   email?: string;
   student_id?: string | null;
   user_type?: string | null;
+  is_faculty?: boolean;
+  is_admin?: boolean;
+  is_super_admin?: boolean;
 }
 
 /** Resolve the displayed profile from (in order): the API /me response,
@@ -31,9 +34,11 @@ function resolveProfile(api: ApiProfileShape | null): UserProfileType {
     ? (window as unknown as { __qmentor_user?: QmentorWindowUser }).__qmentor_user
     : undefined) ?? {};
 
+  // Faculty/Admin are seeded with user_type 'staff', so prefer the explicit
+  // role flags Blade exposes on window.__qmentor_user; fall back to user_type.
   const role: UserProfileType['role'] =
-    winUser.user_type === 'admin' ? 'admin'
-    : winUser.user_type === 'advisor' || winUser.user_type === 'instructor' ? 'advisor'
+    winUser.is_admin || winUser.is_super_admin || winUser.user_type === 'admin' ? 'admin'
+    : winUser.is_faculty || winUser.user_type === 'advisor' || winUser.user_type === 'instructor' ? 'advisor'
     : 'student';
 
   return {

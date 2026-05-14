@@ -67,7 +67,7 @@
 		},
 		{
 			"name": "Chat",
-			"description": "OpenAI-compatible Chat API",
+			"description": "Chat API",
 			"item": [
 				{
 					"name": "Chat Completion",
@@ -88,7 +88,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "chat", "completions"]
 						},
-						"description": "OpenAI-compatible chat completion endpoint.\n\n**Body:**\n- `messages` (required) — array of {role, content}\n- `stream` (optional) — boolean, enables SSE streaming\n- `web_search` (optional) — boolean, enables web search context\n- `model` (optional) — override model\n- `max_tokens` (optional) — 1-8192\n- `temperature` (optional) — 0-2"
+						"description": "Chat completion endpoint.\n\n**Body:**\n- `messages` (required) — array of {role, content}\n- `stream` (optional) — boolean, enables SSE streaming\n- `web_search` (optional) — boolean, enables web search context\n- `model` (optional) — override model\n- `max_tokens` (optional) — 1-8192\n- `temperature` (optional) — 0-2"
 					}
 				},
 				{

@@ -34,3 +34,17 @@ QUBI/tsconfig.tsbuildinfo
 
 # QUAI
 QUAI/.intent/
+
+# QSPARK (standalone Laravel sub-app at ./QSPARK)
+QSPARK/vendor/
+QSPARK/node_modules/
+QSPARK/public/build/
+QSPARK/public/hot
+QSPARK/public/storage
+QSPARK/storage/*.key
+QSPARK/storage/pail/
+QSPARK/storage/framework/cache/
+QSPARK/storage/framework/sessions/
+QSPARK/storage/framework/views/
+QSPARK/storage/logs/
+QSPARK/.phpunit.result.cache
