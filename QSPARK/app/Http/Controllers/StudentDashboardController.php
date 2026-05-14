@@ -915,16 +915,18 @@ class StudentDashboardController extends Controller
         // Get dashboard data for AI analysis
         $dashboardData = $this->getDashboardData();
 
-        // Get or create monthly recommendation
+        // Demo mode: always serve a complete, fully-Arabic dummy recommendation
+        // so every section of the page is populated regardless of AI/DB state.
+        // This also refreshes any stale (English / partial) record left behind
+        // by an earlier live Gemini run.
         $currentMonth = $this->currentSemesterKey();
-        $recommendation = StudentMonthlyRecommendation::where('student_id', $studentId)
-            ->where('month', $currentMonth)
-            ->first();
-
-        // If no recommendation exists for this month, generate one
-        if (! $recommendation) {
-            $recommendation = $this->generateMonthlyRecommendations($studentId, $dashboardData, $student);
-        }
+        $studentDataForDummy = [
+            'name' => $dashboardData['studentArabicName'] ?? ($student->arabic_name ?? 'الطالب'),
+            'gpa' => $dashboardData['gpa'] ?? ($student->gpa ?? 0),
+            'attendance_rate' => $dashboardData['attendanceRate'] ?? ($student->attendance_rate ?? 0),
+            'game_attempts' => $dashboardData['gameAttempts'] ?? ($student->game_attempts ?? 0),
+        ];
+        $recommendation = $this->createFallbackRecommendation($studentId, $currentMonth, $studentDataForDummy);
 
         // Prefer AI-generated career data on the recommendation; fall back to
         // the static major-keyed list only if AI didn't produce anything.
@@ -1127,8 +1129,15 @@ class StudentDashboardController extends Controller
         // Get dashboard data for AI analysis
         $dashboardData = $this->getDashboardData();
 
-        // Generate new recommendation
-        $recommendation = $this->generateMonthlyRecommendations($studentId, $dashboardData, $student);
+        // Demo mode: regenerate the complete, fully-Arabic dummy recommendation
+        // rather than calling the live AI (keeps every section populated).
+        $studentDataForDummy = [
+            'name' => $dashboardData['studentArabicName'] ?? ($student->arabic_name ?? 'الطالب'),
+            'gpa' => $dashboardData['gpa'] ?? ($student->gpa ?? 0),
+            'attendance_rate' => $dashboardData['attendanceRate'] ?? ($student->attendance_rate ?? 0),
+            'game_attempts' => $dashboardData['gameAttempts'] ?? ($student->game_attempts ?? 0),
+        ];
+        $recommendation = $this->createFallbackRecommendation($studentId, $currentMonth, $studentDataForDummy);
 
         return response()->json([
             'success' => true,
@@ -1881,164 +1890,245 @@ class StudentDashboardController extends Controller
      */
     private function createFallbackRecommendation($studentId, $month, $studentData)
     {
-        $recommendations = [];
-        $treatmentPlans = [];
-        $tips = [];
-        $learningPaths = [];
-        $weeklyPlans = [];
-        $goals = [];
-        $strengths = [];
-        $weaknesses = [];
-        $improvementAreas = [];
-        $recommendedResources = [];
-        $studyTechniques = [];
-        $predictedGpa = null;
+        // Demo dataset: a complete, fully-Arabic recommendation that populates
+        // every section the recommendations page renders. Lightly data-aware
+        // (GPA / attendance) for realism, but never leaves a section empty.
+        $gpa = (float) ($studentData['gpa'] ?? 0);
+        $attendanceRate = (float) ($studentData['attendance_rate'] ?? 0);
+        $gpaText = $gpa > 0 ? rtrim(rtrim(number_format($gpa, 2), '0'), '.') : '—';
+        $attendanceText = $attendanceRate > 0 ? rtrim(rtrim(number_format($attendanceRate, 1), '0'), '.') : '—';
 
-        // Generate basic recommendations based on data
-        if ($studentData['gpa'] < 3.5) {
-            $recommendations[] = 'ركز على تحسين معدلك التراكمي من خلال المذاكرة المنتظمة والمراجعة اليومية';
-            $treatmentPlans[] = 'خصص 3 ساعات يومياً للمراجعة والدراسة مع التركيز على المواد الضعيفة';
-            $weaknesses[] = 'المعدل التراكمي يحتاج إلى تحسين - حالياً '.$studentData['gpa'];
-            $improvementAreas[] = 'تحسين المعدل التراكمي: ضع خطة دراسية منظمة وراجع المواد بانتظام';
-            $predictedGpa = min(5.0, $studentData['gpa'] + 0.3);
-        } else {
-            $strengths[] = 'معدل تراكمي ممتاز: '.$studentData['gpa'].' - استمر في هذا الأداء الرائع!';
-            $predictedGpa = min(5.0, $studentData['gpa'] + 0.1);
+        $predictedGpa = $gpa > 0 ? min(5.0, round($gpa + ($gpa < 3.5 ? 0.35 : 0.15), 2)) : 4.5;
+
+        // ── Strengths ─────────────────────────────────────────────────────
+        $strengths = [
+            'التزام واضح بحضور المحاضرات والتفاعل مع المحتوى التعليمي.',
+            'قدرة جيدة على إدارة الوقت بين المقررات المختلفة.',
+            'استخدام منصة كيو سبارك بشكل منتظم لمتابعة التقدم الأكاديمي.',
+            'دافعية عالية نحو تطوير المهارات والحصول على الشهادات المهنية.',
+        ];
+        if ($gpa >= 3.5) {
+            array_unshift($strengths, "معدل تراكمي ممتاز ({$gpaText}) — استمر في هذا الأداء الرائع!");
+        }
+        if ($attendanceRate >= 90) {
+            $strengths[] = "نسبة حضور ممتازة ({$attendanceText}%) — حافظ على هذا الالتزام.";
         }
 
-        if ($studentData['attendance_rate'] < 90) {
-            $recommendations[] = 'احرص على الحضور المنتظم لجميع المحاضرات - الحضور أساس النجاح';
-            $treatmentPlans[] = 'ضع تنبيهات للمحاضرات المهمة واستيقظ مبكراً';
-            $weaknesses[] = 'نسبة الحضور منخفضة: '.$studentData['attendance_rate'].'% - يجب الوصول إلى 95% على الأقل';
-            $goals[] = [
-                'type' => 'monthly',
-                'category' => 'attendance',
-                'description' => 'رفع نسبة الحضور إلى 95% أو أعلى',
-                'target_value' => 95,
-                'timeline' => 'نهاية الشهر',
-                'action_steps' => [
-                    'وضع تنبيهات للمحاضرات',
-                    'النوم مبكراً',
-                    'تجهيز الحقيبة من الليلة السابقة',
+        // ── Weaknesses ────────────────────────────────────────────────────
+        $weaknesses = [
+            'تأخر في تسليم بعض الواجبات قرب موعد التسليم النهائي.',
+            'الاعتماد على المراجعة المكثفة قبل الاختبارات بدلاً من المراجعة المنتظمة.',
+            'قلة المشاركة في مجموعات الدراسة والأنشطة الجماعية.',
+        ];
+        if ($gpa > 0 && $gpa < 3.5) {
+            array_unshift($weaknesses, "المعدل التراكمي يحتاج إلى تحسين — حالياً {$gpaText} من 5.0.");
+        }
+        if ($attendanceRate > 0 && $attendanceRate < 90) {
+            $weaknesses[] = "نسبة الحضور منخفضة ({$attendanceText}%) — يُنصح بالوصول إلى 95% على الأقل.";
+        }
+
+        // ── Top-level recommendations & treatment plans ───────────────────
+        $recommendations = [
+            'ضع جدولاً دراسياً أسبوعياً ثابتاً وخصص وقتاً يومياً لكل مقرر.',
+            'راجع ملاحظات كل محاضرة في نفس اليوم لتثبيت المعلومات.',
+            'احرص على الحضور المنتظم لجميع المحاضرات — الحضور أساس النجاح.',
+            'استفد من الألعاب التعليمية والاختبارات القصيرة في المنصة لتعزيز الفهم.',
+            'ابدأ مبكراً بالتخطيط للشهادات المهنية والتدريب العملي.',
+        ];
+        $treatmentPlans = [
+            'خصص 3 ساعات يومياً للمراجعة مع التركيز على المقررات الأكثر صعوبة.',
+            'استخدم تقنية بومودورو (25 دقيقة تركيز / 5 دقائق راحة) لرفع الإنتاجية.',
+            'حدد موعداً أسبوعياً ثابتاً لمراجعة شاملة لكل المقررات.',
+            'تواصل مع المرشد الأكاديمي عند مواجهة أي تعثر دراسي مبكراً.',
+        ];
+
+        // ── Tips ──────────────────────────────────────────────────────────
+        $tips = [
+            'نظم وقتك بين الدراسة والراحة — التوازن مفتاح الاستمرارية.',
+            'استخدم تقنية بومودورو: 25 دقيقة دراسة مركزة، 5 دقائق راحة.',
+            'راجع ملاحظاتك بعد كل محاضرة مباشرة لتثبيت المعلومات.',
+            'كوّن مجموعات دراسية مع زملائك للمناقشة والتعلم التعاوني.',
+            'نم 7-8 ساعات يومياً — النوم الجيد يحسّن التركيز والذاكرة.',
+        ];
+
+        // ── Improvement areas ─────────────────────────────────────────────
+        $improvementAreas = [
+            'تنظيم الوقت: ضع خطة أسبوعية مكتوبة والتزم بها.',
+            'المراجعة المنتظمة: راجع المقررات أولاً بأول بدلاً من التراكم.',
+            'تسليم الواجبات مبكراً: ابدأ الواجب فور استلامه ولا تؤجله.',
+            'المشاركة الصفية: اطرح الأسئلة وشارك في النقاش داخل المحاضرة.',
+            'استخدام مصادر التعلم: استفد من الفيديوهات والتطبيقات التعليمية.',
+            'إدارة ضغط الاختبارات: وزّع المراجعة على فترات بدل المراجعة الليلية.',
+        ];
+
+        // ── Learning paths ────────────────────────────────────────────────
+        $learningPaths = [
+            [
+                'title' => 'مسار تحسين الأداء الأكاديمي',
+                'description' => 'خطة شاملة لرفع المعدل التراكمي وتحسين الأداء العام.',
+                'duration' => '4 أشهر',
+                'steps' => [
+                    'الأسبوع 1-2: تقييم نقاط القوة والضعف في جميع المقررات.',
+                    'الأسبوع 3-4: وضع جدول دراسي منظم وتخصيص وقت لكل مادة.',
+                    'الشهر 2: البدء في المراجعة المكثفة للمقررات الأكثر صعوبة.',
+                    'الشهر 3-4: التطبيق العملي وحل التمارين والاختبارات التجريبية.',
                 ],
-            ];
-        } else {
-            $strengths[] = 'نسبة حضور ممتازة: '.$studentData['attendance_rate'].'% - حافظ على هذا الالتزام!';
-        }
-
-        if ($studentData['game_attempts'] < 5) {
-            $recommendations[] = 'استفد من الألعاب التعليمية لتعزيز فهمك وجعل التعلم أكثر متعة';
-            $tips[] = 'الألعاب التعليمية تساعد على تثبيت المعلومات بطريقة ممتعة وتفاعلية';
-            $improvementAreas[] = 'زيادة استخدام الألعاب التعليمية: حاول لعب 3 ألعاب أسبوعياً على الأقل';
-        } else {
-            $strengths[] = 'استخدام جيد للألعاب التعليمية: '.$studentData['game_attempts'].' محاولة';
-        }
-
-        // General tips
-        $tips[] = 'نظم وقتك بين الدراسة والراحة - التوازن مهم للنجاح';
-        $tips[] = 'استخدم تقنية بومودورو: 25 دقيقة دراسة مركزة، 5 دقائق راحة';
-        $tips[] = 'راجع ملاحظاتك بعد كل محاضرة مباشرة لتثبيت المعلومات';
-        $tips[] = 'كوّن مجموعات دراسية مع زملائك للمناقشة والتعلم التعاوني';
-
-        // Learning paths
-        $learningPaths[] = [
-            'title' => 'مسار تحسين الأداء الأكاديمي',
-            'description' => 'خطة شاملة لتحسين المعدل والأداء العام',
-            'duration' => '4 أشهر',
-            'steps' => [
-                'الأسبوع 1-2: تقييم نقاط القوة والضعف في جميع المواد',
-                'الأسبوع 3-4: وضع جدول دراسي منظم وتخصيص وقت لكل مادة',
-                'الشهر 2: البدء في المراجعة المكثفة للمواد الضعيفة',
-                'الشهر 3-4: التطبيق العملي وحل التمارين والاختبارات التجريبية',
+            ],
+            [
+                'title' => 'مسار المهارات والتطوير المهني',
+                'description' => 'بناء مهارات عملية تؤهلك لسوق العمل قبل التخرج.',
+                'duration' => '6 أشهر',
+                'steps' => [
+                    'الشهر 1: تحديد المهارات المطلوبة في مجال تخصصك.',
+                    'الشهر 2-3: التسجيل في دورة احترافية معتمدة عبر الإنترنت.',
+                    'الشهر 4-5: تنفيذ مشروع تطبيقي صغير لإثراء ملف الإنجازات.',
+                    'الشهر 6: تجهيز سيرة ذاتية احترافية والبحث عن فرصة تدريب.',
+                ],
             ],
         ];
 
-        // Weekly plans
+        // ── Weekly plans ──────────────────────────────────────────────────
+        $weeklyPlans = [];
         for ($week = 1; $week <= 4; $week++) {
             $weeklyPlans[] = [
                 'week' => $week,
                 'focus' => $week == 1 ? 'التقييم والتخطيط' : ($week == 2 ? 'البدء في التنفيذ' : ($week == 3 ? 'التعمق والممارسة' : 'المراجعة والتقييم')),
                 'tasks' => $week == 1 ? [
-                    'مراجعة جميع المواد وتحديد نقاط الضعف',
-                    'إنشاء جدول دراسي أسبوعي',
-                    'تحديد أهداف واضحة لكل مادة',
+                    'مراجعة جميع المقررات وتحديد نقاط الضعف.',
+                    'إنشاء جدول دراسي أسبوعي مكتوب.',
+                    'تحديد أهداف واضحة وقابلة للقياس لكل مادة.',
                 ] : ($week == 2 ? [
-                    'البدء بمراجعة المواد الضعيفة',
-                    'حضور جميع المحاضرات والتفاعل',
-                    'حل 50% من التمارين المطلوبة',
+                    'البدء بمراجعة المقررات الأكثر صعوبة.',
+                    'حضور جميع المحاضرات والتفاعل فيها.',
+                    'حل 50% من التمارين والواجبات المطلوبة.',
                 ] : ($week == 3 ? [
-                    'حل تمارين إضافية',
-                    'المشاركة في مجموعات دراسية',
-                    'مراجعة الملاحظات يومياً',
+                    'حل تمارين إضافية واختبارات تطبيقية.',
+                    'المشاركة في مجموعة دراسية واحدة على الأقل.',
+                    'مراجعة الملاحظات يومياً قبل النوم.',
                 ] : [
-                    'مراجعة شاملة لجميع المواد',
-                    'حل اختبارات تجريبية',
-                    'تقييم التقدم وتعديل الخطة',
+                    'مراجعة شاملة لجميع المقررات.',
+                    'حل اختبارات تجريبية كاملة بمحاكاة وقت الاختبار.',
+                    'تقييم التقدم وتعديل الخطة للشهر القادم.',
                 ])),
                 'expected_hours' => 15 + ($week * 3),
             ];
         }
 
-        // Goals
-        $goals[] = [
-            'type' => 'monthly',
-            'category' => 'academic',
-            'description' => 'تحسين المعدل التراكمي',
-            'target_value' => min(5.0, $studentData['gpa'] + 0.3),
-            'timeline' => 'نهاية الفصل الدراسي',
-            'action_steps' => [
-                'دراسة 3 ساعات يومياً على الأقل',
-                'حضور جميع المحاضرات',
-                'حل جميع الواجبات في وقتها',
-                'المراجعة الأسبوعية لجميع المواد',
+        // ── SMART goals ───────────────────────────────────────────────────
+        $goals = [
+            [
+                'type' => 'شهري',
+                'category' => 'أكاديمي',
+                'description' => 'رفع المعدل التراكمي بمقدار 0.3 نقطة على الأقل.',
+                'target_value' => $gpa > 0 ? min(5.0, round($gpa + 0.3, 2)) : 4.5,
+                'timeline' => 'نهاية الفصل الدراسي',
+                'action_steps' => [
+                    'الدراسة 3 ساعات يومياً على الأقل.',
+                    'حضور جميع المحاضرات دون استثناء.',
+                    'تسليم جميع الواجبات في وقتها أو قبله.',
+                    'إجراء مراجعة أسبوعية شاملة لكل المقررات.',
+                ],
+            ],
+            [
+                'type' => 'أسبوعي',
+                'category' => 'ساعات الدراسة',
+                'description' => 'تخصيص 20 ساعة دراسة فعّالة كل أسبوع.',
+                'target_value' => '20 ساعة',
+                'timeline' => 'كل أسبوع',
+                'action_steps' => [
+                    'تخصيص 3 ساعات دراسة يومياً.',
+                    'استخدام تقنية بومودورو للحفاظ على التركيز.',
+                    'تتبع ساعات الدراسة في تطبيق أو دفتر متابعة.',
+                ],
+            ],
+            [
+                'type' => 'شهري',
+                'category' => 'الحضور',
+                'description' => 'رفع نسبة الحضور إلى 95% أو أعلى.',
+                'target_value' => '95%',
+                'timeline' => 'نهاية الشهر',
+                'action_steps' => [
+                    'ضبط تنبيهات لجميع المحاضرات.',
+                    'النوم مبكراً والاستيقاظ قبل المحاضرة بوقت كافٍ.',
+                    'تجهيز الحقيبة والمواد من الليلة السابقة.',
+                ],
+            ],
+            [
+                'type' => 'فصلي',
+                'category' => 'تطوير المهارات',
+                'description' => 'إكمال دورة احترافية معتمدة في مجال التخصص.',
+                'target_value' => 'شهادة واحدة',
+                'timeline' => 'خلال الفصل الدراسي',
+                'action_steps' => [
+                    'اختيار دورة معتمدة مناسبة لمجال التخصص.',
+                    'تخصيص ساعتين أسبوعياً لمتابعة الدورة.',
+                    'تطبيق ما تم تعلمه في مشروع عملي صغير.',
+                ],
             ],
         ];
 
-        $goals[] = [
-            'type' => 'weekly',
-            'category' => 'study_hours',
-            'description' => 'دراسة 20 ساعة أسبوعياً على الأقل',
-            'target_value' => 20,
-            'timeline' => 'كل أسبوع',
-            'action_steps' => [
-                'تخصيص 3 ساعات يومياً',
-                'استخدام تقنية بومودورو',
-                'تتبع الساعات في تطبيق أو دفتر',
+        // ── Recommended resources ─────────────────────────────────────────
+        $recommendedResources = [
+            [
+                'type' => 'video',
+                'title' => 'دورة تقنيات الدراسة الفعّالة',
+                'description' => 'تعلّم أفضل الطرق للدراسة والاستيعاب وإدارة وقت المراجعة.',
+                'link' => 'يوتيوب — ابحث عن «تقنيات الدراسة الفعّالة»',
+            ],
+            [
+                'type' => 'app',
+                'title' => 'تطبيق Forest للتركيز',
+                'description' => 'تطبيق يساعدك على التركيز وتجنّب المشتتات أثناء الدراسة.',
+                'link' => 'متجر التطبيقات',
+            ],
+            [
+                'type' => 'book',
+                'title' => 'كتاب: العادات الذرية',
+                'description' => 'دليل عملي لبناء عادات دراسية صغيرة ومستدامة.',
+                'link' => 'متوفر في المكتبة الجامعية',
+            ],
+            [
+                'type' => 'app',
+                'title' => 'تطبيق Notion لتنظيم المهام',
+                'description' => 'لتنظيم الجدول الدراسي والواجبات والملاحظات في مكان واحد.',
+                'link' => 'notion.so',
+            ],
+            [
+                'type' => 'video',
+                'title' => 'سلسلة شرح المقررات الأساسية',
+                'description' => 'شروحات مبسطة للمفاهيم الصعبة في مقررات التخصص.',
+                'link' => 'منصة كيو سبارك — قسم المكتبة التعليمية',
+            ],
+            [
+                'type' => 'link',
+                'title' => 'منصة كورسيرا — دورات مجانية',
+                'description' => 'دورات احترافية معتمدة من جامعات عالمية في مختلف المجالات.',
+                'link' => 'coursera.org',
             ],
         ];
 
-        // Recommended resources
-        $recommendedResources[] = [
-            'type' => 'video',
-            'title' => 'دورة تقنيات الدراسة الفعالة',
-            'description' => 'تعلم أفضل الطرق للدراسة والاستيعاب',
-            'link' => 'يوتيوب - ابحث عن "study techniques"',
-        ];
-
-        $recommendedResources[] = [
-            'type' => 'app',
-            'title' => 'تطبيق Forest للتركيز',
-            'description' => 'تطبيق يساعد على التركيز وتجنب المشتتات',
-            'link' => 'متجر التطبيقات',
-        ];
-
-        // Study techniques
-        $studyTechniques[] = [
-            'name' => 'تقنية بومودورو',
-            'description' => '25 دقيقة دراسة مركزة + 5 دقائق راحة',
-            'benefits' => 'تحسين التركيز وتقليل الإرهاق الذهني',
-        ];
-
-        $studyTechniques[] = [
-            'name' => 'الاسترجاع النشط',
-            'description' => 'محاولة تذكر المعلومات بدون النظر للملاحظات',
-            'benefits' => 'تثبيت المعلومات في الذاكرة طويلة المدى',
-        ];
-
-        $studyTechniques[] = [
-            'name' => 'الخرائط الذهنية',
-            'description' => 'رسم مخططات بصرية للمفاهيم والعلاقات',
-            'benefits' => 'فهم أعمق وربط المعلومات ببعضها',
+        // ── Study techniques ──────────────────────────────────────────────
+        $studyTechniques = [
+            [
+                'name' => 'تقنية بومودورو',
+                'description' => '25 دقيقة دراسة مركّزة + 5 دقائق راحة.',
+                'benefits' => 'تحسين التركيز وتقليل الإرهاق الذهني.',
+            ],
+            [
+                'name' => 'الاسترجاع النشط',
+                'description' => 'محاولة تذكّر المعلومات دون النظر إلى الملاحظات.',
+                'benefits' => 'تثبيت المعلومات في الذاكرة طويلة المدى.',
+            ],
+            [
+                'name' => 'الخرائط الذهنية',
+                'description' => 'رسم مخططات بصرية للمفاهيم والعلاقات بينها.',
+                'benefits' => 'فهم أعمق وربط المعلومات ببعضها.',
+            ],
+            [
+                'name' => 'المراجعة المتباعدة',
+                'description' => 'إعادة مراجعة المادة على فترات متزايدة.',
+                'benefits' => 'مقاومة النسيان وترسيخ المعلومات على المدى البعيد.',
+            ],
         ];
 
         // Timeline Roadmap
@@ -2100,35 +2190,41 @@ class StudentDashboardController extends Controller
                     'شهادة محترف الموارد البشرية (PHR/SPHR) - معهد الموارد البشرية',
                 ],
                 'internship_opportunities' => [
-                    'فرص تدريب في شركات الطاقة القطرية (قطر للطاقة، قطر غاز) - 3-6 أشهر',
-                    'برامج تدريب في المؤسسات المالية (بنك قطر الوطني، مصرف قطر المركزي) - صيفي',
-                    'تدريب في شركات التكنولوجيا والاتصالات (أوريدو، فودافون قطر) - فصلي',
-                    'فرص تدريب في المؤسسات الحكومية (وزارات، هيئات حكومية) - سنوي',
-                    'برامج تدريب في الشركات الاستشارية (ديلويت، برايس ووترهاوس كوبرز) - صيفي',
+                    'فرص تدريب في شركات الطاقة السعودية (أرامكو السعودية، سابك) - 3-6 أشهر',
+                    'برامج تدريب في المؤسسات المالية (البنك الأهلي، الراجحي، ساما) - صيفي',
+                    'تدريب في شركات التقنية والاتصالات (STC، موبايلي، زين) - فصلي',
+                    'فرص تدريب في المؤسسات الحكومية (الوزارات والهيئات الحكومية) - سنوي',
+                    'برامج تدريب في الشركات الاستشارية (ديلويت، PwC، KPMG، EY) - صيفي',
                 ],
             ],
         ];
 
-        return StudentMonthlyRecommendation::create([
-            'student_id' => $studentId,
-            'month' => $month,
-            'recommendations' => $recommendations,
-            'treatment_plans' => $treatmentPlans,
-            'tips' => $tips,
-            'learning_paths' => $learningPaths,
-            'weekly_plans' => $weeklyPlans,
-            'goals' => $goals,
-            'strengths' => $strengths,
-            'weaknesses' => $weaknesses,
-            'improvement_areas' => $improvementAreas,
-            'recommended_resources' => $recommendedResources,
-            'study_techniques' => $studyTechniques,
-            'predicted_gpa' => $predictedGpa,
-            'completion_percentage' => 0,
-            'timeline_roadmap' => $timelineRoadmap,
-            'student_data' => $studentData,
-            'generated_at' => Carbon::now('Asia/Riyadh'),
-        ]);
+        // updateOrCreate so a stale (English / partial) record from an earlier
+        // live AI run is refreshed in place instead of triggering a duplicate.
+        return StudentMonthlyRecommendation::updateOrCreate(
+            [
+                'student_id' => $studentId,
+                'month' => $month,
+            ],
+            [
+                'recommendations' => $recommendations,
+                'treatment_plans' => $treatmentPlans,
+                'tips' => $tips,
+                'learning_paths' => $learningPaths,
+                'weekly_plans' => $weeklyPlans,
+                'goals' => $goals,
+                'strengths' => $strengths,
+                'weaknesses' => $weaknesses,
+                'improvement_areas' => $improvementAreas,
+                'recommended_resources' => $recommendedResources,
+                'study_techniques' => $studyTechniques,
+                'predicted_gpa' => $predictedGpa,
+                'completion_percentage' => 0,
+                'timeline_roadmap' => $timelineRoadmap,
+                'student_data' => $studentData,
+                'generated_at' => Carbon::now('Asia/Riyadh'),
+            ]
+        );
     }
 
     /**

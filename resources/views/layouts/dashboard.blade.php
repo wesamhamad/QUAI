@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'QUAI - منصة الذكاء الاصطناعي')</title>
 
+    {{-- Link-preview / social cards. Pages can set a custom card title via
+         @section('og-title', '...'); otherwise the platform default is used. --}}
+    @include('partials.meta-og', ['ogTitle' => trim(View::yieldContent('og-title')) ?: null])
+
     {{-- FOUC prevention: apply saved theme before CSS loads --}}
     <script>
         (function(){var t=localStorage.getItem('quai-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();

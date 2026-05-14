@@ -2,6 +2,7 @@
 
 @section('title', 'Q SPARK — منصة التعلم والتجربة الأكاديمية')
 @section('page-title', 'Q SPARK')
+@section('og-title', 'Q SPARK — منصة التعلم والتجربة الأكاديمية | جامعة القصيم')
 
 {{-- Use a full-bleed content area so the iframe can fill the available space
      below QUAI's topbar without the default q-content padding. --}}

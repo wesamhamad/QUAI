@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>تسجيل الدخول — QUAI | جامعة القصيم</title>
+
+    {{-- Link-preview / social cards. quailab.dev redirects unauthenticated
+         visitors here, so this is the page crawlers (WhatsApp, etc.) see. --}}
+    @include('partials.meta-og')
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
