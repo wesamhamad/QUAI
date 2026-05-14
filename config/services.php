@@ -35,4 +35,30 @@ return [
         ],
     ],
 
+    // --- Merged from the QSPARK app (used by App\QSpark\* services) ---
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_QUIZ_MODEL', 'gpt-4o-mini'),
+        'direct_quiz' => env('OPENAI_QUIZ_DIRECT', false),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
+    /*
+    | Blackboard Learn REST API — OAuth 2.0 client credentials flow.
+    | See: https://developer.anthology.com/portal/displayApi/Learn
+    */
+    'blackboard' => [
+        'base_url' => env('BLACKBOARD_BASE_URL', 'https://qu.blackboard.com'),
+        'api_path' => '/learn/api/public',
+        'token_url' => env('BLACKBOARD_TOKEN_URL'),
+        'client_id' => env('BLACKBOARD_CLIENT_ID'),
+        'client_secret' => env('BLACKBOARD_CLIENT_SECRET'),
+        'timeout' => env('BLACKBOARD_TIMEOUT', 30),
+        'cache_ttl' => env('BLACKBOARD_CACHE_TTL', 3600),
+    ],
+
 ];

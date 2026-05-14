@@ -252,6 +252,21 @@
         .bp-checkboxes,
         .strategy-toggle,
         .language-toggle { grid-template-columns: 1fr; }
+
+        /* Page header: stack the icon / text / provider badge vertically so the
+           flex row can't grow wider than the rounded card and get clipped by
+           its overflow:hidden. !important overrides the inline align-items /
+           gap / padding set on the element. */
+        .q-page-header {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: var(--q-space-3) !important;
+            padding: var(--q-space-5) !important;
+        }
+        .q-page-header > div { min-width: 0; }
+
+        /* Tighten the form padding so fields get more usable width on phones. */
+        .agent-form .form-body { padding: 1.25rem 1rem; }
     }
 </style>
 @endpush

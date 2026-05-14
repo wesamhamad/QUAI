@@ -54,6 +54,30 @@ return [
             'foreign_key_constraints' => false,
         ],
 
+        // Dedicated connection for the merged QSPARK app (App\QSpark\*).
+        // QSPARK keeps its own schema (users, roles, courses, …) isolated from
+        // QUAI's tables. All App\QSpark\Models\* use this connection; its
+        // migrations live in database/migrations/qspark. Override with
+        // QSPARK_DB_* env vars to point at MySQL/Oracle in production.
+        'qspark' => [
+            'driver' => env('QSPARK_DB_CONNECTION', 'sqlite'),
+            'url' => env('QSPARK_DB_URL'),
+            'database' => env('QSPARK_DB_DATABASE', database_path('qspark.sqlite')),
+            'host' => env('QSPARK_DB_HOST', '127.0.0.1'),
+            'port' => env('QSPARK_DB_PORT', '3306'),
+            'username' => env('QSPARK_DB_USERNAME', 'root'),
+            'password' => env('QSPARK_DB_PASSWORD', ''),
+            'charset' => env('QSPARK_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('QSPARK_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'foreign_key_constraints' => env('QSPARK_DB_FOREIGN_KEYS', true),
+            'busy_timeout' => null,
+            'journal_mode' => null,
+            'synchronous' => null,
+            'transaction_mode' => 'DEFERRED',
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
@@ -122,6 +146,26 @@ return [
             'prefix_indexes' => true,
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
+        // Oracle SIS connection used by App\QSpark\Services\SISService. Inert
+        // unless QSPARK code explicitly selects it; requires the oci8 PHP
+        // extension at runtime (package: yajra/laravel-oci8).
+        'oracle' => [
+            'driver' => 'oracle',
+            'tns' => env('ORACLE_TNS', ''),
+            'host' => env('ORACLE_HOST', ''),
+            'port' => env('ORACLE_PORT', '1521'),
+            'database' => env('ORACLE_DATABASE', ''),
+            'service_name' => env('ORACLE_SERVICE_NAME', ''),
+            'username' => env('ORACLE_USERNAME', ''),
+            'password' => env('ORACLE_PASSWORD', ''),
+            'charset' => env('ORACLE_CHARSET', 'AL32UTF8'),
+            'prefix' => '',
+            'prefix_schema' => '',
+            'options' => [
+                PDO::ATTR_TIMEOUT => 15,
+            ],
         ],
 
     ],

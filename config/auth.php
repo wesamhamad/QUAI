@@ -44,6 +44,15 @@ return [
             'driver' => 'sanctum',
             'provider' => 'users',
         ],
+
+        // Guard for the merged QSPARK app. QSPARK routes run under the
+        // UseQSparkGuard middleware which makes this the default guard, so
+        // QSPARK's auth()->user() resolves against App\QSpark\Models\User
+        // while QUAI keeps the `web` guard. (Phase 2 will unify these.)
+        'qspark' => [
+            'driver' => 'session',
+            'provider' => 'qspark_users',
+        ],
     ],
 
     /*
@@ -67,6 +76,12 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        // QSPARK keeps its own users table (the `qspark` DB connection).
+        'qspark_users' => [
+            'driver' => 'eloquent',
+            'model' => App\QSpark\Models\User::class,
         ],
 
         // 'users' => [
