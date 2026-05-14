@@ -58,9 +58,9 @@
 @endphp
 
 @section('content')
-<div class="p-6 space-y-6">
-  <div class="flex justify-between items-center">
-    <h2 class="text-3xl font-extrabold" data-translate="usage_dashboard">{{ __('messages.usage_dashboard') }}</h2>
+<div class="p-4 sm:p-6 space-y-6">
+  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+    <h2 class="text-2xl sm:text-3xl font-extrabold" data-translate="usage_dashboard">{{ __('messages.usage_dashboard') }}</h2>
 
     <div class="hidden md:flex items-center gap-3">
       <div class="bg-white rounded-xl shadow px-4 py-2 text-center">
@@ -80,11 +80,11 @@
       </div>
     </div>
 
-    <form method="GET" action="{{ route('qspark.usage.dashboard') }}" class="flex gap-2 items-center" dir="ltr">
-      <input type="date" name="start_date" value="{{ $startDate }}" class="px-3 py-2 border rounded-lg" placeholder="{{ __('messages.usage_from_date_placeholder') }}">
+    <form method="GET" action="{{ route('qspark.usage.dashboard') }}" class="flex flex-wrap gap-2 items-center" dir="ltr">
+      <input type="date" name="start_date" value="{{ $startDate }}" class="flex-1 min-w-[8rem] px-3 py-2 border rounded-lg" placeholder="{{ __('messages.usage_from_date_placeholder') }}">
       <span data-translate="to">{{ __('messages.to') }}</span>
-      <input type="date" name="end_date" value="{{ $endDate }}" class="px-3 py-2 border rounded-lg" placeholder="{{ __('messages.usage_to_date_placeholder') }}">
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600" data-translate="update">{{ __('messages.update') }}</button>
+      <input type="date" name="end_date" value="{{ $endDate }}" class="flex-1 min-w-[8rem] px-3 py-2 border rounded-lg" placeholder="{{ __('messages.usage_to_date_placeholder') }}">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 shrink-0" data-translate="update">{{ __('messages.update') }}</button>
     </form>
   </div>
 
@@ -377,7 +377,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Daily Visits Chart -->
     <div class="bg-white rounded-2xl p-6 shadow-lg">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div class="flex items-center gap-2">
           <div>
             <h3 class="font-bold text-xl text-gray-800">{{ __('messages.daily_visits') }}</h3>
@@ -439,7 +439,7 @@
 
     <!-- Daily Quiz Game Chart -->
     <div class="bg-white rounded-2xl p-6 shadow-lg">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div class="flex items-center gap-2">
           <div>
             <h3 class="font-bold text-xl text-gray-800" data-translate="daily_quiz_game">{{ __('messages.daily_quiz_game') }}</h3>

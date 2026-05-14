@@ -3,14 +3,14 @@
 @section('title', __('messages.faculty_dashboard_page_title'))
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="p-4 sm:p-6 space-y-6">
   <!-- Title -->
   <div class="flex justify-between items-center">
-    <h2 class="text-3xl font-extrabold">{{ __('messages.faculty_dashboard_title') }}</h2>
+    <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.faculty_dashboard_title') }}</h2>
   </div>
 
   <!-- Top Row - Statistics Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
     <!-- Total Students -->
     <div class="bg-[#DFF6E7] rounded-2xl p-4">
       <div class="flex items-center gap-2">
@@ -376,14 +376,14 @@
   </div>
 
   <!-- Students at Risk - full width -->
-  <div class="bg-white rounded-2xl p-6 shadow">
-    <div class="flex items-center justify-between mb-6">
+  <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
       <h3 class="font-bold text-xl text-red-600">{{ __('messages.faculty_students_at_risk') }}</h3>
       <span class="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full">
         {{ count($studentsAtRisk) }} {{ __('messages.student_word') }}
       </span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       @forelse($studentsAtRisk as $index => $student)
         @if($index < 12)
         <div class="p-4 rounded-xl border-2 transition hover:shadow-md

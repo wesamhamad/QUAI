@@ -72,16 +72,16 @@
 @endpush
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="p-4 sm:p-6 space-y-6">
   <!-- Title -->
   @cache('dashboard_title', 60)
 	  <div class="flex justify-between items-center">
-	    <h2 class="text-3xl font-extrabold" data-translate="dashboard">{{ __('messages.dashboard') }}</h2>
+	    <h2 class="text-2xl sm:text-3xl font-extrabold" data-translate="dashboard">{{ __('messages.dashboard') }}</h2>
 	  </div>
   @endcache
 
   <!-- Top Row -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
     <!-- Attendance -->
     <div class="bg-[#DFF6E7] rounded-2xl p-4">
       <div class="flex items-center gap-2">
@@ -202,7 +202,7 @@
   </div>
 
   <!-- 3 Columns -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
     <!-- Column 1 -->
     <div class="space-y-6">
       @php

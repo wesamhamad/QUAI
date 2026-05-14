@@ -3,13 +3,13 @@
 @section('title', __('messages.student_courses') . ' - Q SPARK')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 max-w-7xl mx-auto">
   <!-- Page Title -->
-  <div class="mb-10 flex items-center justify-between">
-    <h2 class="text-3xl font-extrabold text-gray-800" data-translate="student_courses">
+  <div class="mb-6 sm:mb-10 flex items-center justify-between gap-2">
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800" data-translate="student_courses">
       {{ __('messages.student_courses') }}
     </h2>
-    <div id="coursesCount" class="text-sm text-gray-500">
+    <div id="coursesCount" class="text-sm text-gray-500 shrink-0">
         <span id="countNumber">{{ count($courses ?? []) }}</span> {{ __('messages.courses') }}
     </div>
   </div>
@@ -29,7 +29,7 @@
   </div>
 
   <!-- Courses Grid -->
-  <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 {{ count($courses ?? []) == 0 ? 'hidden' : '' }}">
+  <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 {{ count($courses ?? []) == 0 ? 'hidden' : '' }}">
     @forelse ($courses as $course)
       <div class="group bg-white/80 backdrop-blur-lg border border-gray-100 rounded-3xl shadow-md hover:shadow-2xl transition transform hover:scale-[1.02] p-6 flex flex-col justify-between">
         <!-- Course Info -->

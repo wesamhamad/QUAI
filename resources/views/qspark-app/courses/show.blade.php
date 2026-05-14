@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-  <div class="max-w-7xl mx-auto p-6 space-y-8">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-dga-primary-500 to-dga-primary-600 text-white grid place-items-center shadow-lg shadow-indigo-500/20">

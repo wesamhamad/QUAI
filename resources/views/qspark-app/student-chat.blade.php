@@ -5,9 +5,21 @@
 @push('styles')
 <style>
   .chat-container {
-    height: calc(100vh - 2rem);
     display: flex;
     flex-direction: column;
+    /* Mobile: let the card grow with content and the page scroll naturally,
+       so the messages area never gets crushed by the stacked prompt buttons. */
+    min-height: calc(100vh - 2rem);
+    min-height: calc(100dvh - 2rem);
+  }
+
+  @media (min-width: 768px) {
+    /* Desktop/tablet: lock to the viewport for an app-like fixed layout. */
+    .chat-container {
+      height: calc(100vh - 3rem);
+      height: calc(100dvh - 3rem);
+      min-height: 0;
+    }
   }
 
   .chat-header {
@@ -15,10 +27,12 @@
     border-radius: 1rem 1rem 0 0;
     padding: 1.25rem 1.5rem;
     color: white;
+    flex-shrink: 0;
   }
 
   .chat-messages {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 12rem;
     overflow-y: auto;
     padding: 1.5rem;
     background: #F9FAFB;
@@ -91,6 +105,7 @@
     background: white;
     border-top: 1px solid #E5E7EB;
     border-radius: 0 0 1rem 1rem;
+    flex-shrink: 0;
   }
 
   .prompt-button {

@@ -3,8 +3,8 @@
 @section('title', __('messages.admin_dashboard_page_title'))
 
 @section('content')
-<div class="p-6 space-y-6">
-  <h2 class="text-3xl font-extrabold">{{ __('messages.admin_dashboard_title') }}</h2>
+<div class="p-4 sm:p-6 space-y-6">
+  <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.admin_dashboard_title') }}</h2>
 
   <!-- Top Row - 2 Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -232,13 +232,13 @@
   </div>
 
   <!-- Statistics Chart Section -->
-  <div class="bg-white rounded-2xl p-6 shadow-lg mt-6">
-    <div class="flex items-center justify-between mb-6">
+  <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-lg mt-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
       <div>
         <h3 class="font-bold text-xl text-gray-800">{{ __('messages.admin_period_stats') }}</h3>
         <p class="text-sm text-gray-500 mt-1">{{ __('messages.from') }} {{ $startDate ?? '2024-12-01' }} {{ __('messages.to') }} {{ $endDate ?? '2026-05-10' }}</p>
       </div>
-      <div class="flex gap-4 text-sm">
+      <div class="flex flex-wrap gap-2 sm:gap-4 text-sm">
         <span class="inline-flex items-center gap-1.5 bg-dga-primary-50 px-3 py-1.5 rounded-lg">
           <span class="w-3 h-3 rounded-full bg-dga-primary-600"></span>
           <span class="font-medium text-dga-primary-700">{{ __('messages.admin_visits_label') }}</span>

@@ -51,6 +51,23 @@
             margin-bottom: 30px;
         }
 
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        @media screen and (max-width: 768px) {
+            body { padding: 12px; }
+            .header h1 { font-size: 24px; }
+            .two-col-grid { grid-template-columns: 1fr; }
+            .print-button { padding: 8px 16px; font-size: 14px; }
+        }
+
         .stat-card {
             background: #F9FAFB;
             border: 2px solid #E5E7EB;
@@ -268,10 +285,11 @@
     <div class="section">
         <h2 class="section-title">{{ __('messages.admin_most_visiting_users') }}</h2>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div class="two-col-grid">
             <!-- Top Students -->
             <div>
                 <h3 style="margin-bottom: 15px; color: #175CD3;">👨‍🎓 {{ __('messages.admin_top_visiting_students') }}</h3>
+                <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
@@ -292,11 +310,13 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <!-- Top Faculty -->
             <div>
                 <h3 style="margin-bottom: 15px; color: #1B8354;">👩‍🏫 {{ __('messages.admin_top_visiting_faculty') }}</h3>
+                <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
@@ -319,6 +339,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

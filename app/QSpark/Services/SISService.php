@@ -255,10 +255,10 @@ class SISService
      */
     public function getStudentCoursesWithGrades($studentId, $includeLookups = true)
     {
-        // Demo mode: no Oracle. Return empty so the grades page renders the
-        // "no grades available yet" branch instead of timing out.
+        // Demo mode: no Oracle. Serve the demo student's graded course history
+        // from the StudentFixture bundle instead.
         if (config('app.demo_mode')) {
-            return [];
+            return $this->demoCoursesWithGrades();
         }
 
         try {
@@ -344,6 +344,45 @@ class SISService
 
             return [];
         }
+    }
+
+    /**
+     * Demo-mode grades: flatten the StudentFixture academic-transactions bundle
+     * (the demo student's graded course history) into the row shape the grades
+     * page expects. Grouped by semester since the fixture carries no Oracle
+     * plan categories.
+     *
+     * @return array<int,object>
+     */
+    private function demoCoursesWithGrades(): array
+    {
+        $transactions = \App\QSpark\Support\StudentFixture::academicTransactions();
+        $semesters = $transactions['data'] ?? [];
+
+        $profile = \App\QSpark\Support\StudentFixture::profile()['data']['profile'] ?? [];
+        $facultyName = $profile['faculty']['name'] ?? '';
+        $majorName = $profile['major']['name'] ?? '';
+
+        $rows = [];
+        foreach ($semesters as $semester) {
+            $semesterCode = (string) ($semester['semester'] ?? '');
+            $semesterGpa = $semester['semester_gpa'] ?? null;
+
+            foreach ($semester['courses'] ?? [] as $course) {
+                $rows[] = (object) [
+                    'course_code' => $course['course_code'] ?? '',
+                    'course_name' => $course['course_name'] ?? '',
+                    'letter_grade' => $course['letter_grade'] ?? ($course['letter_grade_s'] ?? ''),
+                    'semester' => $semesterCode,
+                    'faculty_name' => $facultyName,
+                    'major_name' => $majorName,
+                    'category_name' => $semesterCode !== '' ? 'الفصل الدراسي '.$semesterCode : 'غير محدد',
+                    'group_type_name' => $semesterGpa !== null ? 'المعدل الفصلي: '.$semesterGpa : 'المقررات',
+                ];
+            }
+        }
+
+        return $rows;
     }
 
     /**

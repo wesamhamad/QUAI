@@ -3,10 +3,10 @@
 @section('title', __('messages.calendar') . ' - Q SPARK')
 
 @section('content')
-<div class="p-6">
+<div class="p-4 sm:p-6">
   <div class="bg-white rounded-lg shadow-lg w-full">
-    <div class="header flex justify-between border-b p-4 items-center bg-gray-50 rounded-t-lg">
-      <form method="GET" action="{{ route('qspark.calendar.index') }}" class="flex items-center space-x-3 rtl:space-x-reverse rtl:space-x-3">
+    <div class="header flex flex-col sm:flex-row sm:justify-between gap-3 border-b p-4 sm:items-center bg-gray-50 rounded-t-lg">
+      <form method="GET" action="{{ route('qspark.calendar.index') }}" class="flex flex-wrap items-center gap-3">
         <select name="view" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 min-w-[140px]">
           <option value="weekly" {{ request('view') == 'weekly' ? 'selected' : '' }} data-translate="weekly_schedule">{{ __('messages.weekly_schedule') }}</option>
           <option value="monthly" {{ request('view','monthly') == 'monthly' ? 'selected' : '' }} data-translate="monthly_calendar">{{ __('messages.monthly_calendar') }}</option>
@@ -120,7 +120,8 @@
       </div>
 
     @else
-      <table class="w-full">
+      <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[640px]">
         <thead>
           <tr>
             @foreach (['sunday','monday','tuesday','wednesday','thursday','friday','saturday'] as $dayKey)
@@ -167,6 +168,7 @@
           @endfor
         </tbody>
       </table>
+      </div>
     @endif
 
   </div>

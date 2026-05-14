@@ -140,7 +140,7 @@ Route::get('/dashboard-student', [StudentDashboardController::class, 'show'])
     ->name('dashboard.student');
 
 Route::get('/dashboard-student/grades', [StudentDashboardController::class, 'showGrades'])
-    ->middleware(['auth', 'qspark.role:admin', 'qspark.cache.views:60'])
+    ->middleware(['auth', 'qspark.role:student,admin', 'qspark.cache.views:60'])
     ->name('dashboard.student.grades');
 
 Route::get('/dashboard-student/blackboard-grades', [StudentDashboardController::class, 'showBlackboardGrades'])

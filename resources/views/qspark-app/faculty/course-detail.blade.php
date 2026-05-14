@@ -3,9 +3,9 @@
 @section('title', ($course->course_name ?? __('messages.course_details_default')) . ' - Q SPARK')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 max-w-7xl mx-auto">
   <!-- Breadcrumb -->
-  <div class="mb-6 flex items-center gap-2 text-sm text-gray-500">
+  <div class="mb-6 flex flex-wrap items-center gap-2 text-sm text-gray-500">
     <a href="{{ route('qspark.faculty.dashboard') }}" class="hover:text-dga-primary-600">{{ __('messages.breadcrumb_dashboard') }}</a>
     <span>/</span>
     <a href="{{ route('qspark.faculty.courses') }}" class="hover:text-dga-primary-600">{{ __('messages.breadcrumb_my_courses') }}</a>
@@ -14,12 +14,12 @@
   </div>
 
   <!-- Course Header -->
-  <div class="bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 rounded-2xl p-6 text-white mb-6 shadow-lg">
-    <div class="flex items-start justify-between">
+  <div class="bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 rounded-2xl p-4 sm:p-6 text-white mb-6 shadow-lg">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold mb-2">{{ $course->course_name ?? __('messages.not_available') }}</h1>
+        <h1 class="text-xl sm:text-2xl font-bold mb-2">{{ $course->course_name ?? __('messages.not_available') }}</h1>
         <p class="text-blue-100 text-lg">{{ $course->course_code ?? 'N/A' }}</p>
-        <div class="flex items-center gap-4 mt-4 text-sm text-blue-100">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4 text-sm text-blue-100">
           <span>{{ __('messages.semester_label') }} {{ $currentSemester ?? __('messages.undefined_value') }}</span>
           <span>•</span>
           <span>{{ __('messages.campus_label') }} {{ $course->campus_name ?? __('messages.undefined_value') }}</span>
@@ -306,7 +306,7 @@
 
       <div class="bg-gradient-to-br from-dga-primary-50 via-white to-dga-primary-50 rounded-2xl shadow-lg overflow-hidden border border-purple-100">
         <!-- Header Section with Gradient -->
-        <div class="bg-gradient-to-r from-dga-primary-600 via-dga-primary-600 to-dga-primary-600 p-6 text-white">
+        <div class="bg-gradient-to-r from-dga-primary-600 via-dga-primary-600 to-dga-primary-600 p-4 sm:p-6 text-white">
           <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -334,7 +334,7 @@
 
         <!-- Statistics Cards -->
         @if($totalQuestions > 0)
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white/80 border-b border-purple-100">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 p-4 bg-white/80 border-b border-purple-100">
           <div class="bg-gradient-to-br from-dga-primary-500 to-dga-primary-600 rounded-xl p-3 text-white text-center shadow-md">
             <div class="text-2xl font-black">{{ $totalQuestions }}</div>
             <div class="text-xs text-purple-100 font-medium">{{ __('messages.total_questions') }}</div>

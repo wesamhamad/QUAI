@@ -2284,7 +2284,12 @@ class StudentDashboardController extends Controller
 
         $apiKey = config('services.openai.api_key');
         if (empty($apiKey)) {
-            return response()->json(['success' => false, 'error' => 'OpenAI key missing'], 500);
+            Log::error('Chat assistant unavailable: AI provider key not configured');
+
+            return response()->json([
+                'success' => false,
+                'error' => 'المساعد الذكي غير متاح حالياً. حاول مرة أخرى لاحقاً.',
+            ], 503);
         }
 
         $systemPrompt = 'أنت مساعد ذكي لطلاب جامعة القصيم. أجب بالعربية في 4-6 جمل قصيرة، نقاط واضحة وعملية، بدون مقدمات. استخدم ✅ أو • للقوائم.';
