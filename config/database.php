@@ -148,26 +148,6 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
-        // Oracle SIS connection used by App\QSpark\Services\SISService. Inert
-        // unless QSPARK code explicitly selects it; requires the oci8 PHP
-        // extension at runtime (package: yajra/laravel-oci8).
-        'oracle' => [
-            'driver' => 'oracle',
-            'tns' => env('ORACLE_TNS', ''),
-            'host' => env('ORACLE_HOST', ''),
-            'port' => env('ORACLE_PORT', '1521'),
-            'database' => env('ORACLE_DATABASE', ''),
-            'service_name' => env('ORACLE_SERVICE_NAME', ''),
-            'username' => env('ORACLE_USERNAME', ''),
-            'password' => env('ORACLE_PASSWORD', ''),
-            'charset' => env('ORACLE_CHARSET', 'AL32UTF8'),
-            'prefix' => '',
-            'prefix_schema' => '',
-            'options' => [
-                PDO::ATTR_TIMEOUT => 15,
-            ],
-        ],
-
     ],
 
     /*
