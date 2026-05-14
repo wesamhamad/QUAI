@@ -90,4 +90,25 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->user_type === 'student' || !empty($this->student_id);
     }
+
+    /**
+     * The name to show in the UI — the full name with the family (last) name
+     * dropped. The QU demo addresses faculty/students by their given name(s)
+     * only, never the tribe/family name. Falls back to the full name when
+     * there is just a single token.
+     */
+    public function displayName(): string
+    {
+        $name = trim($this->name ?? '');
+
+        if ($name === '') {
+            return '';
+        }
+
+        $parts = preg_split('/\s+/', $name);
+
+        return \count($parts) > 1
+            ? implode(' ', \array_slice($parts, 0, -1))
+            : $name;
+    }
 }

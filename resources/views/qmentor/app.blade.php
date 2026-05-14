@@ -43,7 +43,7 @@
 
             $userData = [
                 'id' => $u->id,
-                'name' => $u->name ?? '',
+                'name' => $u->displayName(),
                 'email' => $u->email ?? '',
                 'student_id' => $effectiveStudentId,
                 'user_type' => $u->user_type ?? null,
