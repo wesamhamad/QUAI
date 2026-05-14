@@ -18,12 +18,17 @@ class DailyVisit extends QSparkModel
 
     public static function incrementToday()
     {
-        $today = Carbon::today();
-        
-        return static::updateOrCreate(
-            ['visit_date' => $today],
-            ['visits_count' => \DB::raw('visits_count + 1')]
+        // firstOrCreate then increment(): a bare `visits_count + 1` expression
+        // is invalid in the INSERT path (the column has no value yet), so split
+        // the create (seed at 0) from the atomic UPDATE ... SET col = col + 1.
+        $record = static::firstOrCreate(
+            ['visit_date' => Carbon::today()],
+            ['visits_count' => 0]
         );
+
+        $record->increment('visits_count');
+
+        return $record;
     }
 
     public static function getVisitsForDateRange($startDate, $endDate)

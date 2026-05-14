@@ -64,12 +64,12 @@
         @endphp
         window.__qmentor_user = {!! json_encode($userData) !!};
         window.__qmentor_students = {!! json_encode($studentRoster) !!};
-        {{-- 'qspark' points at the real QSpark learning hub — NOT /qspark-plus,
-             which is just the QMentor SPA rebranded. The "Study on QSpark"
-             buttons deep-link here. 'home' / 'logout' let the SPA shell return
-             to the QUAI platform home and sign out from any page. --}}
+        {{-- 'qspark' points at the merged QSPARK app (served under /qspark) —
+             NOT /qspark-plus, which is just the QMentor SPA rebranded. The
+             "Study on QSpark" buttons deep-link here. 'home' / 'logout' let the
+             SPA shell return to the QUAI platform home and sign out. --}}
         window.__qmentor_links = {!! json_encode([
-            'qspark' => route('qspark.index'),
+            'qspark' => url('/qspark'),
             'digitalRecord' => route('digital-record.index'),
             'home' => route('home'),
             'logout' => route('demo.logout'),

@@ -19,17 +19,20 @@ class StudentPlayHour extends QSparkModel
 
     public static function addPlayTime($studentId, $minutes)
     {
-        $today = Carbon::today('Asia/Riyadh');
-
-        return static::updateOrCreate(
+        // firstOrCreate then increment(): a bare `minutes_played + N` expression
+        // is invalid in the INSERT path, and increment()'s amount is bound as a
+        // parameter so $minutes is never interpolated into raw SQL.
+        $record = static::firstOrCreate(
             [
                 'student_id' => $studentId,
-                'play_date' => $today
+                'play_date' => Carbon::today('Asia/Riyadh'),
             ],
-            [
-                'minutes_played' => \DB::raw("minutes_played + {$minutes}")
-            ]
+            ['minutes_played' => 0]
         );
+
+        $record->increment('minutes_played', $minutes);
+
+        return $record;
     }
 
     public static function getTodayMinutes($studentId)

@@ -41,9 +41,12 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_CACHE_CONNECTION'),
+            // Pin to the main DB connection by name. QSPARK requests swap the
+            // *default* connection to `qspark` (UseQSparkConnection middleware);
+            // pinning here keeps the cache table on QUAI's database regardless.
+            'connection' => env('DB_CACHE_CONNECTION', env('DB_CONNECTION', 'sqlite')),
             'table' => env('DB_CACHE_TABLE', 'cache'),
-            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
+            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION', env('DB_CONNECTION', 'sqlite')),
             'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 

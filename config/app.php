@@ -30,6 +30,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Demo Mode
+    |--------------------------------------------------------------------------
+    |
+    | Used by the merged QSPARK app (App\QSpark\*): when true, QSPARK skips SAML
+    | and uses its local demo-login / quick-login personas instead. Read via
+    | config('app.demo_mode').
+    |
+    */
+
+    'demo_mode' => filter_var(env('DEMO_MODE', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

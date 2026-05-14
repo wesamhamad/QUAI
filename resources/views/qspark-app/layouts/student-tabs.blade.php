@@ -4,11 +4,11 @@
 --}}
 @php
   $studentTabs = [
-    ['route' => 'dashboard.student',                'label' => __('messages.nav_student_dashboard'), 'active' => ['dashboard.student']],
-    ['route' => 'dashboard.student.grades',         'label' => __('messages.nav_grades'),            'active' => ['dashboard.student.grades', 'dashboard.student.blackboard.grades']],
-    ['route' => 'dashboard.student.courses',        'label' => __('messages.courses'),               'active' => ['dashboard.student.courses']],
-    ['route' => 'dashboard.student.recommendations','label' => __('messages.nav_recommendations'),   'active' => ['dashboard.student.recommendations*']],
-    ['route' => 'dashboard.student.chat',           'label' => __('messages.nav_ai_assistant'),      'active' => ['dashboard.student.chat*']],
+    ['route' => 'qspark.dashboard.student',                'label' => __('messages.nav_student_dashboard'), 'active' => ['qspark.dashboard.student']],
+    ['route' => 'qspark.dashboard.student.grades',         'label' => __('messages.nav_grades'),            'active' => ['qspark.dashboard.student.grades', 'qspark.dashboard.student.blackboard.grades']],
+    ['route' => 'qspark.dashboard.student.courses',        'label' => __('messages.courses'),               'active' => ['qspark.dashboard.student.courses']],
+    ['route' => 'qspark.dashboard.student.recommendations','label' => __('messages.nav_recommendations'),   'active' => ['qspark.dashboard.student.recommendations*']],
+    ['route' => 'qspark.dashboard.student.chat',           'label' => __('messages.nav_ai_assistant'),      'active' => ['qspark.dashboard.student.chat*']],
   ];
 @endphp
 

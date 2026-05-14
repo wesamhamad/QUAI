@@ -15,12 +15,10 @@
     $showQSparkSystem = true;
     $showQDecisionSystem = $isAdmin;
 
-    // Map the QUAI session role onto QSPARK's demo quick-login route so the
-    // standalone Q SPARK app (./QSPARK, served on :8001) signs the user in
-    // with the matching role and shows aligned identity/data on every page.
+    // Map the QUAI session role onto the merged QSPARK app's demo persona; the
+    // /qspark-demo wrapper deep-links the iframe into /qspark/dev/{role} so the
+    // user is quick-logged-in with the matching role.
     $qsparkRole = $isAdmin ? 'admin' : ($isFaculty ? 'faculty' : 'student');
-    $qsparkBaseUrl = config('quai.qspark_demo_url', 'http://127.0.0.1:8001');
-    $qsparkUrl = rtrim($qsparkBaseUrl, '/') . '/dev/' . $qsparkRole;
 @endphp
 
 <div class="q-fade-in q-home" style="max-width: var(--q-content-max); margin: 0 auto;">

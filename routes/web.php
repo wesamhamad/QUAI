@@ -5,7 +5,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\DigitalRecordController;
 use App\Http\Controllers\QDecisionController;
-use App\Http\Controllers\QSparkController;
 use App\Http\Controllers\Auth\DemoAuthController;
 
 // ── Demo clone: password-based login ──────────────────────────────────────
@@ -41,11 +40,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/digital-record', [DigitalRecordController::class, 'index'])
         ->name('digital-record.index');
 
-    // Server-rendered QSpark hub (courses, learning paths, projects, achievements).
-    Route::get('/qspark', [QSparkController::class, 'index'])->name('qspark.index');
+    // The QSpark hub now lives in the merged QSPARK app, served under the
+    // /qspark prefix (see routes/qspark.php, mounted from bootstrap/app.php).
 
-    // Standalone Q SPARK demo (./QSPARK on :8001) embedded inside QUAI's shell
-    // as an iframe. The wrapper view derives the role-matched deep-link
+    // The merged Q SPARK app is embedded inside QUAI's shell as a same-origin
+    // iframe. The wrapper view derives the role-matched deep-link
     // (/dev/{admin|faculty|student}) so the iframe auto-authenticates the user
     // into the matching QSPARK demo persona. An optional ?page= query forwards
     // a sanitized post-login path so the wrapper can land directly on a specific
@@ -55,7 +54,9 @@ Route::middleware(['auth'])->group(function () {
         $isAdmin = $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['Admin', 'Super Admin']);
         $isFaculty = $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
         $qsparkRole = $isAdmin ? 'admin' : ($isFaculty ? 'faculty' : 'student');
-        $qsparkBaseUrl = rtrim(config('quai.qspark_demo_url', 'http://127.0.0.1:8001'), '/');
+        // QSPARK is merged into this app under the /qspark prefix, so the iframe
+        // is always same-origin — derive the base from this app's own URL.
+        $qsparkBaseUrl = rtrim(url('/qspark'), '/');
 
         // Role-aware section catalogue: keys are stable section ids the home page
         // (or sidebar) can deep-link to; values are the QSPARK paths the iframe

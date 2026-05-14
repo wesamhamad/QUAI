@@ -23,13 +23,15 @@ class BlackboardConnectionController extends Controller
 
     public function __construct()
     {
-        // Use config values with env fallbacks
-        $this->baseUrl = config('services.blackboard.base_url', env('BLACKBOARD_BASE_URL', 'https://qu.blackboard.com'));
-        $this->tokenUrl = config('services.blackboard.token_url')
-            ?? env('BLACKBOARD_TOKEN_URL', $this->baseUrl . '/learn/api/public/v1/oauth2/token');
-        $this->clientId = config('services.blackboard.client_id', env('BLACKBOARD_CLIENT_ID', ''));
-        $this->clientSecret = config('services.blackboard.client_secret', env('BLACKBOARD_CLIENT_SECRET', ''));
-        $this->timeout = (int) config('services.blackboard.timeout', 30);
+        // config() defaults don't apply when a key exists but is null — which it
+        // is whenever the BLACKBOARD_* env vars are unset — so cast every value
+        // to satisfy the typed properties.
+        $this->baseUrl = (string) (config('services.blackboard.base_url') ?: 'https://qu.blackboard.com');
+        $this->tokenUrl = (string) (config('services.blackboard.token_url')
+            ?: $this->baseUrl . '/learn/api/public/v1/oauth2/token');
+        $this->clientId = (string) config('services.blackboard.client_id');
+        $this->clientSecret = (string) config('services.blackboard.client_secret');
+        $this->timeout = (int) (config('services.blackboard.timeout') ?: 30);
     }
 
     /**

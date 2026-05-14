@@ -2,158 +2,150 @@
 
 namespace Tests\Feature;
 
+use App\QSpark\Http\Middleware\AllowEmbedding;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
+/**
+ * QSPARK is merged into QUAI as one app: its code lives under app/QSpark, its
+ * routes (routes/qspark.php) are mounted under the /qspark URL prefix with the
+ * `qspark.` route-name prefix, and it runs on its own `qspark` auth guard and
+ * database connection. These tests lock in that wiring.
+ */
 class QsparkIntegrationTest extends TestCase
 {
-    public function test_qspark_subapp_directory_is_present(): void
+    public function test_qspark_routes_are_mounted_under_the_qspark_prefix(): void
     {
-        $this->assertDirectoryExists(base_path('QSPARK'));
-        $this->assertFileExists(base_path('QSPARK/artisan'));
-        $this->assertFileExists(base_path('QSPARK/.env'));
-        $this->assertFileExists(base_path('QSPARK/database/database.sqlite'));
-        $this->assertFileExists(base_path('QSPARK/routes/web.php'));
+        foreach ([
+            'qspark.login',
+            'qspark.dev.login',
+            'qspark.admin.dashboard',
+            'qspark.faculty.dashboard',
+            'qspark.dashboard.student',
+        ] as $name) {
+            $this->assertTrue(Route::has($name), "Route [{$name}] must be registered by the merged QSPARK app.");
+            $this->assertStringStartsWith(
+                'qspark',
+                ltrim(Route::getRoutes()->getByName($name)->uri(), '/'),
+                "Route [{$name}] must live under the /qspark URL prefix."
+            );
+        }
     }
 
-    public function test_qspark_demo_url_is_configured(): void
+    public function test_qspark_dev_route_accepts_the_three_demo_roles(): void
     {
+        $route = Route::getRoutes()->getByName('qspark.dev.login');
+
+        $this->assertNotNull($route);
+        $this->assertSame('qspark/dev/{role?}', $route->uri());
+        $this->assertSame('student|faculty|admin', $route->wheres['role'] ?? null);
+    }
+
+    public function test_qspark_service_providers_are_registered(): void
+    {
+        foreach ([
+            \App\QSpark\Providers\QSparkServiceProvider::class,
+            \App\QSpark\Providers\QSparkEventServiceProvider::class,
+            \App\QSpark\Providers\ViewCacheServiceProvider::class,
+        ] as $provider) {
+            $this->assertNotEmpty(
+                $this->app->getProviders($provider),
+                "{$provider} must be registered in bootstrap/providers.php."
+            );
+        }
+    }
+
+    public function test_qspark_view_namespace_and_helpers_are_available(): void
+    {
+        $this->assertTrue(
+            view()->exists('qspark::layouts.app'),
+            'The qspark:: view namespace must point at resources/views/qspark-app.'
+        );
+        $this->assertTrue(function_exists('dashboardRedirectFor'));
+        $this->assertTrue(function_exists('samlIdpForCurrentEnv'));
+
+        $composer = json_decode(file_get_contents(base_path('composer.json')), true);
+        $this->assertContains(
+            'app/QSpark/Support/helpers.php',
+            $composer['autoload']['files'] ?? [],
+            'composer.json must autoload the QSPARK helpers file.'
+        );
+    }
+
+    public function test_qspark_auth_guard_and_demo_mode_are_configured(): void
+    {
+        $this->assertSame('session', config('auth.guards.qspark.driver'));
+        $this->assertSame('qspark_users', config('auth.guards.qspark.provider'));
         $this->assertSame(
-            'http://127.0.0.1:8001',
-            config('quai.qspark_demo_url'),
-            'config/quai.php must publish qspark_demo_url for the home-page card.'
+            \App\QSpark\Models\User::class,
+            config('auth.providers.qspark_users.model')
         );
+
+        // demo_mode must resolve (config/app.php) — QSPARK reads it to skip SAML.
+        $this->assertIsBool(config('app.demo_mode'));
     }
 
-    public function test_home_view_renders_role_based_qspark_card(): void
+    public function test_qspark_uses_a_dedicated_database_connection(): void
     {
-        $bladePath = resource_path('views/home/index.blade.php');
-        $this->assertFileExists($bladePath);
+        $this->assertNotNull(
+            config('database.connections.qspark'),
+            'config/database.php must define the isolated `qspark` connection.'
+        );
 
-        $blade = file_get_contents($bladePath);
+        // The connection-swap + guard-switch middleware must be wired into the
+        // QSPARK route group (and the guard must run before Laravel's `auth`).
+        $bootstrap = file_get_contents(base_path('bootstrap/app.php'));
+        $this->assertStringContainsString(\App\QSpark\Http\Middleware\UseQSparkGuard::class . '::class', $bootstrap);
+        $this->assertStringContainsString(\App\QSpark\Http\Middleware\UseQSparkConnection::class . '::class', $bootstrap);
+        $this->assertStringContainsString('prependToPriorityList', $bootstrap);
+    }
 
+    public function test_allow_embedding_middleware_lets_quai_iframe_qspark(): void
+    {
+        $response = (new AllowEmbedding())->handle(
+            Request::create('/qspark', 'GET'),
+            fn () => new \Illuminate\Http\Response('ok')
+        );
+
+        $this->assertSame('SAMEORIGIN', $response->headers->get('X-Frame-Options'));
         $this->assertStringContainsString(
-            "config('quai.qspark_demo_url'",
-            $blade,
-            'The home view must read the QSPARK base URL from config.'
-        );
-        $this->assertStringContainsString(
-            "/dev/' . \$qsparkRole",
-            $blade,
-            'The QSPARK card must deep-link into QSPARK\'s /dev/{role} quick-login route.'
-        );
-        $this->assertStringContainsString(
-            "route('qspark-demo')",
-            $blade,
-            'The QSpark card must link into QUAI\'s internal /qspark-demo iframe wrapper.'
-        );
-        $this->assertStringNotContainsString(
-            'target="_blank"',
-            $blade,
-            'The QSpark card must stay inside QUAI\'s shell (no new tab) so the embed renders inline.'
-        );
-        $this->assertStringContainsString(
-            'منصة التعلم والتجربة الأكاديمية',
-            $blade,
-            'The unified QSpark card title must be present on the home page.'
-        );
-        // Old in-app /qspark card has been retired in favour of the standalone QSPARK demo.
-        $this->assertStringNotContainsString(
-            "route('qspark.index')",
-            $blade,
-            'The legacy in-app QSpark card linking to route("qspark.index") must be removed.'
+            "frame-ancestors 'self'",
+            $response->headers->get('Content-Security-Policy'),
+            'QSPARK responses must allow same-origin framing so the /qspark-demo wrapper works.'
         );
     }
 
     public function test_qspark_demo_iframe_wrapper_route_and_view_exist(): void
     {
+        $this->assertTrue(Route::has('qspark-demo'), 'routes/web.php must keep the named qspark-demo wrapper route.');
+
         $routes = file_get_contents(base_path('routes/web.php'));
-        $this->assertStringContainsString(
-            "->name('qspark-demo')",
-            $routes,
-            'routes/web.php must define a named qspark-demo route hosting the iframe wrapper.'
-        );
-        $this->assertStringContainsString(
-            "view('qspark-demo'",
-            $routes,
-            'qspark-demo route must render the resources/views/qspark-demo.blade.php wrapper.'
-        );
+        $this->assertStringContainsString("view('qspark-demo'", $routes);
+        // The wrapper is same-origin now — the iframe base comes from this app.
+        $this->assertStringContainsString("url('/qspark')", $routes);
+        $this->assertStringContainsString("'/dev/' . \$qsparkRole", $routes);
+        $this->assertStringContainsString("'?next=' . rawurlencode(\$nextPath)", $routes);
 
         $viewPath = resource_path('views/qspark-demo.blade.php');
         $this->assertFileExists($viewPath);
         $view = file_get_contents($viewPath);
-        $this->assertStringContainsString('@extends(\'layouts.dashboard\')', $view);
         $this->assertStringContainsString('<iframe', $view);
         $this->assertStringContainsString('src="{{ $qsparkUrl }}"', $view);
-        $this->assertStringContainsString('qsparkSections', $view);
-        $this->assertStringContainsString('qspark-embed__tabs', $view);
     }
 
     public function test_qspark_demo_route_exposes_role_specific_sections(): void
     {
         $routes = file_get_contents(base_path('routes/web.php'));
 
-        // Admin section paths must be present so admins can deep-link into QSPARK's
-        // admin pages (dashboard / users / roles / permissions) from inside the iframe.
-        foreach (['/admin/dashboard', '/admin/users', '/admin/roles', '/admin/permissions'] as $path) {
-            $this->assertStringContainsString($path, $routes, "admin section path {$path} missing from qspark-demo route.");
+        foreach ([
+            '/admin/dashboard', '/admin/users', '/admin/roles', '/admin/permissions',
+            '/faculty/dashboard', '/faculty/courses', '/faculty/students', '/faculty/reports',
+            '/dashboard-student', '/dashboard-student/grades', '/dashboard-student/courses',
+            '/dashboard-student/recommendations', '/dashboard-student/chat',
+        ] as $path) {
+            $this->assertStringContainsString($path, $routes, "section path {$path} missing from the qspark-demo route.");
         }
-
-        // Faculty section paths must be present (dashboard / courses / students / reports).
-        foreach (['/faculty/dashboard', '/faculty/courses', '/faculty/students', '/faculty/reports'] as $path) {
-            $this->assertStringContainsString($path, $routes, "faculty section path {$path} missing from qspark-demo route.");
-        }
-
-        // Student section paths must be present (main dashboard plus the major sub-pages).
-        foreach (['/dashboard-student', '/dashboard-student/grades', '/dashboard-student/courses', '/dashboard-student/recommendations', '/dashboard-student/chat'] as $path) {
-            $this->assertStringContainsString($path, $routes, "student section path {$path} missing from qspark-demo route.");
-        }
-
-        // The wrapper must build the iframe URL as /dev/{role}?next=... so QSPARK
-        // can land the user directly on the chosen section after auto-login.
-        $this->assertStringContainsString("'/dev/' . \$qsparkRole", $routes);
-        $this->assertStringContainsString("'?next=' . rawurlencode(\$nextPath)", $routes);
-    }
-
-    public function test_qspark_quick_login_honours_next_query_for_deep_links(): void
-    {
-        $controller = file_get_contents(base_path('QSPARK/app/Http/Controllers/LocalLoginController.php'));
-
-        $this->assertStringContainsString(
-            "query('next'",
-            $controller,
-            'LocalLoginController::quickLogin must read the ?next= query so the QUAI wrapper can deep-link.'
-        );
-        $this->assertStringContainsString(
-            'sanitizeNextPath',
-            $controller,
-            'QSPARK must sanitize the ?next= path to block open-redirects to external hosts.'
-        );
-        $this->assertStringContainsString(
-            'return redirect($next);',
-            $controller,
-            'QSPARK quickLogin must redirect to the sanitized next path when one is supplied.'
-        );
-    }
-
-    public function test_qspark_middleware_allows_quai_to_embed_via_csp(): void
-    {
-        $middleware = file_get_contents(base_path('QSPARK/app/Http/Middleware/PerformanceOptimizationMiddleware.php'));
-        $this->assertStringContainsString(
-            'QSPARK_FRAME_ANCESTORS',
-            $middleware,
-            'QSPARK middleware must read QSPARK_FRAME_ANCESTORS from env so QUAI can embed it.'
-        );
-        $this->assertStringContainsString(
-            'frame-ancestors',
-            $middleware,
-            'QSPARK middleware must emit a CSP frame-ancestors directive when embedding is enabled.'
-        );
-
-        $env = file_get_contents(base_path('QSPARK/.env'));
-        $this->assertStringContainsString('QSPARK_FRAME_ANCESTORS=', $env);
-        $this->assertStringContainsString('http://127.0.0.1:8007', $env);
-        $this->assertStringContainsString('SESSION_SAME_SITE=none', $env);
-        $this->assertStringContainsString('SESSION_SECURE_COOKIE=true', $env);
     }
 
     public function test_home_view_maps_admin_faculty_student_to_qspark_roles(): void
@@ -163,33 +155,21 @@ class QsparkIntegrationTest extends TestCase
         $this->assertStringContainsString(
             "\$qsparkRole = \$isAdmin ? 'admin' : (\$isFaculty ? 'faculty' : 'student');",
             $blade,
-            'QUAI role must be mapped onto QSPARK\'s admin|faculty|student demo personas.'
+            'The QUAI role must be mapped onto QSPARK\'s admin|faculty|student demo personas.'
+        );
+        $this->assertStringContainsString(
+            "route('qspark-demo')",
+            $blade,
+            'The QSpark home card must link into QUAI\'s internal /qspark-demo iframe wrapper.'
         );
     }
 
-    public function test_qspark_routes_expose_dev_quick_login(): void
+    public function test_qspark_quick_login_honours_next_query_for_deep_links(): void
     {
-        $routes = file_get_contents(base_path('QSPARK/routes/web.php'));
+        $controller = file_get_contents(base_path('app/QSpark/Http/Controllers/LocalLoginController.php'));
 
-        $this->assertStringContainsString(
-            "/dev/{role?}",
-            $routes,
-            'QSPARK must expose the /dev/{role} quick-login route the home card depends on.'
-        );
-        $this->assertStringContainsString(
-            "'role', 'student|faculty|admin'",
-            $routes,
-            'QSPARK /dev route must accept the three demo roles QUAI maps onto.'
-        );
-    }
-
-    public function test_start_servers_script_boots_qspark_on_8001(): void
-    {
-        $script = file_get_contents(base_path('start-servers.sh'));
-
-        $this->assertStringContainsString('start_qspark', $script);
-        $this->assertStringContainsString('QSPARK_PATH', $script);
-        $this->assertStringContainsString('--port=8001', $script);
-        $this->assertStringContainsString('QSPARK_PID', $script);
+        $this->assertStringContainsString("query('next'", $controller);
+        $this->assertStringContainsString('sanitizeNextPath', $controller);
+        $this->assertStringContainsString('return redirect($next);', $controller);
     }
 }
