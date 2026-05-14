@@ -72,7 +72,8 @@ export default function CollegeView({ colleges }: Props) {
 
             {isExpanded && (
               <div className="px-5 pb-5 border-t border-gray-200 dark:border-gray-700">
-                <table className="w-full text-sm mt-4">
+                <div className="overflow-x-auto -mx-5 px-5 mt-4">
+                <table className="w-full text-sm min-w-[480px]">
                   <thead>
                     <tr className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                       <th className="text-start pb-2">{t('القسم', 'Department')}</th>
@@ -102,6 +103,7 @@ export default function CollegeView({ colleges }: Props) {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </Card>

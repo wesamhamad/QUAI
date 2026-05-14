@@ -178,7 +178,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               {studentMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setStudentMenuOpen(false)} />
-                  <div className={`absolute end-0 top-full mt-1 z-50 w-72 ${dropdownPanel}`}>
+                  <div className={`absolute start-0 top-full mt-1 z-50 w-72 max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
                     <div className={`${dropdownHeader} border-b border-gray-100 dark:border-gray-700`}>
                       {t('حالات الطلاب', 'Student cases')}
                     </div>
@@ -243,7 +243,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               {roleMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setRoleMenuOpen(false)} />
-                  <div className={`absolute end-0 top-full mt-1 z-50 w-48 ${dropdownPanel}`}>
+                  <div className={`absolute start-0 top-full mt-1 z-50 w-48 max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
                     {availableRoles.map(r => {
                       const Icon = r.icon;
                       const isActive = r.value === role;
@@ -298,7 +298,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                <div className={`absolute end-0 top-full mt-1 z-50 w-60 ${dropdownPanel}`}>
+                <div className={`absolute end-0 top-full mt-1 z-50 w-60 max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
                   <div className={`${dropdownHeader} border-b border-gray-100 dark:border-gray-700 normal-case`}>
                     <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {(window as { __qmentor_user?: { name?: string } }).__qmentor_user?.name || t('مستخدم', 'User')}
