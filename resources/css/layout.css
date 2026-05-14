@@ -4,6 +4,15 @@
    ======================================== */
 
 /* === Base === */
+/* Clip horizontal overflow at the root: the mobile sidebar is position:fixed
+   and parked off-screen with translateX(100%), which would otherwise extend
+   the document's scroll width and let the whole page drift sideways. */
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     font-family: var(--q-font-family);
     background: var(--q-bg);

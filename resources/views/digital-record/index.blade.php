@@ -409,6 +409,49 @@
         margin-bottom: var(--q-space-5);
     }
     @media (max-width: 900px) { .dr-charts-row2 { grid-template-columns: 1fr; } }
+
+    /* === Mobile (phones) === */
+    @media (max-width: 640px) {
+        /* Hero: smaller padding + type, let the text column shrink */
+        .dr-hero { padding: var(--q-space-5); }
+        .dr-hero-row { gap: var(--q-space-3); }
+        .dr-hero-icon { width: 48px; height: 48px; }
+        .dr-hero-icon svg { width: 26px; height: 26px; }
+        .dr-hero h1 { font-size: var(--q-font-2xl); }
+        .dr-hero p { font-size: var(--q-font-sm); }
+        .dr-hero-row > div { min-width: 0 !important; }
+        .dr-hero-badge { margin-inline-start: 0 !important; }
+
+        /* Stats: single column */
+        .dr-stats { grid-template-columns: 1fr; gap: var(--q-space-3); }
+
+        /* Toolbar: stack heading above a full-width filter form */
+        .dr-toolbar { flex-direction: column; align-items: stretch; }
+        .dr-form { flex-wrap: wrap; }
+        .dr-input { flex: 1 1 100%; min-width: 0; }
+        .dr-btn { flex: 1 1 auto; justify-content: center; }
+
+        /* AI analysis: tighter padding */
+        .dr-ai { padding: var(--q-space-4); }
+        .dr-ai-summary { padding: var(--q-space-4); }
+        .dr-top3 { padding: var(--q-space-4); }
+
+        /* Recommendation / featured grids: single column */
+        .dr-recs,
+        .dr-top3-grid { grid-template-columns: 1fr; }
+
+        /* Tabs: allow horizontal scroll instead of overflowing */
+        .dr-ai-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .dr-tab { white-space: nowrap; }
+
+        /* Section cards: tighten inner padding */
+        .dr-section-head { padding: var(--q-space-3) var(--q-space-4); }
+        .dr-skill { padding: var(--q-space-3); gap: var(--q-space-2); }
+
+        /* Shorter charts on small screens */
+        .dr-chart-canvas { height: 180px !important; }
+        .dr-chart-canvas-tall { height: 200px !important; }
+    }
 </style>
 @endpush
 @push('scripts')

@@ -131,7 +131,7 @@
             <p style="margin: 4px 0 0 0; font-size: var(--q-font-sm); color: var(--q-text-secondary);">مشاريع عملية تثبت كفاءاتك للجهات التوظيفية.</p>
         </header>
         <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; font-size: var(--q-font-sm);">
+            <table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--q-font-sm);">
                 <thead>
                     <tr style="text-align: start; color: var(--q-text-secondary); font-size: var(--q-font-xs); font-weight: 700;">
                         <th style="padding: 10px 12px; border-bottom: 1px solid var(--q-border-color);">المشروع</th>

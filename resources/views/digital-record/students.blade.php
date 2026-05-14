@@ -11,21 +11,21 @@
         <p style="margin:0; opacity:.9;">اختر طالبًا لاستعراض سجله الرقمي وتحليل مهاراته مقابل سوق العمل.</p>
     </div>
 
-    <form method="get" action="{{ route('digital-record.index') }}" style="margin-bottom: var(--q-space-5); display: flex; gap: var(--q-space-2); align-items: stretch;">
+    <form method="get" action="{{ route('digital-record.index') }}" style="margin-bottom: var(--q-space-5); display: flex; flex-wrap: wrap; gap: var(--q-space-2); align-items: stretch;">
         <input
             type="text"
             name="q"
             value="{{ $query }}"
             placeholder="ابحث بالاسم أو رقم الطالب أو التخصص..."
-            style="flex:1; padding: var(--q-space-3) var(--q-space-4); border: 1px solid var(--q-border-color); border-radius: var(--q-radius-lg); font-size: var(--q-font-base);">
+            style="flex: 1 1 200px; min-width: 0; padding: var(--q-space-3) var(--q-space-4); border: 1px solid var(--q-border-color); border-radius: var(--q-radius-lg); font-size: var(--q-font-base);">
         <button type="submit" class="q-btn q-btn-primary" style="padding: var(--q-space-3) var(--q-space-5);">بحث</button>
         @if($query !== '')
             <a href="{{ route('digital-record.index') }}" class="q-btn" style="padding: var(--q-space-3) var(--q-space-5); background: var(--q-card-bg); border: 1px solid var(--q-border-color);">مسح</a>
         @endif
     </form>
 
-    <div class="q-card" style="padding: 0; overflow: hidden;">
-        <table style="width:100%; border-collapse: collapse; font-size: var(--q-font-sm);">
+    <div class="q-card" style="padding: 0; overflow-x: auto;">
+        <table style="width:100%; min-width: 640px; border-collapse: collapse; font-size: var(--q-font-sm);">
             <thead style="background: #F1F5F2;">
                 <tr style="text-align: right;">
                     <th style="padding: var(--q-space-3) var(--q-space-4);">رقم الطالب</th>

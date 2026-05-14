@@ -103,10 +103,10 @@
     /* Data table (Filament table) */
     .ai-table-card {
         background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.75rem;
-        overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04); margin-bottom: 1.5rem;
+        overflow-x: auto; box-shadow: 0 1px 2px rgba(0,0,0,0.04); margin-bottom: 1.5rem;
     }
     .ai-table-card .t-head { font-size: 0.95rem; font-weight: 700; color: #1f2937; padding: 1rem 1.35rem; border-bottom: 1px solid #e5e7eb; }
-    .ai-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ai-table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 0.82rem; }
     .ai-table th { text-align: right; font-weight: 600; color: #6b7280; padding: 0.7rem 1.35rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
     .ai-table td { padding: 0.75rem 1.35rem; border-bottom: 1px solid #f3f4f6; color: #374151; }
     .ai-table tr:last-child td { border-bottom: none; }
@@ -124,7 +124,7 @@
     .ai-recs-head .cnt { margin-inline-start: auto; font-size: 0.75rem; color: #6b7280; font-weight: 600; }
     [data-theme="dark"] .ai-recs-head span.lbl { color: #f3f4f6; }
 
-    .ai-recs { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.25rem; }
+    .ai-recs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 1.25rem; }
     .ai-rec {
         background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.75rem;
         padding: 1.25rem 1.35rem; box-shadow: 0 1px 2px rgba(0,0,0,0.04);

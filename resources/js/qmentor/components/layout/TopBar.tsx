@@ -178,7 +178,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               {studentMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setStudentMenuOpen(false)} />
-                  <div className={`absolute start-0 top-full mt-1 z-50 w-72 max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
+                  <div className={`fixed start-2 end-2 top-16 z-50 sm:absolute sm:start-0 sm:end-auto sm:top-full sm:mt-1 sm:w-72 sm:max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
                     <div className={`${dropdownHeader} border-b border-gray-100 dark:border-gray-700`}>
                       {t('حالات الطلاب', 'Student cases')}
                     </div>
@@ -243,7 +243,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               {roleMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setRoleMenuOpen(false)} />
-                  <div className={`absolute start-0 top-full mt-1 z-50 w-48 max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
+                  <div className={`fixed start-2 end-2 top-16 z-50 sm:absolute sm:start-0 sm:end-auto sm:top-full sm:mt-1 sm:w-48 sm:max-w-[calc(100vw-1rem)] ${dropdownPanel}`}>
                     {availableRoles.map(r => {
                       const Icon = r.icon;
                       const isActive = r.value === role;
