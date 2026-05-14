@@ -30,6 +30,18 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Sub-path awareness. In production QSPARK is mounted under a path of
+        // the shared domain (APP_URL=https://quailab.dev/qspark) behind the
+        // QUAI nginx vhost — see deploy/nginx/quailab.dev.conf. When APP_URL
+        // carries a path, force it as the root URL so route(), url(), asset()
+        // and even redirect('/') stay inside /qspark instead of escaping to
+        // the parent QUAI app. Locally APP_URL has no path, so this is a no-op.
+        $appUrl = (string) config('app.url');
+        $basePath = parse_url($appUrl, PHP_URL_PATH);
+        if ($basePath !== null && trim($basePath, '/') !== '') {
+            URL::forceRootUrl($appUrl);
+        }
+
         // Remove this line - use EventServiceProvider instead
         // Event::listen(SignedIn::class, SamlLoginListener::class);
 

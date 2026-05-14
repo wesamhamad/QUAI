@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\TrackDailyVisits::class,
             \App\Http\Middleware\DetectEmbeddedMode::class,
+            // Emits CSP frame-ancestors so the QUAI shell can iframe QSPARK.
+            \App\Http\Middleware\AllowEmbedding::class,
         ]);
         
         $middleware->validateCsrfTokens(except: [
