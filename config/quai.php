@@ -9,10 +9,12 @@ return [
     ],
 
     // Base URL of the bundled standalone Q SPARK demo (./QSPARK) — a SEPARATE
-    // Laravel app with its own /dev/{role} auto-login routes. It must NOT point
-    // at APP_URL (the main QUAI app has no /dev/* routes, so the iframe 404s).
-    // Set QSPARK_DEMO_URL to wherever the QSPARK app is actually served:
-    //   local : http://127.0.0.1:8001  (php artisan serve --port=8001 in ./QSPARK)
-    //   prod  : the deployed QSPARK host, e.g. https://qspark.quailab.dev
-    'qspark_demo_url' => env('QSPARK_DEMO_URL', 'http://127.0.0.1:8001'),
+    // Laravel app with its own /dev/{role} auto-login routes. Defaults to the
+    // production host; override QSPARK_DEMO_URL per environment when QSPARK is
+    // served elsewhere (e.g. http://127.0.0.1:8001 locally via
+    // `php artisan serve --port=8001` inside ./QSPARK).
+    // NOTE: the host this points at must actually expose /dev/{role}; the main
+    // QUAI app does not, so QSPARK must be deployed at this URL for the iframe
+    // to resolve instead of 404ing.
+    'qspark_demo_url' => env('QSPARK_DEMO_URL', 'https://quailab.dev'),
 ];
