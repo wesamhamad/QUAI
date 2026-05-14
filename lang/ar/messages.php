@@ -234,6 +234,7 @@ return [
     'pages' => 'صفحات',
     'quiz_description' => 'خذ اختبار بناءً على مواد المقرر',
     'start_quiz' => 'بدء الاختبار',
+    'take_quiz' => 'ابدأ الاختبار',
 
     // Notification translations
     'hours_ago' => 'ساعات مضت',

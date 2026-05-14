@@ -3,8 +3,8 @@
 @section('title', __('messages.users_management_page_title'))
 
 @section('content')
-<div class="p-6 space-y-6">
-    <h2 class="text-3xl font-extrabold">{{ __('messages.users_management_title') }}</h2>
+<div class="p-4 sm:p-6 space-y-6">
+    <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.users_management_title') }}</h2>
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">
             {{ session('success') }}

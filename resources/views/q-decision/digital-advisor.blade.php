@@ -248,6 +248,22 @@
     .chat-demo-note { font-size: 0.6875rem; color: var(--q-text-secondary, #94a3b8); text-align: center; margin-top: 0.5rem; }
     .chat-empty { text-align: center; color: var(--q-text-secondary, #94a3b8); padding: 2rem 1rem; font-size: 0.875rem; }
 
+    /* ───── Responsive: tablets ───── */
+    @media (max-width: 1024px) {
+        .agent-form .form-body { padding: 1.25rem 1.35rem; }
+    }
+
+    /* ───── Responsive: small tablets / large phones ───── */
+    @media (max-width: 768px) {
+        .agent-card-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        .agent-card-url { flex-wrap: wrap; gap: 0.4rem; }
+        .agent-card-url-text { width: 100%; flex: 1 1 100%; }
+        .btn-copy { flex: 0 0 auto; }
+        .web-search-toggle { flex-wrap: wrap; gap: 0.75rem; }
+        .web-search-toggle-info { min-width: 0; flex: 1 1 auto; }
+    }
+
+    /* ───── Responsive: phones ───── */
     @media (max-width: 640px) {
         .bp-checkboxes,
         .strategy-toggle,
@@ -267,6 +283,32 @@
 
         /* Tighten the form padding so fields get more usable width on phones. */
         .agent-form .form-body { padding: 1.25rem 1rem; }
+
+        .agents-list-header { flex-wrap: wrap; gap: 0.4rem; }
+        .agent-card { padding: 1rem; }
+        .agent-card-actions { flex-wrap: wrap; }
+        .agent-card-actions .btn-agent-action { flex: 1 1 calc(50% - 0.25rem); text-align: center; }
+        .agent-card-badges { gap: 0.25rem; }
+        .agent-badge { font-size: 0.65rem; padding: 0.1rem 0.45rem; }
+
+        /* Chat modal sits flush on small screens */
+        .chat-modal-overlay { padding: 0.75rem; }
+        .chat-modal { max-height: 92vh; border-radius: 14px; }
+        .chat-modal-header { padding: 0.85rem 1rem; }
+        .chat-modal-body { padding: 1rem; gap: 0.85rem; }
+        .chat-modal-footer { padding: 0.75rem 1rem; }
+        .chat-msg { max-width: 92%; }
+        .chat-bubble { font-size: 0.85rem; line-height: 1.65; }
+
+        /* File upload — give more space to the file name on phones */
+        .uploaded-file-name { max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+
+    /* Extra-small phones (≤360px) */
+    @media (max-width: 360px) {
+        .agent-form .form-body { padding: 1rem 0.85rem; }
+        .agent-card { padding: 0.9rem; }
+        .agent-card-name { font-size: 0.95rem; }
     }
 </style>
 @endpush

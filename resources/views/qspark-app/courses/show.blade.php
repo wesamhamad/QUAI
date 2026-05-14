@@ -2,6 +2,24 @@
 
 @section('title', $code . ' - ' . __('messages.course_content'))
 
+@php
+    // Demo fallback: when no Blackboard files are returned (no live token in
+    // the /qspark-demo iframe), render a fixed set of dummy course materials
+    // so the page always shows content + a working "Take Quiz" entry point.
+    $useDummyFiles = empty($files);
+    $demoQuizUrl   = url('/qspark/react-game-test');
+    if ($useDummyFiles) {
+        $files = [
+            ['contentTitle' => 'مقدمة المقرر',                  'fileName' => 'lecture-01-intro.pdf',        'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'المحاضرة الأولى — المفاهيم',    'fileName' => 'lecture-02-concepts.pdf',     'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'المحاضرة الثانية — التطبيقات',  'fileName' => 'lecture-03-applications.pdf', 'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'تمارين الفصل الأول',            'fileName' => 'exercises-ch1.pdf',           'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'حالة دراسية',                   'fileName' => 'case-study.pdf',              'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'مراجعة الاختبار النصفي',        'fileName' => 'midterm-review.pdf',          'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+        ];
+    }
+@endphp
+
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
   <div class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
@@ -17,7 +35,8 @@
       </div>
 
       <div class="flex flex-wrap gap-3">
-        <a href="{{ route('qspark.courses.quiz', $code) }}"
+        <a href="{{ $useDummyFiles ? $demoQuizUrl : route('qspark.courses.quiz', $code) }}"
+           {{ $useDummyFiles ? 'target=_top' : '' }}
            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm transition-all duration-200 {{ count($files) > 0 ? 'bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 hover:to-dga-primary-700 hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-indigo-500/20' : 'bg-slate-300 cursor-not-allowed disabled-link' }}"
            {{ count($files) == 0 ? 'data-disabled=true' : '' }}>
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>
@@ -43,7 +62,7 @@
       </div>
     </div>
 
-    <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+    <div id="loadingState" class="{{ $useDummyFiles ? 'hidden ' : '' }}flex flex-col items-center justify-center py-20">
       <div class="relative">
         <div class="w-16 h-16 border-4 border-dga-primary-200 rounded-full animate-pulse"></div>
         <div class="absolute top-0 left-0 w-16 h-16 border-4 border-indigo-600 rounded-full animate-spin border-t-transparent"></div>
@@ -56,7 +75,7 @@
       </div>
     </div>
 
-    <div id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    <div id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 {{ $useDummyFiles ? '' : 'hidden' }}">
       @forelse($files as $index => $file)
         @php
           $cardColors = [
@@ -95,7 +114,13 @@
           </div>
 
           <div class="mt-5 flex items-center gap-2">
-            @if(isset($file['generateQuizUrl']))
+            @if(isset($file['demoQuizUrl']))
+              <a href="{{ $file['demoQuizUrl'] }}" target="_top"
+                 class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3,3V21H21V3M19,19H5V5H19M17,7H7V9H17M17,11H7V13H17M13,15H7V17H13"/></svg>
+                <span>{{ __('messages.take_quiz') ?? 'ابدأ الاختبار' }}</span>
+              </a>
+            @elseif(isset($file['generateQuizUrl']))
               <button
                 class="quiz-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 hover:to-dga-primary-700 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
                 data-quiz-url="{{ $file['generateQuizUrl'] }}"
@@ -746,7 +771,8 @@
   });
 
   // AJAX loading - always load files via AJAX for instant page display
-  @if(!empty($externalId))
+  // Skipped in dummy/demo mode so the server-rendered fallback content stays.
+  @if(!empty($externalId) && !$useDummyFiles)
   (function loadFilesAjax() {
     const loadingEl = document.getElementById('loadingState');
     const gridEl = document.getElementById('filesGrid');

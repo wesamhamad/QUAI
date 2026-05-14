@@ -233,6 +233,7 @@ return [
     'pages' => 'pages',
     'quiz_description' => 'Take a quiz based on the course materials',
     'start_quiz' => 'Start Quiz',
+    'take_quiz' => 'Take Quiz',
 
     // Notification translations
     'hours_ago' => 'hours ago',

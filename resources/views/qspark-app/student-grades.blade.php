@@ -3,18 +3,18 @@
 @section('title', __('messages.student_grades_page_title'))
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="p-4 sm:p-6 space-y-6">
   <!-- Title -->
-  <div class="flex justify-between items-center">
-    <h2 class="text-3xl font-extrabold">{{ __('messages.student_grades_title') }}</h2>
-    <div class="flex gap-3">
-      <a href="{{ route('qspark.dashboard.student.blackboard.grades') }}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2">
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+    <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.student_grades_title') }}</h2>
+    <div class="flex flex-wrap gap-2 sm:gap-3">
+      <a href="{{ route('qspark.dashboard.student.blackboard.grades') }}" class="bg-green-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 text-sm sm:text-base">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
         </svg>
         <span data-translate="course_grades">{{ __('messages.course_grades') }}</span>
       </a>
-      <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-4 py-2 rounded-lg hover:bg-dga-primary-600">
+      <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-dga-primary-600 text-sm sm:text-base">
         {{ __('messages.back_to_dashboard') }}
       </a>
     </div>

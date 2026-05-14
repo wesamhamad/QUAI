@@ -35,6 +35,29 @@ class LocalLoginController extends Controller
         $next = $request ? (string) $request->query('next', '') : (string) request()->query('next', '');
         $next = $this->sanitizeNextPath($next);
 
+        // Align the QSPARK student persona with the QUAI shell user. The shell
+        // (web guard) authenticates the real demo user (e.g. student.1517 →
+        // student_id 443211517), but QSPARK's iframe always signs in the shared
+        // `demo_student` account on the qspark guard — so without this the
+        // dashboard would render the previous persona's profile from session
+        // or the default. Resolve the persona from the shell user and reset
+        // the cached dashboard data whenever it changes.
+        if ($role === 'student') {
+            $shellUser = Auth::guard('web')->user();
+            $shellStudentId = $shellUser?->student_id ? (string) $shellUser->student_id : '';
+            if ($shellStudentId !== '' && DemoStudents::has($shellStudentId)) {
+                $currentPersona = (string) session(DemoStudents::SESSION_KEY, '');
+                if ($currentPersona !== $shellStudentId) {
+                    session([DemoStudents::SESSION_KEY => $shellStudentId]);
+                    Cache::flush();
+                    Log::info('Demo quick-login: bound QSPARK persona to shell user', [
+                        'shell_username' => $shellUser->username ?? null,
+                        'student_id' => $shellStudentId,
+                    ]);
+                }
+            }
+        }
+
         Auth::logout();
 
         $username = "demo_{$role}";
@@ -59,7 +82,9 @@ class LocalLoginController extends Controller
         try {
             DailyVisit::incrementToday();
         } catch (\Throwable $e) {
-            Log::warning('Demo quick-login: failed to increment daily visits', ['error' => $e->getMessage()]);
+            // qspark connection may not be writable on the demo host; the
+            // counter isn't critical for the demo, so swallow at debug level.
+            Log::debug('Demo quick-login: skipped daily visit increment', ['error' => $e->getMessage()]);
         }
 
         Log::info('Demo quick-login', ['username' => $user->username, 'role' => $role, 'next' => $next ?: null]);
@@ -115,7 +140,9 @@ class LocalLoginController extends Controller
         try {
             DailyVisit::incrementToday();
         } catch (\Throwable $e) {
-            Log::warning('Demo login: failed to increment daily visits', ['error' => $e->getMessage()]);
+            // qspark connection may not be writable on the demo host; the
+            // counter isn't critical for the demo, so swallow at debug level.
+            Log::debug('Demo login: skipped daily visit increment', ['error' => $e->getMessage()]);
         }
 
         return $this->redirectForRole($user->role ?? 'student');

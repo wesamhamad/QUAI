@@ -3,11 +3,11 @@
 @section('title', __('messages.blackboard_grades') . ' - Q SPARK')
 
 @section('content')
-<div class="p-6 space-y-6">
+<div class="p-4 sm:p-6 space-y-6">
   <!-- Title -->
-  <div class="flex justify-between items-center">
-    <h2 class="text-3xl font-extrabold" data-translate="blackboard_grades">{{ __('messages.blackboard_grades') }}</h2>
-    <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-4 py-2 rounded-lg hover:bg-dga-primary-600">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+    <h2 class="text-2xl sm:text-3xl font-extrabold" data-translate="blackboard_grades">{{ __('messages.blackboard_grades') }}</h2>
+    <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-dga-primary-600 text-sm sm:text-base self-start sm:self-auto">
       {{ __('messages.back_to_dashboard') }}
     </a>
   </div>
@@ -38,10 +38,10 @@
     @foreach($courses as $course)
       <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition-shadow">
         <!-- Course Header -->
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <h3 class="font-bold text-2xl text-dga-primary-600 mb-2">{{ $course['course_name'] }}</h3>
-            <div class="flex gap-4 text-sm text-gray-600">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+          <div class="min-w-0">
+            <h3 class="font-bold text-xl sm:text-2xl text-dga-primary-600 mb-2 break-words">{{ $course['course_name'] }}</h3>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
               <span>
                 <span class="font-semibold" data-translate="course_code">{{ __('messages.course_code') }}:</span>
                 <span class="en-numbers">{{ $course['course_code'] }}</span>

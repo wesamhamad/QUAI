@@ -3,8 +3,8 @@
 @section('title', 'قائمة الطلاب - Q SPARK')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <h2 class="text-3xl font-extrabold">قائمة الطلاب</h2>
+<div class="p-4 sm:p-6 space-y-6">
+    <h2 class="text-2xl sm:text-3xl font-extrabold">قائمة الطلاب</h2>
 
     <div class="bg-white rounded-2xl shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">

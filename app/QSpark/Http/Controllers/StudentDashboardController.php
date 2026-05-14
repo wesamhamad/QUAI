@@ -2248,6 +2248,65 @@ class StudentDashboardController extends Controller
     }
 
     /**
+     * Predefined demo answers used as a fallback when the live AI provider
+     * is not configured or is unreachable. Keys match allowedChatPrompts().
+     */
+    private function dummyChatAnswers(): array
+    {
+        return [
+            'improve_gpa' => "لرفع معدلك التراكمي، ركّز على الخطوات التالية:\n\n"
+                . "✅ ضع خطة أسبوعية واضحة لكل مادة وحدّد ساعات مذاكرة ثابتة.\n"
+                . "✅ ابدأ بالمواد ذات الساعات المعتمدة الأعلى لأن أثرها أكبر على المعدل.\n"
+                . "✅ راجع نقاط ضعفك مع أعضاء هيئة التدريس في الساعات المكتبية.\n"
+                . "✅ حلّ نماذج الاختبارات السابقة وراجع أخطاءك بانتظام.\n"
+                . "✅ لا تهمل الواجبات والمشاركة فهي تدعم درجاتك التراكمية.",
+            'study_tips' => "نصائح عملية لدراسة فعّالة:\n\n"
+                . "• اعتمد تقنية بومودورو: ٢٥ دقيقة تركيز ثم ٥ دقائق راحة.\n"
+                . "• لخّص كل محاضرة بخريطة ذهنية أو نقاط مختصرة.\n"
+                . "• ذاكر بصوت مرتفع أو اشرح المادة لزميلك لتثبيت المعلومة.\n"
+                . "• ابتعد عن الهاتف أثناء الجلسة وضعه في وضع الطيران.\n"
+                . "• راجع المادة خلال ٢٤ ساعة من المحاضرة لتقليل النسيان.",
+            'time_management' => "لتنظيم وقتك بين الدراسة والراحة:\n\n"
+                . "✅ ابدأ يومك بقائمة مهام مرتّبة حسب الأولوية.\n"
+                . "✅ خصّص بلوكات زمنية ثابتة للدراسة (٩٠ دقيقة) وأخرى للراحة (٣٠ دقيقة).\n"
+                . "✅ احرص على نوم ٧–٨ ساعات يومياً فهو يضاعف كفاءة المذاكرة.\n"
+                . "✅ اجعل يوماً في الأسبوع للراحة الكاملة والأنشطة الاجتماعية.\n"
+                . "✅ راجع خطتك الأسبوعية كل خميس وعدّلها حسب احتياجاتك.",
+            'exam_prep' => "أفضل طرق المذاكرة للاختبارات:\n\n"
+                . "• ابدأ المراجعة قبل الاختبار بأسبوعين على الأقل.\n"
+                . "• قسّم المنهج إلى وحدات صغيرة وحدّد هدفاً يومياً واضحاً.\n"
+                . "• استخدم البطاقات التعليمية (Flashcards) للمفاهيم والتعاريف.\n"
+                . "• حلّ نماذج اختبارات سابقة تحت ضغط الوقت.\n"
+                . "• اجمع ملاحظاتك في ورقة واحدة قبل ليلة الاختبار للمراجعة السريعة.",
+            'handle_pressure' => "للتعامل مع ضغط الدراسة والقلق:\n\n"
+                . "✅ تنفّس بعمق ٤-٤-٦ (شهيق ٤ ثوانٍ، حبس ٤، زفير ٦) عند التوتر.\n"
+                . "✅ قسّم المهام الكبيرة إلى خطوات صغيرة قابلة للتنفيذ.\n"
+                . "✅ مارس رياضة خفيفة ٢٠ دقيقة يومياً لتفريغ التوتر.\n"
+                . "✅ تحدّث مع مرشدك الأكاديمي أو وحدة الإرشاد الطلابي عند الحاجة.\n"
+                . "✅ تذكّر أن الراحة ليست تكاسلاً بل جزء من خطة النجاح.",
+            'skill_dev' => "أهم المهارات لطالب جامعي ناجح:\n\n"
+                . "• التفكير النقدي وحلّ المشكلات.\n"
+                . "• التواصل الفعّال والعرض والإلقاء.\n"
+                . "• إدارة الوقت وتحديد الأولويات.\n"
+                . "• العمل الجماعي والتعاون مع فرق متعددة التخصصات.\n"
+                . "• المهارات الرقمية الأساسية (Excel، أدوات التعاون، أساسيات البرمجة).\n"
+                . "• تعلّم لغة ثانية وتطوير المهارات البحثية.",
+            'final_exams' => "للاستعداد للامتحانات النهائية بفاعلية:\n\n"
+                . "✅ ضع خطة مراجعة لكل مادة قبل الاختبارات بثلاثة أسابيع.\n"
+                . "✅ ابدأ بأصعب المواد أولاً عندما يكون تركيزك في أعلى مستوى.\n"
+                . "✅ شكّل مجموعة دراسة صغيرة لتبادل الملخصات والأسئلة.\n"
+                . "✅ احرص على نوم منتظم وتغذية متوازنة طوال فترة الاختبارات.\n"
+                . "✅ لا تذاكر مادة جديدة في ليلة الاختبار، اكتفِ بالمراجعة السريعة.",
+            'focus' => "للحفاظ على التركيز أثناء المذاكرة:\n\n"
+                . "• اختر مكاناً هادئاً ومرتباً وبإضاءة جيدة.\n"
+                . "• اضبط الهاتف على وضع \"عدم الإزعاج\" أو ضعه في غرفة أخرى.\n"
+                . "• ضع هدفاً واضحاً لكل جلسة (مثلاً: إنهاء فصلين خلال ساعة).\n"
+                . "• خذ راحة قصيرة كل ٢٥–٣٠ دقيقة لتفادي الإرهاق الذهني.\n"
+                . "• اشرب الماء بانتظام وتجنّب الوجبات الثقيلة قبل المذاكرة.",
+        ];
+    }
+
+    /**
      * Display the full-page chat interface.
      */
     public function chatPage()
@@ -2281,15 +2340,16 @@ class StudentDashboardController extends Controller
             return response()->json(['success' => false, 'error' => 'Invalid choice'], 422);
         }
         $userMessage = $prompts[$promptId];
+        $dummyAnswers = $this->dummyChatAnswers();
 
         $apiKey = config('services.openai.api_key');
         if (empty($apiKey)) {
-            Log::error('Chat assistant unavailable: AI provider key not configured');
-
             return response()->json([
-                'success' => false,
-                'error' => 'المساعد الذكي غير متاح حالياً. حاول مرة أخرى لاحقاً.',
-            ], 503);
+                'success' => true,
+                'status' => 'completed',
+                'question' => $userMessage,
+                'response' => $this->convertMarkdownToHtml($dummyAnswers[$promptId] ?? ''),
+            ]);
         }
 
         $systemPrompt = 'أنت مساعد ذكي لطلاب جامعة القصيم. أجب بالعربية في 4-6 جمل قصيرة، نقاط واضحة وعملية، بدون مقدمات. استخدم ✅ أو • للقوائم.';
@@ -2314,17 +2374,21 @@ class StudentDashboardController extends Controller
                 ]);
 
                 return response()->json([
-                    'success' => false,
-                    'error' => 'فشل الاتصال بالمساعد الذكي. حاول مرة أخرى.',
-                ], 500);
+                    'success' => true,
+                    'status' => 'completed',
+                    'question' => $userMessage,
+                    'response' => $this->convertMarkdownToHtml($dummyAnswers[$promptId] ?? ''),
+                ]);
             }
 
             $aiResponse = $response->json('choices.0.message.content') ?? '';
             if (trim($aiResponse) === '') {
                 return response()->json([
-                    'success' => false,
-                    'error' => 'لم أتمكن من معالجة طلبك. حاول مرة أخرى.',
-                ], 500);
+                    'success' => true,
+                    'status' => 'completed',
+                    'question' => $userMessage,
+                    'response' => $this->convertMarkdownToHtml($dummyAnswers[$promptId] ?? ''),
+                ]);
             }
 
             return response()->json([
@@ -2337,9 +2401,11 @@ class StudentDashboardController extends Controller
             Log::error('Chat API exception', ['message' => $e->getMessage()]);
 
             return response()->json([
-                'success' => false,
-                'error' => 'حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى.',
-            ], 500);
+                'success' => true,
+                'status' => 'completed',
+                'question' => $userMessage,
+                'response' => $this->convertMarkdownToHtml($dummyAnswers[$promptId] ?? ''),
+            ]);
         }
     }
 

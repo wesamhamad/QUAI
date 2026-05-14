@@ -352,28 +352,38 @@ class CoursesController extends Controller
         }
 
         try {
-            Log::info('Fetching student courses from API for lookup');
-
             $data = null;
-            try {
-                $response = Http::timeout(30)->withHeaders([
-                    'Authorization' => "Bearer {$token}",
-                    'Accept' => 'application/json',
-                ])->get($this->getApiBaseUrl().'/api/v2/student/courses');
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                } else {
-                    Log::error('Student courses API failed', ['status' => $response->status()]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('Student courses API exception', ['error' => $e->getMessage()]);
-            }
-
-            if ($data === null) {
+            // Demo mode: skip the live HTTP call entirely and serve the fixture
+            // directly so the production logs aren't littered with 401s from
+            // api.qu.edu.sa (the demo's qspark_token is a placeholder).
+            if (config('app.demo_mode')) {
                 $data = \App\QSpark\Support\StudentFixture::courses();
                 if ($data !== null) {
-                    \App\QSpark\Support\StudentFixture::logServed('CoursesController.fetchStudentCoursesForLookup', '/api/v2/student/courses');
+                    \App\QSpark\Support\StudentFixture::logServed('CoursesController.fetchStudentCoursesForLookup[demo]', '/api/v2/student/courses');
+                }
+            } else {
+                Log::info('Fetching student courses from API for lookup');
+
+                try {
+                    $response = Http::timeout(30)->withHeaders([
+                        'Authorization' => "Bearer {$token}",
+                        'Accept' => 'application/json',
+                    ])->get($this->getApiBaseUrl().'/api/v2/student/courses');
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                    } else {
+                        Log::error('Student courses API failed', ['status' => $response->status()]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('Student courses API exception', ['error' => $e->getMessage()]);
+                }
+
+                if ($data === null) {
+                    $data = \App\QSpark\Support\StudentFixture::courses();
+                    if ($data !== null) {
+                        \App\QSpark\Support\StudentFixture::logServed('CoursesController.fetchStudentCoursesForLookup', '/api/v2/student/courses');
+                    }
                 }
             }
 

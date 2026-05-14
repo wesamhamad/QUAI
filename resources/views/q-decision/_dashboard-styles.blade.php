@@ -161,4 +161,65 @@
     [data-theme="dark"] .ai-rec.has-quote { background: #1d1a12; border-color: #5c4813; }
     [data-theme="dark"] .ai-rec .quote-card { background: #15181f; border-color: #5c4813; }
     [data-theme="dark"] .ai-rec .quote-card .qc-body { color: #f3f4f6; }
+
+    /* ───── Responsive: tablets ───── */
+    @media (max-width: 1024px) {
+        .ai-page { padding: 0 0.25rem; }
+        .ai-recs { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
+        .ai-kpis { gap: 1rem; }
+        .ai-chart-card { padding: 1.15rem 1.15rem 1.2rem; }
+        .ai-chart-canvas-wrap { height: 260px; }
+        .ai-chart-card.full .ai-chart-canvas-wrap { height: 300px; }
+    }
+
+    /* ───── Responsive: small tablets / large phones ───── */
+    @media (max-width: 768px) {
+        .fi-header h1 { font-size: 1.35rem; }
+        .fi-header p { font-size: 0.85rem; }
+        .ai-kpis { grid-template-columns: 1fr 1fr; }
+        .ai-quarters { padding: 0.6rem 0.75rem; gap: 0.4rem; }
+        .ai-quarters .lbl { width: 100%; margin-bottom: 0.25rem; }
+        .ai-quarter-tab { min-width: 0; flex: 1 1 calc(50% - 0.4rem); padding: 0.4rem 0.65rem; }
+        .ai-quarters .demo-flag { margin-inline-start: 0; }
+        .ai-table-card .t-head { padding: 0.85rem 1rem; font-size: 0.9rem; }
+        .ai-table th, .ai-table td { padding: 0.6rem 1rem; }
+        .ai-chart-card { padding: 1rem; }
+        .ai-chart-canvas-wrap { height: 240px; }
+        .ai-chart-card.full .ai-chart-canvas-wrap { height: 260px; }
+        .ai-chart-card h4 { font-size: 0.92rem; }
+    }
+
+    /* ───── Responsive: phones ───── */
+    @media (max-width: 560px) {
+        .ai-page { font-size: 0.95rem; }
+        .fi-header { margin-bottom: 1.1rem; }
+        .fi-header h1 { font-size: 1.2rem; }
+        .ai-kpis { grid-template-columns: 1fr; gap: 0.85rem; margin-bottom: 1.1rem; }
+        .ai-kpi { padding: 1rem 1.1rem; }
+        .ai-kpi .k-value { font-size: 1.55rem; }
+        .ai-recs { grid-template-columns: 1fr; gap: 0.85rem; }
+        .ai-rec { padding: 1rem 1.1rem; }
+        .ai-rec h3 { font-size: 0.94rem; }
+        .ai-rec .field { font-size: 0.82rem; }
+        .ai-rec.has-quote .quote-card .qc-body { font-size: 0.95rem; line-height: 1.7; }
+        .ai-rec.has-quote .quote-card .qc-foot { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+        .ai-recs-head { flex-wrap: wrap; }
+        .ai-recs-head .cnt { margin-inline-start: 0; width: 100%; }
+        .fi-section-head { flex-wrap: wrap; }
+        .fi-section-head .count { margin-inline-start: 0; width: 100%; }
+        .ai-quarters { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .ai-quarters .lbl { width: auto; margin-bottom: 0; white-space: nowrap; }
+        .ai-quarter-tab { flex: 0 0 auto; min-width: 120px; }
+        .ai-quarters .demo-flag { display: none; }
+        .ai-chart-canvas-wrap { height: 220px; }
+        .ai-chart-card.full .ai-chart-canvas-wrap { height: 240px; }
+    }
+
+    /* Extra-small phones (≤360px) — tighten further */
+    @media (max-width: 360px) {
+        .fi-header h1 { font-size: 1.1rem; }
+        .ai-kpi { padding: 0.85rem 0.95rem; }
+        .ai-kpi .k-value { font-size: 1.4rem; }
+        .ai-rec { padding: 0.9rem 1rem; }
+    }
 </style>

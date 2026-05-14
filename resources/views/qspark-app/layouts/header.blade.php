@@ -1,18 +1,18 @@
-<header class="bg-white border-b border-dga-gray-200 px-4 sm:px-6 py-3 sm:py-4 shadow-sm flex justify-between items-center gap-2 sm:gap-4">
+<header class="bg-white border-b border-dga-gray-200 px-3 sm:px-6 py-2.5 sm:py-4 shadow-sm flex justify-between items-center gap-2 sm:gap-4">
   <div class="flex items-center gap-2 shrink-0">
     <a href="#" class="hover:opacity-80 transition cursor-pointer">
-      <img src="https://www.qu.edu.sa/wp-content/uploads/2025/02/qu_icon.webp" alt="logo" class="w-8 h-8">
+      <img src="https://www.qu.edu.sa/wp-content/uploads/2025/02/qu_icon.webp" alt="logo" class="w-7 h-7 sm:w-8 sm:h-8">
     </a>
-    <h1 class="text-lg sm:text-xl font-bold">Q SPARK</h1>
+    <h1 class="text-base sm:text-xl font-bold">Q SPARK</h1>
   </div>
 
-  <div class="flex-1 min-w-0 mx-2 sm:mx-6 lg:mx-12">
-    <div class="bg-dga-gray-100 flex items-center rounded-full px-4 py-2 border-0">
+  <div class="flex-1 min-w-0 mx-1 sm:mx-6 lg:mx-12">
+    <div class="bg-dga-gray-100 flex items-center rounded-full px-3 sm:px-4 py-1.5 sm:py-2 border-0">
       <input type="text" placeholder="{{ __('messages.search_placeholder') }}"
         id="searchInput" oninput="performSearch(this.value)"
         class="bg-transparent outline-none text-sm w-full min-w-0 border-0 focus:ring-0">
       <a href="#" class="hover:scale-110 transition cursor-pointer shrink-0">
-        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
           <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5L20.5 19l-5-5zM10 14a4 4 0 110-8 4 4 0 010 8z" />
         </svg>
       </a>

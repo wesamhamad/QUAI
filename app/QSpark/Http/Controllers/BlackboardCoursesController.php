@@ -432,21 +432,31 @@ class BlackboardCoursesController extends Controller
 
         return Cache::remember($cacheKey, 900, function () use ($token) {
             $data = null;
-            try {
-                Log::info('Fetching student courses from API (not cached)');
-
-                $response = Http::timeout(15)->withHeaders([
-                    'Authorization' => "Bearer {$token}",
-                    'Accept' => 'application/json'
-                ])->get($this->getApiBaseUrl() . '/api/v2/student/courses');
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                } else {
-                    Log::error('Student courses API failed', ['status' => $response->status()]);
+            // Demo mode: skip the live HTTP call entirely and serve the fixture
+            // directly so the production logs aren't littered with 401s from
+            // api.qu.edu.sa (the demo's qspark_token is a placeholder).
+            if (config('app.demo_mode')) {
+                $data = \App\QSpark\Support\StudentFixture::courses();
+                if ($data !== null) {
+                    \App\QSpark\Support\StudentFixture::logServed('BlackboardCoursesController.studentCoursesRaw[demo]', '/api/v2/student/courses');
                 }
-            } catch (\Throwable $e) {
-                Log::error('Student courses API exception', ['error' => $e->getMessage()]);
+            } else {
+                try {
+                    Log::info('Fetching student courses from API (not cached)');
+
+                    $response = Http::timeout(15)->withHeaders([
+                        'Authorization' => "Bearer {$token}",
+                        'Accept' => 'application/json'
+                    ])->get($this->getApiBaseUrl() . '/api/v2/student/courses');
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                    } else {
+                        Log::error('Student courses API failed', ['status' => $response->status()]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('Student courses API exception', ['error' => $e->getMessage()]);
+                }
             }
 
             if ($data === null) {

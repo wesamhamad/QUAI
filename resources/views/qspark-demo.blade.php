@@ -53,15 +53,20 @@
         </nav>
     @endif
 
-    <iframe
-        id="qsparkFrame"
-        src="{{ $qsparkUrl }}"
-        title="Q SPARK Demo"
-        class="qspark-embed__frame"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        allow="clipboard-read; clipboard-write; fullscreen"
-    ></iframe>
+    <div class="qspark-embed__viewport">
+        <div id="qsparkLoader" class="qspark-embed__loader" role="status" aria-live="polite">
+            <div class="qspark-embed__spinner" aria-hidden="true"></div>
+            <span class="qspark-embed__loader-text">{{ __('جاري التحميل...') }}</span>
+        </div>
+        <iframe
+            id="qsparkFrame"
+            src="{{ $qsparkUrl }}"
+            title="Q SPARK Demo"
+            class="qspark-embed__frame"
+            referrerpolicy="no-referrer-when-downgrade"
+            allow="clipboard-read; clipboard-write; fullscreen"
+        ></iframe>
+    </div>
 </div>
 
 @push('styles')
@@ -153,11 +158,49 @@
         background: linear-gradient(135deg, var(--q-primary, #14573A) 0%, var(--q-secondary-dark, #1B8354) 100%);
         color: #fff;
     }
-    .qspark-embed__frame {
+    .qspark-embed__viewport {
+        position: relative;
         flex: 1;
+        min-height: 0;
+        background: #fff;
+    }
+    .qspark-embed__frame {
+        position: absolute;
+        inset: 0;
         width: 100%;
+        height: 100%;
         border: 0;
         background: #fff;
+    }
+    .qspark-embed__loader {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: var(--q-bg-primary, #fff);
+        color: var(--q-text-secondary, #4b5563);
+        font-size: 0.875rem;
+        font-weight: 600;
+        z-index: 1;
+        transition: opacity 0.2s ease;
+    }
+    .qspark-embed__loader.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .qspark-embed__spinner {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 3px solid var(--q-border-color, #e5e7eb);
+        border-top-color: var(--q-primary, #14573A);
+        animation: qsparkSpin 0.8s linear infinite;
+    }
+    @keyframes qsparkSpin {
+        to { transform: rotate(360deg); }
     }
 </style>
 @endpush
@@ -167,10 +210,27 @@
     (function() {
         var frame = document.getElementById('qsparkFrame');
         var reload = document.getElementById('qsparkReload');
+        var loader = document.getElementById('qsparkLoader');
+
+        function showLoader() {
+            if (loader) loader.classList.remove('is-hidden');
+        }
+        function hideLoader() {
+            if (loader) loader.classList.add('is-hidden');
+        }
+
+        if (frame) {
+            frame.addEventListener('load', hideLoader);
+            // Safety net: hide the loader after a reasonable timeout even if the
+            // iframe's load event never fires (e.g., blocked cross-origin nav).
+            setTimeout(hideLoader, 8000);
+        }
+
         if (reload && frame) {
             reload.addEventListener('click', function() {
                 // Reset to the canonical entry URL so a stale inner-iframe state
                 // can be recovered to the role-matched login route.
+                showLoader();
                 frame.src = @json($qsparkUrl);
             });
         }

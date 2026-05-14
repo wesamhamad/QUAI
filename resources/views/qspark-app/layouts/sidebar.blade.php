@@ -1,4 +1,4 @@
-<aside class="w-20 bg-white border-l border-dga-gray-200 rtl:border-l-0 rtl:border-r flex flex-col items-center py-4 space-y-6 shadow-sm rtl:order-last">
+<aside class="w-14 sm:w-20 bg-white border-l border-dga-gray-200 rtl:border-l-0 rtl:border-r flex flex-col items-center py-3 sm:py-4 space-y-4 sm:space-y-6 shadow-sm rtl:order-last shrink-0">
   {{-- Collapse Button --}}
   <a href="javascript:void(0)"
     class="bg-white w-8 h-8 rounded-full shadow flex items-center justify-center hover:bg-gray-200 transition cursor-pointer">

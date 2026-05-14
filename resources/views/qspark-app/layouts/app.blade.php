@@ -198,6 +198,36 @@
 
     /* Divide utilities */
     [dir="rtl"] .divide-x > :not([hidden]) ~ :not([hidden]) { --tw-divide-x-reverse: 1; }
+
+    /* ===== Global Responsive Helpers ===== */
+    /* Prevent images/media from forcing page overflow on small screens */
+    img, video, canvas, svg { max-width: 100%; height: auto; }
+    svg { height: revert; } /* keep explicit sizes on icon SVGs */
+
+    /* Make wide tables horizontally scrollable instead of breaking the layout */
+    @media (max-width: 768px) {
+      main table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
+
+    /* Phones */
+    @media (max-width: 640px) {
+      /* Body text scales down slightly for very small viewports */
+      body { font-size: 15px; }
+
+      /* Form controls full-width by default on phones */
+      input[type="text"], input[type="email"], input[type="password"],
+      input[type="number"], input[type="search"], input[type="date"],
+      select, textarea { max-width: 100%; }
+
+      /* Modals/dialogs shouldn't exceed viewport */
+      [role="dialog"], .modal, .dialog { max-width: 100vw; }
+    }
+
+    /* Extra-small phones */
+    @media (max-width: 380px) {
+      .text-3xl { font-size: 1.5rem; line-height: 1.85rem; }
+      .text-2xl { font-size: 1.25rem; line-height: 1.65rem; }
+    }
   </style>
 
   <!-- Alpine (vendored locally; see public/vendor/) -->

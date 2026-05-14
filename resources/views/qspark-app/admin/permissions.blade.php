@@ -3,8 +3,8 @@
 @section('title', __('messages.permissions_page_title'))
 
 @section('content')
-<div class="p-6 space-y-6">
-    <h2 class="text-3xl font-extrabold">{{ __('messages.permissions_management') }}</h2>
+<div class="p-4 sm:p-6 space-y-6">
+    <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.permissions_management') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @foreach($permissions as $role => $rolePermissions)

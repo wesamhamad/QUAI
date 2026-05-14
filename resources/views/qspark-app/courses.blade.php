@@ -2,6 +2,64 @@
 
 @section('title', __('messages.student_courses') . ' - Q SPARK')
 
+@php
+    // Demo fallback: when no courses come from the API/fixture, render a fixed
+    // dummy set so the /qspark-demo?section=courses iframe always has content
+    // to showcase (cards + working "Take Quiz" button per course).
+    if (empty($courses)) {
+        $courses = [
+            [
+                'course_name'     => 'مبادئ المحاسبة',
+                'course_code'     => 'ACCT241',
+                'activity_desc'   => 'نظري',
+                'instructor_name' => 'د. عبدالله سعد',
+                'lastAccessed'    => now()->subDays(1)->format('Y-m-d H:i'),
+                'numeric_id'      => 1,
+            ],
+            [
+                'course_name'     => 'المحاسبة المتوسطة (2)',
+                'course_code'     => 'ACCT350',
+                'activity_desc'   => 'نظري',
+                'instructor_name' => 'د. محمد ماهر',
+                'lastAccessed'    => now()->subDays(2)->format('Y-m-d H:i'),
+                'numeric_id'      => 2,
+            ],
+            [
+                'course_name'     => 'محاسبة التكاليف',
+                'course_code'     => 'ACCT353',
+                'activity_desc'   => 'نظري',
+                'instructor_name' => 'د. خالد العتيبي',
+                'lastAccessed'    => now()->subDays(3)->format('Y-m-d H:i'),
+                'numeric_id'      => 3,
+            ],
+            [
+                'course_name'     => 'نظم المعلومات المحاسبية',
+                'course_code'     => 'ISPM356',
+                'activity_desc'   => 'نظري',
+                'instructor_name' => 'د. منى السهلي',
+                'lastAccessed'    => now()->subDays(5)->format('Y-m-d H:i'),
+                'numeric_id'      => 4,
+            ],
+            [
+                'course_name'     => 'تحليل وتصميم النظم',
+                'course_code'     => 'IS357',
+                'activity_desc'   => 'عملي',
+                'instructor_name' => 'د. سارة عبدالله',
+                'lastAccessed'    => now()->subDays(6)->format('Y-m-d H:i'),
+                'numeric_id'      => 5,
+            ],
+            [
+                'course_name'     => 'إدارة المشاريع',
+                'course_code'     => 'MGT320',
+                'activity_desc'   => 'نظري',
+                'instructor_name' => 'د. فهد العنزي',
+                'lastAccessed'    => now()->subDays(7)->format('Y-m-d H:i'),
+                'numeric_id'      => 6,
+            ],
+        ];
+    }
+@endphp
+
 @section('content')
 <div class="p-4 sm:p-6 max-w-7xl mx-auto">
   <!-- Page Title -->

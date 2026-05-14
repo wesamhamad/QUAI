@@ -4,7 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -90,5 +92,45 @@ return Application::configure(basePath: dirname(__DIR__))
                     ],
                 ], 429);
             }
+        });
+
+        // Expired CSRF tokens on the logout forms render Laravel's bare 419
+        // page, which is confusing for users who only wanted to sign out.
+        // Laravel's prepareException() wraps TokenMismatchException into an
+        // HttpException(419) before render callbacks run, so we match on the
+        // wrapper here. Treat a stale token on a logout URL as the logout
+        // itself: drop the session and bounce to the matching login page.
+        // For other URLs we redirect back to login with a flash so the user
+        // can retry.
+        $exceptions->render(function (HttpException $e, Request $request) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'error' => [
+                        'message' => 'Session expired. Please refresh and try again.',
+                        'type' => 'token_mismatch',
+                    ],
+                ], 419);
+            }
+
+            $isQspark = $request->is('qspark*');
+            $loginRoute = $isQspark ? 'qspark.login' : 'demo.login';
+            $isLogout = $request->is('logout') || $request->is('qspark/logout');
+
+            if ($isLogout) {
+                try {
+                    Auth::guard($isQspark ? 'qspark' : null)->logout();
+                } catch (\Throwable $ignored) {
+                }
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->route($loginRoute);
+            }
+
+            return redirect()->route($loginRoute)
+                ->with('status', 'Your session expired. Please sign in again.');
         });
     })->create();

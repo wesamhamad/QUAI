@@ -19,9 +19,13 @@ class TrackDailyVisits
             
             try {
                 DailyVisit::incrementToday();
-            } catch (\Exception $e) {
-                // Log error but don't break the request
-                \Log::error('Failed to track daily visit: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                // The qspark connection isn't always writable in the demo
+                // deployment (e.g. when QSPARK_DB_DATABASE points at an sqlite
+                // path that doesn't exist on Laravel Cloud). The dashboard
+                // doesn't actually need this counter for the demo, so swallow
+                // failures at debug level instead of spamming error logs.
+                \Log::debug('Skipped daily visit tracking: ' . $e->getMessage());
             }
         }
 

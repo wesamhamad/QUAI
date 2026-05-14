@@ -3,14 +3,14 @@
 @section('title', __('messages.faculty_courses_page_title'))
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 max-w-7xl mx-auto">
   <!-- Page Title -->
-  <div class="mb-8 flex items-center justify-between">
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h2 class="text-3xl font-extrabold text-gray-800">{{ __('messages.my_courses') }}</h2>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800">{{ __('messages.my_courses') }}</h2>
       <p class="text-gray-500 mt-1">{{ __('messages.semester_label_with_value') }} {{ $currentSemester ?? __('messages.undefined_value') }}</p>
     </div>
-    <div class="flex items-center gap-4">
+    <div class="flex flex-wrap items-center gap-3 sm:gap-4">
       <a href="{{ route('qspark.faculty.dashboard') }}" class="text-dga-primary-600 hover:text-dga-primary-800 flex items-center gap-2">
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>

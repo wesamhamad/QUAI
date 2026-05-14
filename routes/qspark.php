@@ -326,21 +326,49 @@ Route::get('/game-test', function () {
 });
 
 // 🚀 راوت اللعبة الجديدة بـ React - احترافية ومتطورة
+// Accounting-themed MCQ exam for Faisal's demo bundle, split into
+// سهل / متوسط / صعب so the React game's adaptive difficulty engine
+// (groupedQuestions in public/game-react) can pull from each bucket.
 Route::get('/react-game-test', function () {
-    $questions = [
-        ['question' => 'ما نتيجة ٥ + ٥ ؟', 'options' => ['١٠', '١٥', '٥', '١'], 'correctIndex' => 0],
-        ['question' => 'ماهي عاصمة المملكة العربية السعودية؟', 'options' => ['جدة', 'الرياض', 'مكة', 'الدمام'], 'correctIndex' => 1],
-        ['question' => 'أكبر كوكب في المجموعة الشمسية هو؟', 'options' => ['الأرض', 'المريخ', 'المشتري', 'زحل'], 'correctIndex' => 2],
-        ['question' => 'كم عدد أيام السنة؟', 'options' => ['360', '365', '366', '370'], 'correctIndex' => 1],
-        ['question' => 'ما هي عاصمة فرنسا؟', 'options' => ['لندن', 'باريس', 'روما', 'برلين'], 'correctIndex' => 1],
-        ['question' => 'كم عدد قارات العالم؟', 'options' => ['٥', '٦', '٧', '٨'], 'correctIndex' => 2],
+    $groupedQuestions = [
+        'easy' => [
+            ['id' => 'acct-e1', 'difficulty' => 'easy', 'q' => 'ما هي المعادلة المحاسبية الأساسية؟', 'qEn' => 'What is the basic accounting equation?',
+                'options' => ['الأصول = الخصوم + حقوق الملكية', 'الأصول = الإيرادات − المصروفات', 'الأصول = النقدية + المخزون', 'الأصول = الخصوم − حقوق الملكية'], 'correct' => 0],
+            ['id' => 'acct-e2', 'difficulty' => 'easy', 'q' => 'أي مما يلي يُعد أصلاً متداولاً؟', 'qEn' => 'Which of the following is a current asset?',
+                'options' => ['المباني', 'الأراضي', 'المخزون', 'براءات الاختراع'], 'correct' => 2],
+            ['id' => 'acct-e3', 'difficulty' => 'easy', 'q' => 'الإيرادات في قائمة الدخل تظهر كـ:', 'qEn' => 'Revenues in the income statement appear as:',
+                'options' => ['مدين', 'دائن', 'أصل', 'خصم'], 'correct' => 1],
+            ['id' => 'acct-e4', 'difficulty' => 'easy', 'q' => 'الفرق بين الإيرادات والمصروفات يُسمى:', 'qEn' => 'The difference between revenues and expenses is called:',
+                'options' => ['رأس المال', 'صافي الدخل', 'الأصول', 'النقدية'], 'correct' => 1],
+        ],
+        'medium' => [
+            ['id' => 'acct-m1', 'difficulty' => 'medium', 'q' => 'وفقاً لمعايير IFRS، تُقاس الأصول الثابتة مبدئياً بـ:', 'qEn' => 'Under IFRS, PP&E is initially measured at:',
+                'options' => ['القيمة العادلة', 'التكلفة التاريخية', 'صافي القيمة الممكن تحقيقها', 'القيمة الحالية'], 'correct' => 1],
+            ['id' => 'acct-m2', 'difficulty' => 'medium', 'q' => 'قيد إثبات مبيعات آجلة بقيمة 5,000 ريال يكون:', 'qEn' => 'The entry to record a credit sale of SAR 5,000 is:',
+                'options' => ['من ح/ النقدية إلى ح/ المبيعات', 'من ح/ المدينين إلى ح/ المبيعات', 'من ح/ المبيعات إلى ح/ المدينين', 'من ح/ المخزون إلى ح/ المبيعات'], 'correct' => 1],
+            ['id' => 'acct-m3', 'difficulty' => 'medium', 'q' => 'طريقة القسط الثابت لاحتساب الإهلاك تعتمد على:', 'qEn' => 'Straight-line depreciation is based on:',
+                'options' => ['ساعات التشغيل الفعلية', 'الإنتاج السنوي', 'العمر الإنتاجي المقدّر', 'قيمة السوق الحالية'], 'correct' => 2],
+            ['id' => 'acct-m4', 'difficulty' => 'medium', 'q' => 'نسبة التداول = الأصول المتداولة ÷ ......', 'qEn' => 'Current ratio = Current Assets ÷ ......',
+                'options' => ['إجمالي الخصوم', 'الخصوم المتداولة', 'حقوق الملكية', 'صافي المبيعات'], 'correct' => 1],
+        ],
+        'hard' => [
+            ['id' => 'acct-h1', 'difficulty' => 'hard', 'q' => 'عند تطبيق IFRS 15، يتم الاعتراف بالإيراد عند:', 'qEn' => 'Under IFRS 15, revenue is recognised when:',
+                'options' => ['استلام النقدية', 'إصدار الفاتورة', 'انتقال السيطرة على البضاعة أو الخدمة', 'توقيع العقد'], 'correct' => 2],
+            ['id' => 'acct-h2', 'difficulty' => 'hard', 'q' => 'صافي القيمة الحالية (NPV) لمشروع موجبة تعني:', 'qEn' => 'A positive NPV for a project means:',
+                'options' => ['رفض المشروع', 'قبول المشروع', 'عدم كفاية البيانات', 'تأجيل القرار'], 'correct' => 1],
+            ['id' => 'acct-h3', 'difficulty' => 'hard', 'q' => 'في تسوية البنك، الشيكات المعلّقة:', 'qEn' => 'In a bank reconciliation, outstanding checks are:',
+                'options' => ['تُضاف إلى رصيد البنك', 'تُطرح من رصيد البنك', 'تُضاف إلى رصيد الدفاتر', 'تُطرح من رصيد الدفاتر'], 'correct' => 1],
+            ['id' => 'acct-h4', 'difficulty' => 'hard', 'q' => 'وفق طريقة FIFO في تقييم المخزون، تكلفة البضاعة المباعة تُحتسب بأسعار:', 'qEn' => 'Under FIFO, COGS is valued at:',
+                'options' => ['أحدث المشتريات', 'أقدم المشتريات', 'متوسط الفترة', 'سعر السوق'], 'correct' => 1],
+        ],
     ];
 
     return view('qspark::quiz.react-game', [
-        'questions' => $questions,
-        'courseCode' => 'TEST',
-        'courseName' => 'لعبة ماريو الاحترافية',
-        'studentId' => null,
+        'groupedQuestions' => $groupedQuestions,
+        'questions' => [],
+        'courseCode' => 'ACCT350',
+        'courseName' => 'مبادئ المحاسبة (تجريبي) — فيصل خالد',
+        'studentId' => '443211517',
     ]);
 });
 

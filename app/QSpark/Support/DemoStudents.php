@@ -29,6 +29,14 @@ class DemoStudents
         $infoSystems = ['name' => 'نظم المعلومات', 'name_en' => 'Information Systems', 'major_id' => null];
 
         return [
+            // Default QSpark persona — mirrors the Faisal record in App\Support\DemoData
+            // and the course bundle (ACCT350/353/354/355/ISPM356) shipped in
+            // resources/fixtures/student_demo.json.
+            '443211517' => self::persona('443211517', 'فيصل خالد محمد', 'Faisal Khalid Mohammed', '1', '1100211517', '2003-09-14', [
+                'academic_level' => '6', 'last_recorded_gpa' => '4.32', 'total_plan_hours' => '136',
+                'total_earned_hours' => '75', 'current_registered_hours' => '15', 'remaining_hours_to_graduate' => '61',
+            ], 3, $business, $accounting),
+
             '444000001' => self::persona('444000001', 'نورة عبدالله سعد', 'Noura Abdullah S', '2', '1100000001', '2004-06-04', [
                 'academic_level' => '5', 'last_recorded_gpa' => '4.83', 'total_plan_hours' => '129',
                 'total_earned_hours' => '67', 'current_registered_hours' => '15', 'remaining_hours_to_graduate' => '62',
