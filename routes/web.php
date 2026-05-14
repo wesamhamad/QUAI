@@ -59,27 +59,28 @@ Route::middleware(['auth'])->group(function () {
         $qsparkBaseUrl = rtrim(url('/qspark'), '/');
 
         // Role-aware section catalogue: keys are stable section ids the home page
-        // (or sidebar) can deep-link to; values are the QSPARK paths the iframe
-        // should land on after auto-login.
+        // (or sidebar) can deep-link to; values are the paths the iframe should
+        // land on after auto-login. QSPARK is mounted under /qspark, so every
+        // path carries that prefix (it becomes the quick-login ?next= target).
         $sectionsByRole = [
             'admin' => [
-                'dashboard'   => ['label' => 'لوحة الإدارة',  'path' => '/admin/dashboard'],
-                'users'       => ['label' => 'المستخدمون',    'path' => '/admin/users'],
-                'roles'       => ['label' => 'الأدوار',        'path' => '/admin/roles'],
-                'permissions' => ['label' => 'الصلاحيات',     'path' => '/admin/permissions'],
+                'dashboard'   => ['label' => 'لوحة الإدارة',  'path' => '/qspark/admin/dashboard'],
+                'users'       => ['label' => 'المستخدمون',    'path' => '/qspark/admin/users'],
+                'roles'       => ['label' => 'الأدوار',        'path' => '/qspark/admin/roles'],
+                'permissions' => ['label' => 'الصلاحيات',     'path' => '/qspark/admin/permissions'],
             ],
             'faculty' => [
-                'dashboard' => ['label' => 'لوحة هيئة التدريس', 'path' => '/faculty/dashboard'],
-                'courses'   => ['label' => 'المقررات',          'path' => '/faculty/courses'],
-                'students'  => ['label' => 'الطلاب',            'path' => '/faculty/students'],
-                'reports'   => ['label' => 'التقارير',          'path' => '/faculty/reports'],
+                'dashboard' => ['label' => 'لوحة هيئة التدريس', 'path' => '/qspark/faculty/dashboard'],
+                'courses'   => ['label' => 'المقررات',          'path' => '/qspark/faculty/courses'],
+                'students'  => ['label' => 'الطلاب',            'path' => '/qspark/faculty/students'],
+                'reports'   => ['label' => 'التقارير',          'path' => '/qspark/faculty/reports'],
             ],
             'student' => [
-                'dashboard'       => ['label' => 'لوحة الطالب',  'path' => '/dashboard-student'],
-                'grades'          => ['label' => 'الدرجات',       'path' => '/dashboard-student/grades'],
-                'courses'         => ['label' => 'المقررات',      'path' => '/dashboard-student/courses'],
-                'recommendations' => ['label' => 'التوصيات',     'path' => '/dashboard-student/recommendations'],
-                'chat'            => ['label' => 'المساعد الذكي', 'path' => '/dashboard-student/chat'],
+                'dashboard'       => ['label' => 'لوحة الطالب',  'path' => '/qspark/dashboard-student'],
+                'grades'          => ['label' => 'الدرجات',       'path' => '/qspark/dashboard-student/grades'],
+                'courses'         => ['label' => 'المقررات',      'path' => '/qspark/dashboard-student/courses'],
+                'recommendations' => ['label' => 'التوصيات',     'path' => '/qspark/dashboard-student/recommendations'],
+                'chat'            => ['label' => 'المساعد الذكي', 'path' => '/qspark/dashboard-student/chat'],
             ],
         ];
         $sections = $sectionsByRole[$qsparkRole] ?? [];

@@ -54,24 +54,38 @@ return [
             'foreign_key_constraints' => false,
         ],
 
-        // Dedicated connection for the merged QSPARK app (App\QSpark\*).
-        // QSPARK keeps its own schema (users, roles, courses, …) isolated from
-        // QUAI's tables. All App\QSpark\Models\* use this connection; its
-        // migrations live in database/migrations/qspark. Override with
-        // QSPARK_DB_* env vars to point at MySQL/Oracle in production.
+        // Dedicated connection for the merged QSPARK app (App\QSpark\*). All
+        // App\QSpark\Models\* use it, and the UseQSparkConnection middleware
+        // makes it the default during /qspark requests; its migrations live in
+        // database/migrations/qspark.
+        //
+        // By default it REUSES QUAI's main database connection (the QSPARK_DB_*
+        // vars fall back to QUAI's DB_* vars) and isolates QSPARK's schema with
+        // the `qspark_` table prefix — so it works on Laravel Cloud with no
+        // extra database to provision. Set QSPARK_DB_* explicitly to point it
+        // at a separate database instead (then QSPARK_DB_PREFIX can be empty).
         'qspark' => [
-            'driver' => env('QSPARK_DB_CONNECTION', 'sqlite'),
-            'url' => env('QSPARK_DB_URL'),
-            'database' => env('QSPARK_DB_DATABASE', database_path('qspark.sqlite')),
-            'host' => env('QSPARK_DB_HOST', '127.0.0.1'),
-            'port' => env('QSPARK_DB_PORT', '3306'),
-            'username' => env('QSPARK_DB_USERNAME', 'root'),
-            'password' => env('QSPARK_DB_PASSWORD', ''),
-            'charset' => env('QSPARK_DB_CHARSET', 'utf8mb4'),
-            'collation' => env('QSPARK_DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
+            'driver' => env('QSPARK_DB_CONNECTION', env('DB_CONNECTION', 'sqlite')),
+            'url' => env('QSPARK_DB_URL', env('DB_URL')),
+            'database' => env('QSPARK_DB_DATABASE', env('DB_DATABASE', database_path('database.sqlite'))),
+            'host' => env('QSPARK_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('QSPARK_DB_PORT', env('DB_PORT', '3306')),
+            'username' => env('QSPARK_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('QSPARK_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('QSPARK_DB_SOCKET', env('DB_SOCKET', '')),
+            'charset' => env('QSPARK_DB_CHARSET', env('DB_CHARSET', 'utf8mb4')),
+            'collation' => env('QSPARK_DB_COLLATION', env('DB_COLLATION', 'utf8mb4_unicode_ci')),
+            // Keeps QSPARK's tables (users, roles, courses, …) from colliding
+            // with QUAI's own when the two share one database.
+            'prefix' => env('QSPARK_DB_PREFIX', 'qspark_'),
             'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
             'foreign_key_constraints' => env('QSPARK_DB_FOREIGN_KEYS', true),
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+            // sqlite-only knobs (ignored by mysql/mariadb/pgsql):
             'busy_timeout' => null,
             'journal_mode' => null,
             'synchronous' => null,

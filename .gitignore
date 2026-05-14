@@ -34,6 +34,3 @@ QUBI/tsconfig.tsbuildinfo
 
 # QUAI
 QUAI/.intent/
-
-# Merged QSPARK app's isolated database (provision per environment).
-database/qspark.sqlite
