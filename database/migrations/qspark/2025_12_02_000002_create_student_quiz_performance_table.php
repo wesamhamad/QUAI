@@ -49,8 +49,10 @@ return new class extends Migration
             
             $table->timestamps();
             
-            // Index for finding latest performance
-            $table->index(['student_id', 'course_code', 'created_at']);
+            // Index for finding latest performance. Explicit short name: the
+            // auto-generated one exceeds MySQL's 64-char identifier limit once
+            // the `qspark_` table prefix is added.
+            $table->index(['student_id', 'course_code', 'created_at'], 'sqp_student_course_created_idx');
         });
     }
 

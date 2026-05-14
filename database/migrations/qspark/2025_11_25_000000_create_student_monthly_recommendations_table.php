@@ -24,7 +24,9 @@ return new class extends Migration
             
             // Unique constraint: one recommendation per student per month
             $table->unique(['student_id', 'month']);
-            $table->index(['student_id', 'generated_at']);
+            // Explicit short name: the auto-generated one exceeds MySQL's
+            // 64-char identifier limit once the `qspark_` table prefix is added.
+            $table->index(['student_id', 'generated_at'], 'smr_student_generated_idx');
         });
     }
 

@@ -35,7 +35,9 @@ return new class extends Migration
 
             $table->index(['semester', 'faculty_no']);
             $table->index(['semester', 'gpa_improvement']);
-            $table->index(['semester', 'attendance_improvement']);
+            // Explicit short name: the auto-generated one exceeds MySQL's
+            // 64-char identifier limit once the `qspark_` table prefix is added.
+            $table->index(['semester', 'attendance_improvement'], 'ais_semester_attendance_idx');
         });
     }
 
