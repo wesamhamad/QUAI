@@ -126,6 +126,12 @@ class QDecisionController extends Controller
         ];
     }
 
+    /** Public accessor for the recommendation sections (used by the Filament dashboard pages). */
+    public static function recommendationSections(): array
+    {
+        return (new self())->sections();
+    }
+
     private function sections(): array
     {
         return [

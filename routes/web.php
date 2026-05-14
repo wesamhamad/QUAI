@@ -125,8 +125,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/q-decision/digital-advisor', [QDecisionController::class, 'digitalAdvisor'])
             ->name('q-decision.digital-advisor');
 
-        // Legacy alias — التقرير الذاتي now lives at the recommendations page.
-        Route::get('/q-decision/self-report', fn () => redirect()->route('q-decision.recommendations'))
+        // التقرير الذاتي now lives in the Filament admin panel.
+        Route::get('/q-decision/self-report', fn () => redirect('/admin/dashboards/ai-recommendations'))
             ->name('q-decision.self-report');
     });
 });

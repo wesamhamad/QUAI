@@ -65,18 +65,14 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isAdmin): ?>
-        <?php ($dashCatalog = \App\Http\Controllers\QDecisionController::dashboardCatalog()); ?>
         <div class="q-nav-divider"></div>
-        <div class="q-nav-section-label">Dashboards</div>
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dashCatalog; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dashItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <a href="<?php echo e($dashItem['url']); ?>"
-               class="q-nav-item <?php echo e($dashItem['active'] ? 'active' : ''); ?>">
-                <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<?php echo e($dashItem['icon']); ?>"/>
-                </svg>
-                <span class="q-nav-label"><?php echo e($dashItem['title']); ?></span>
-            </a>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <a href="<?php echo e(url('/admin/dashboards/ai-recommendations')); ?>"
+           class="q-nav-item">
+            <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 14l4-4 4 4 5-5"/>
+            </svg>
+            <span class="q-nav-label">لوحات القرار</span>
+        </a>
         <a href="<?php echo e(route('q-decision.digital-advisor')); ?>"
            class="q-nav-item <?php echo e(request()->routeIs('q-decision.digital-advisor') ? 'active' : ''); ?>">
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
