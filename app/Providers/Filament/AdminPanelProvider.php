@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Illuminate\Auth\Middleware\Authenticate;
+use App\Http\Middleware\SetFilamentArabicLocale;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -55,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetFilamentArabicLocale::class,
                 Authenticate::class,
             ])
             ->plugins([
