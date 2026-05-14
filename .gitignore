@@ -1,0 +1,36 @@
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/.claude
+/.workspace
+/auth.json
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+*.md
+!README.md
+
+# QUBI
+QUBI/.next/
+QUBI/backend/.venv/
+QUBI/node_modules/
+QUBI/tsconfig.tsbuildinfo
+
+# QUAI
+QUAI/.intent/

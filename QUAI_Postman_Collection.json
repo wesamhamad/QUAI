@@ -1,0 +1,697 @@
+{
+	"info": {
+		"_postman_id": "quai-api-collection",
+		"name": "QUAI API",
+		"description": "QUAI (Qassim University AI) Platform API Collection.\n\nBase URL: http://127.0.0.1:8007",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8007",
+			"type": "string"
+		},
+		{
+			"key": "share_token",
+			"value": "YOUR_AGENT_SHARE_TOKEN",
+			"type": "string"
+		},
+		{
+			"key": "course_id",
+			"value": "1_2_471_15_7224",
+			"type": "string"
+		},
+		{
+			"key": "content_id",
+			"value": "_123456_1",
+			"type": "string"
+		},
+		{
+			"key": "attachment_id",
+			"value": "_789012_1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Course Quiz",
+			"description": "Course quiz generation from Blackboard attachments",
+			"item": [
+				{
+					"name": "Generate Quiz",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"course_id\": \"{{course_id}}\",\n    \"content_id\": \"{{content_id}}\",\n    \"attachment_id\": \"{{attachment_id}}\",\n    \"lang\": \"ar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/course-quiz/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "course-quiz", "generate"]
+						},
+						"description": "Generate 18 MCQ questions from a Blackboard course attachment.\n\nRequires SAML session authentication and student_id.\n\n**Body:**\n- `course_id` (required) — Blackboard course ID (format: degree_campus_semester_course_section)\n- `content_id` (required) — Blackboard content ID\n- `attachment_id` (required) — Blackboard attachment ID\n- `lang` (optional) — ar or en (default: ar)\n\n**Response:** 18 questions: 6 easy (enemy), 6 medium (minion), 6 hard (boss)"
+					}
+				}
+			]
+		},
+		{
+			"name": "Chat",
+			"description": "OpenAI-compatible Chat API",
+			"item": [
+				{
+					"name": "Chat Completion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"ما هو الذكاء الاصطناعي؟\"\n        }\n    ],\n    \"stream\": false,\n    \"web_search\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/completions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "completions"]
+						},
+						"description": "OpenAI-compatible chat completion endpoint.\n\n**Body:**\n- `messages` (required) — array of {role, content}\n- `stream` (optional) — boolean, enables SSE streaming\n- `web_search` (optional) — boolean, enables web search context\n- `model` (optional) — override model\n- `max_tokens` (optional) — 1-8192\n- `temperature` (optional) — 0-2"
+					}
+				},
+				{
+					"name": "Chat Completion (Streaming)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"اكتب فقرة عن التحول الرقمي\"\n        }\n    ],\n    \"stream\": true,\n    \"web_search\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/completions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "completions"]
+						},
+						"description": "Streaming chat completion via Server-Sent Events (SSE)."
+					}
+				},
+				{
+					"name": "Chat with Web Search",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"ما آخر أخبار جامعة القصيم؟\"\n        }\n    ],\n    \"stream\": false,\n    \"web_search\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/completions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "completions"]
+						},
+						"description": "Chat with web search enabled. Uses SearXNG for real-time web results."
+					}
+				},
+				{
+					"name": "Text Completion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"messages\": [\n        {\n            \"role\": \"user\",\n            \"content\": \"أكمل هذه الجملة: التعليم الإلكتروني هو\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/completions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "completions"]
+						}
+					}
+				},
+				{
+					"name": "Upload File for Chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"description": "PDF, DOCX, PPTX, TXT, MD, CSV, JSON, PNG, JPG, JPEG, WEBP"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "upload"]
+						},
+						"description": "Upload a file to extract text content for chat context. Max 10MB."
+					}
+				},
+				{
+					"name": "List Models",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/models",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "models"]
+						},
+						"description": "List all available AI models."
+					}
+				}
+			]
+		},
+		{
+			"name": "Training Bag",
+			"description": "Training bag (حقيبة تدريبية) generation",
+			"item": [
+				{
+					"name": "Generate Training Bag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"مقدمة في الذكاء الاصطناعي\",\n    \"objectives\": \"تعريف الذكاء الاصطناعي\\nتطبيقات الذكاء الاصطناعي\\nمستقبل الذكاء الاصطناعي\",\n    \"language\": \"ar\",\n    \"audience\": \"مبتدئين\",\n    \"duration\": \"يوم واحد\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/training-bag/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "training-bag", "generate"]
+						},
+						"description": "Generate a full training bag with chapters, content, and quizzes."
+					}
+				},
+				{
+					"name": "Save Training Bag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"مقدمة في الذكاء الاصطناعي\",\n    \"content\": \"# محتوى الحقيبة التدريبية...\",\n    \"language\": \"ar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/training-bag/save",
+							"host": ["{{base_url}}"],
+							"path": ["api", "training-bag", "save"]
+						}
+					}
+				},
+				{
+					"name": "Update Training Bag",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"عنوان محدث\",\n    \"content\": \"# محتوى محدث...\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/training-bag/:id/update",
+							"host": ["{{base_url}}"],
+							"path": ["api", "training-bag", ":id", "update"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "UUID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Download PPTX",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"مقدمة في الذكاء الاصطناعي\",\n    \"content\": \"# محتوى...\",\n    \"language\": \"ar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/training-bag/download-pptx",
+							"host": ["{{base_url}}"],
+							"path": ["api", "training-bag", "download-pptx"]
+						},
+						"description": "Generate and download a PPTX presentation from training bag content."
+					}
+				},
+				{
+					"name": "Search Training Bags",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"ذكاء اصطناعي\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/training-bag/search",
+							"host": ["{{base_url}}"],
+							"path": ["api", "training-bag", "search"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Meeting Minutes",
+			"description": "Meeting minutes (محاضر اجتماعات) management",
+			"item": [
+				{
+					"name": "Upload Audio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"description": "Audio file (MP3, WAV, M4A, etc.)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/upload",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", "upload"]
+						}
+					}
+				},
+				{
+					"name": "Transcribe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id/transcribe",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id", "transcribe"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Analyze",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id/analyze",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id", "analyze"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Meeting Details",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id", "status"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Generate Document",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id", "generate"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Download Document",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/meeting-minutes/:id/download",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "meeting-minutes", ":id", "download"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "MEETING_ID"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "QU Agent",
+			"description": "QU Agent CRUD and chat endpoints",
+			"item": [
+				{
+					"name": "List Agents",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents"]
+						}
+					}
+				},
+				{
+					"name": "Create Agent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"مساعد المقرر\",\n    \"description\": \"مساعد ذكي للإجابة على أسئلة المقرر\",\n    \"system_prompt\": \"أنت مساعد تعليمي متخصص...\",\n    \"language\": \"ar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents"]
+						}
+					}
+				},
+				{
+					"name": "Get Agent",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents/:agent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents", ":agent"],
+							"variable": [
+								{
+									"key": "agent",
+									"value": "AGENT_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Agent",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"اسم محدث\",\n    \"description\": \"وصف محدث\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents/:agent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents", ":agent"],
+							"variable": [
+								{
+									"key": "agent",
+									"value": "AGENT_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Agent",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents/:agent",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents", ":agent"],
+							"variable": [
+								{
+									"key": "agent",
+									"value": "AGENT_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload Agent Files",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[]",
+									"type": "file",
+									"description": "Knowledge files for the agent"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/clude-agents/:agent/files",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "clude-agents", ":agent", "files"],
+							"variable": [
+								{
+									"key": "agent",
+									"value": "AGENT_ID"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Agent Chat (Public)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"مرحباً، كيف يمكنك مساعدتي؟\",\n    \"session_id\": \"session_123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/agent-chat/{{share_token}}/chat",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "agent-chat", "{{share_token}}", "chat"]
+						},
+						"description": "Send a message to a public agent. No auth required."
+					}
+				},
+				{
+					"name": "Agent Chat Stream (Public)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"اشرح لي الموضوع\",\n    \"session_id\": \"session_123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/agent-chat/{{share_token}}/chat-stream",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "agent-chat", "{{share_token}}", "chat-stream"]
+						},
+						"description": "Streaming agent chat via SSE."
+					}
+				},
+				{
+					"name": "Agent Chat History (Public)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/agent-chat/{{share_token}}/history/:sessionId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "agent-chat", "{{share_token}}", "history", ":sessionId"],
+							"variable": [
+								{
+									"key": "sessionId",
+									"value": "session_123"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Utility",
+			"description": "Health checks and status endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Check Ollama and file extraction service health."
+					}
+				},
+				{
+					"name": "Web Search Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/web-search/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "web-search", "status"]
+						},
+						"description": "Check if SearXNG web search is available."
+					}
+				},
+				{
+					"name": "Auth Status (Debug)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/auth-status",
+							"host": ["{{base_url}}"],
+							"path": ["auth-status"]
+						},
+						"description": "Debug endpoint to check SAML authentication status."
+					}
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,92 @@
+use_default_settings:
+  engines:
+    keep_only:
+      - google
+      - bing
+      - duckduckgo
+      - brave
+      - mojeek
+      - qwant
+      - yahoo
+      - startpage
+      - wikipedia
+
+server:
+  secret_key: "quai-searxng-secret-key-change-me"
+  bind_address: "0.0.0.0"
+  port: 8080
+  limiter: false
+
+outgoing:
+  verify: false
+  request_timeout: 15
+  max_request_timeout: 20
+
+search:
+  safe_search: 0
+  autocomplete: "google"
+  default_lang: "all"
+  formats:
+    - html
+    - json
+  suspended_times:
+    SearxEngineCaptchaException: 120
+    SearxEngineTooManyRequestsException: 120
+    SearxEngineAccessDeniedException: 120
+    cf_SearxEngineCaptchaException: 120
+    cf_SearxEngineTooManyRequestsException: 120
+    recaptcha_SearxEngineCaptchaException: 120
+
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+    timeout: 12
+
+  - name: bing
+    engine: bing
+    shortcut: b
+    disabled: false
+    timeout: 12
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+    timeout: 12
+
+  - name: brave
+    engine: brave
+    shortcut: br
+    disabled: false
+    timeout: 12
+
+  - name: mojeek
+    engine: mojeek
+    shortcut: mj
+    disabled: false
+    timeout: 12
+
+  - name: qwant
+    engine: qwant
+    shortcut: qw
+    disabled: false
+    timeout: 12
+
+  - name: yahoo
+    engine: yahoo
+    shortcut: yh
+    disabled: false
+    timeout: 12
+
+  - name: startpage
+    engine: startpage
+    shortcut: sp
+    disabled: false
+    timeout: 12
+
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    disabled: false

@@ -1,0 +1,41 @@
+[
+    {
+        "id": 1,
+        "key": "faculty",
+        "name": "بوابة أعضاء هيئة التدريس",
+        "host": "faculty.qu.edu.sa",
+        "is_active": true,
+        "color": "#1B8354",
+        "sort_order": 1,
+        "last_synced_at": "2026-05-12T22:00:00.000000Z",
+        "last_sync_error": null,
+        "created_at": "2026-05-12T22:00:00.000000Z",
+        "updated_at": "2026-05-12T22:00:00.000000Z"
+    },
+    {
+        "id": 2,
+        "key": "myqu",
+        "name": "منصة myQU للطلاب",
+        "host": "myqu.qu.edu.sa",
+        "is_active": true,
+        "color": "#7C3AED",
+        "sort_order": 2,
+        "last_synced_at": "2026-05-12T22:00:00.000000Z",
+        "last_sync_error": null,
+        "created_at": "2026-05-12T22:00:00.000000Z",
+        "updated_at": "2026-05-12T22:00:00.000000Z"
+    },
+    {
+        "id": 3,
+        "key": "www",
+        "name": "الموقع الرئيسي للجامعة",
+        "host": "www.qu.edu.sa",
+        "is_active": true,
+        "color": "#0891B2",
+        "sort_order": 3,
+        "last_synced_at": "2026-05-12T22:00:00.000000Z",
+        "last_sync_error": null,
+        "created_at": "2026-05-12T22:00:00.000000Z",
+        "updated_at": "2026-05-12T22:00:00.000000Z"
+    }
+]

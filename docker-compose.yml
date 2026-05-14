@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # SearXNG meta-search engine (web search)
+  searxng:
+    image: searxng/searxng:latest
+    container_name: quai-searxng
+    ports:
+      - "${SEARXNG_PORT:-8888}:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:${SEARXNG_PORT:-8888}/
+    restart: unless-stopped
+
+  # File extraction microservice (Arabic OCR + text extraction)
+  file-extraction:
+    build:
+      context: ./file_extraction
+      dockerfile: Dockerfile
+    container_name: quai-file-extraction
+    ports:
+      - "${FILE_EXTRACTION_PORT:-8001}:8000"
+    environment:
+      - EXTRACT_MAX_CHUNK_SIZE=${EXTRACT_MAX_CHUNK_SIZE:-4000}
+      - EXTRACT_MAX_FILE_SIZE_MB=${EXTRACT_MAX_FILE_SIZE_MB:-20}
+      - EXTRACT_OCR_LANGUAGES=${EXTRACT_OCR_LANGUAGES:-ara+eng}
+      - EXTRACT_OCR_DPI=${EXTRACT_OCR_DPI:-300}
+      - EXTRACT_SCANNED_THRESHOLD=${EXTRACT_SCANNED_THRESHOLD:-50}
+      - EXTRACT_LOG_LEVEL=${EXTRACT_LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Semantic search service (RAG with ChromaDB + multilingual embeddings)
+  semantic-search:
+    build:
+      context: ./semantic_search
+      dockerfile: Dockerfile
+    container_name: quai-semantic-search
+    ports:
+      - "${SEMANTIC_SEARCH_PORT:-8002}:8000"
+    volumes:
+      - semantic_search_data:/data/chromadb
+    environment:
+      - EMBEDDING_MODEL=${SEMANTIC_EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      - CHROMA_PERSIST_DIR=/data/chromadb
+      - CHROMA_COLLECTION=${SEMANTIC_COLLECTION:-advisor_knowledge}
+      - DEFAULT_TOP_K=${SEMANTIC_TOP_K:-10}
+      - CHUNK_SIZE=${SEMANTIC_CHUNK_SIZE:-500}
+      - CHUNK_OVERLAP=${SEMANTIC_CHUNK_OVERLAP:-100}
+      - LOG_LEVEL=${SEMANTIC_LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Python code executor (sandboxed Python execution for Vibe Coding)
+  python-executor:
+    build:
+      context: ./python_executor
+      dockerfile: Dockerfile
+    container_name: quai-python-executor
+    ports:
+      - "${PYTHON_EXECUTOR_PORT:-8003}:8000"
+    environment:
+      - MAX_EXECUTION_TIME=${PYTHON_MAX_EXEC_TIME:-10}
+      - MAX_MEMORY_MB=${PYTHON_MAX_MEMORY:-128}
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '1.0'
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=50M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  semantic_search_data:

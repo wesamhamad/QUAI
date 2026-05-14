@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+    <rect width="48" height="48" rx="12" fill="#25935F" fill-opacity="0.10"/>
+    <text x="24" y="32" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="24" fill="#25935F">Q</text>
+    <g transform="translate(28 8)" fill="#25935F" stroke="#25935F" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M7.15 1.1 L2.2 7.7 h3.85 l-1.1 4.4 4.95 -6.6 h-3.85 z"/>
+    </g>
+</svg>

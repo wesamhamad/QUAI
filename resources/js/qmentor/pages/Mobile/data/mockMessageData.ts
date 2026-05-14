@@ -1,0 +1,175 @@
+import type { ScreenAuditItem, ChatMessage, PushNotification, SMSMessage } from '../types';
+
+export const screenAuditData: ScreenAuditItem[] = [
+  { id: '1', nameAr: 'لوحة التحكم', nameEn: 'Dashboard', path: '/', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '2', nameAr: 'التوأم الرقمي', nameEn: 'Digital Twin', path: '/digital-twin', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '3', nameAr: 'لوحة المرشد', nameEn: 'Advisor Dashboard', path: '/advisor-dashboard', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '4', nameAr: 'تحليل المخاطر', nameEn: 'Risk Analytics', path: '/risk-analytics', mobile: 'warn', tablet: 'pass', desktop: 'pass' },
+  { id: '5', nameAr: 'الخطة الدراسية', nameEn: 'Study Plan', path: '/study-plan', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '6', nameAr: 'المحادثة الذكية', nameEn: 'AI Chatbot', path: '/chatbot', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '7', nameAr: 'التنبيهات', nameEn: 'Alerts', path: '/alerts', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '8', nameAr: 'بوابة الأساتذة', nameEn: 'Faculty Portal', path: '/faculty', mobile: 'warn', tablet: 'pass', desktop: 'pass' },
+  { id: '9', nameAr: 'التعلم التعاوني', nameEn: 'Peer Tutoring', path: '/peer-tutoring', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '10', nameAr: 'خطة التعافي', nameEn: 'Recovery Plan', path: '/recovery', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+  { id: '11', nameAr: 'المقارنة المؤسسية', nameEn: 'Benchmarking', path: '/benchmarking', mobile: 'pass', tablet: 'pass', desktop: 'pass' },
+];
+
+export const whatsappMessages: ChatMessage[] = [
+  {
+    id: 'wa1',
+    sender: 'bot',
+    textAr: 'تنبيه المعدل التراكمي\n\nمرحباً أحمد، معدلك التراكمي الحالي هو 3.45 من 4.0\nلقد تحسن بمقدار 0.12 عن الفصل الماضي. أحسنت!',
+    textEn: 'GPA Alert\n\nHi Ahmed, your current GPA is 3.45/4.0\nIt improved by 0.12 from last semester. Great job!',
+    time: '09:15',
+    type: 'text',
+  },
+  {
+    id: 'wa2',
+    sender: 'user',
+    textAr: 'شكراً! ما هي مواعيد محاضراتي غداً؟',
+    textEn: 'Thanks! What are my lectures tomorrow?',
+    time: '09:16',
+    type: 'text',
+  },
+  {
+    id: 'wa3',
+    sender: 'bot',
+    textAr: 'جدول الغد - الأحد\n\n• 08:00 - هندسة البرمجيات (قاعة 204)\n• 10:00 - قواعد البيانات (قاعة 301)\n• 13:00 - الذكاء الاصطناعي (قاعة 105)',
+    textEn: 'Tomorrow\'s Schedule - Sunday\n\n• 08:00 - Software Engineering (Room 204)\n• 10:00 - Databases (Room 301)\n• 13:00 - AI (Room 105)',
+    time: '09:16',
+    type: 'text',
+  },
+  {
+    id: 'wa4',
+    sender: 'bot',
+    textAr: 'رسالة من المرشد الأكاديمي\n\nد. محمد العلي يرغب في مقابلتك يوم الثلاثاء الساعة 11:00 لمناقشة خطتك الدراسية للفصل القادم.',
+    textEn: 'Message from Academic Advisor\n\nDr. Mohammed Al-Ali would like to meet you on Tuesday at 11:00 to discuss your study plan for next semester.',
+    time: '10:30',
+    type: 'text',
+  },
+  {
+    id: 'wa5',
+    sender: 'bot',
+    textAr: 'تم رصد درجة جديدة!\n\nالمادة: هندسة البرمجيات\nالاختبار: الاختبار الفصلي الأول\nالدرجة: 42/50 (84%)\n\nممتاز! أنت في المسار الصحيح',
+    textEn: 'New Grade Posted!\n\nCourse: Software Engineering\nExam: Midterm 1\nGrade: 42/50 (84%)\n\nExcellent! You\'re on track',
+    time: '14:22',
+    type: 'text',
+  },
+];
+
+export const telegramMessages: ChatMessage[] = [
+  {
+    id: 'tg1',
+    sender: 'bot',
+    textAr: 'مرحباً بك في بوت كيومنتور!\n\nأنا مساعدك الأكاديمي الذكي. كيف يمكنني مساعدتك اليوم؟',
+    textEn: 'Welcome to QMentor Bot!\n\nI\'m your AI academic assistant. How can I help you today?',
+    time: '08:00',
+    type: 'button',
+    buttons: [
+      { labelAr: 'معدلي التراكمي', labelEn: 'My GPA' },
+      { labelAr: 'جدولي', labelEn: 'My Schedule' },
+      { labelAr: 'درجاتي', labelEn: 'My Grades' },
+      { labelAr: 'طلب مساعدة', labelEn: 'Get Help' },
+    ],
+  },
+  {
+    id: 'tg2',
+    sender: 'user',
+    textAr: 'معدلي التراكمي',
+    textEn: 'My GPA',
+    time: '08:01',
+    type: 'text',
+  },
+  {
+    id: 'tg3',
+    sender: 'bot',
+    textAr: 'تقرير المعدل التراكمي\n\n• المعدل الحالي: 3.45/4.0\n• التصنيف: جيد جداً\n• الساعات المكتسبة: 96/132\n• المتبقي: 36 ساعة\n\nتوقع التخرج: الفصل القادم',
+    textEn: 'GPA Report\n\n• Current GPA: 3.45/4.0\n• Classification: Very Good\n• Credits Earned: 96/132\n• Remaining: 36 credits\n\nGraduation Forecast: Next Semester',
+    time: '08:01',
+    type: 'button',
+    buttons: [
+      { labelAr: 'تفاصيل المواد', labelEn: 'Course Details' },
+      { labelAr: 'نصائح التحسين', labelEn: 'Improvement Tips' },
+      { labelAr: 'القائمة الرئيسية', labelEn: 'Main Menu' },
+    ],
+  },
+  {
+    id: 'tg4',
+    sender: 'bot',
+    textAr: 'تنبيه الحضور\n\nلديك 3 غيابات في مادة قواعد البيانات.\nالحد الأقصى المسموح: 5 غيابات.\n\nتبقى لك غيابين فقط!',
+    textEn: 'Attendance Alert\n\nYou have 3 absences in Databases.\nMaximum allowed: 5 absences.\n\nOnly 2 remaining!',
+    time: '09:30',
+    type: 'text',
+  },
+];
+
+export const pushNotifications: PushNotification[] = [
+  {
+    id: 'pn1',
+    platform: 'ios',
+    titleAr: 'تم رصد درجة جديدة',
+    titleEn: 'New Grade Posted',
+    bodyAr: 'هندسة البرمجيات - الاختبار الفصلي: 42/50',
+    bodyEn: 'Software Engineering - Midterm: 42/50',
+    appName: 'QMentor',
+    time: '2m ago',
+    icon: 'grade',
+  },
+  {
+    id: 'pn2',
+    platform: 'ios',
+    titleAr: 'تحذير الحضور',
+    titleEn: 'Attendance Warning',
+    bodyAr: 'لديك 3 غيابات في قواعد البيانات. تبقى 2 فقط.',
+    bodyEn: 'You have 3 absences in Databases. Only 2 remaining.',
+    appName: 'QMentor',
+    time: '15m ago',
+    icon: 'attendance',
+  },
+  {
+    id: 'pn3',
+    platform: 'android',
+    titleAr: 'رسالة من المرشد الأكاديمي',
+    titleEn: 'Advisor Message',
+    bodyAr: 'د. محمد العلي: يرجى حضور اجتماع يوم الثلاثاء الساعة 11:00',
+    bodyEn: 'Dr. Mohammed Al-Ali: Please attend the meeting on Tuesday at 11:00',
+    appName: 'QMentor',
+    time: '1h ago',
+    icon: 'advisor',
+  },
+  {
+    id: 'pn4',
+    platform: 'android',
+    titleAr: 'موعد تسليم قريب',
+    titleEn: 'Upcoming Deadline',
+    bodyAr: 'مشروع هندسة البرمجيات - التسليم بعد 48 ساعة',
+    bodyEn: 'Software Engineering Project - Due in 48 hours',
+    appName: 'QMentor',
+    time: '3h ago',
+    icon: 'deadline',
+  },
+];
+
+export const smsMessages: SMSMessage[] = [
+  {
+    id: 'sms1',
+    sender: 'QMentor',
+    textAr: 'تنبيه عاجل: معدلك التراكمي انخفض إلى 2.0. يرجى مراجعة مرشدك الأكاديمي في أقرب وقت. اتصل: 0163801234',
+    textEn: 'URGENT: Your GPA has dropped to 2.0. Please see your academic advisor ASAP. Call: 0163801234',
+    time: '08:45 AM',
+  },
+  {
+    id: 'sms2',
+    sender: 'QMentor',
+    textAr: 'تذكير: اختبار قواعد البيانات غداً الساعة 10:00 صباحاً - قاعة 301. بالتوفيق!',
+    textEn: 'Reminder: Databases exam tomorrow at 10:00 AM - Room 301. Good luck!',
+    time: '06:00 PM',
+  },
+  {
+    id: 'sms3',
+    sender: 'QMentor',
+    textAr: 'تم تحديث جدولك الدراسي. ادخل على بوابة كيومنتور للاطلاع على التفاصيل.',
+    textEn: 'Your schedule has been updated. Visit QMentor portal for details.',
+    time: '02:30 PM',
+  },
+];

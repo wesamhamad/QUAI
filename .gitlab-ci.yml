@@ -1,0 +1,75 @@
+stages:
+  - Staging
+  - Production
+
+Process Staging Auto Deployment:
+  stage: Staging
+
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$STAGING_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh $SERVER_USER@$STAGING_SERVER_HOST "
+      cd public_html/ &&
+      git pull origin main &&
+      rm -rf vendor &&
+      composer install --no-dev --optimize-autoloader --no-interaction &&
+      npm ci --omit=dev 2>/dev/null || true &&
+      php artisan migrate --force &&
+      php artisan db:seed --class=RolePermissionSeeder --force &&
+      php artisan db:seed --class=AiModelManagementSeeder --force &&
+      php artisan optimize:clear"
+
+  environment:
+    name: Staging
+
+  only:
+    - main
+
+Process Production Host 01:
+  stage: Production
+
+  before_script:
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$PRODUCTION_SERVER_KEY")
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh $SERVER_USER@$PRODUCTION_SERVER_HOST_01 "
+      cd public_html/ &&
+      git pull origin main &&
+      composer install --no-dev --optimize-autoloader --no-interaction &&
+      npm ci --omit=dev 2>/dev/null || true &&
+      touch .env &&
+      echo '--- ensuring .env keys ---' &&
+      if grep -qE '^QU_API_KEY[[:space:]]*=' .env; then echo '[exists] QU_API_KEY (kept)'; elif [ -n '$QU_API_KEY' ]; then printf 'QU_API_KEY=%s\n' '$QU_API_KEY' >> .env && echo '[insert] QU_API_KEY (from CI var)'; else echo '[MISSING] QU_API_KEY (not in .env and no CI var)'; fi &&
+      if grep -qE '^FACULTY_ClARITY_API_KEY[[:space:]]*=' .env; then echo '[exists] FACULTY_ClARITY_API_KEY (kept)'; elif [ -n '$FACULTY_ClARITY_API_KEY' ]; then printf 'FACULTY_ClARITY_API_KEY=%s\n' '$FACULTY_ClARITY_API_KEY' >> .env && echo '[insert] FACULTY_ClARITY_API_KEY (from CI var)'; else echo '[MISSING] FACULTY_ClARITY_API_KEY (not in .env and no CI var)'; fi &&
+      if grep -qE '^MYQU_ClARITY_API_KEY[[:space:]]*=' .env; then echo '[exists] MYQU_ClARITY_API_KEY (kept)'; elif [ -n '$MYQU_ClARITY_API_KEY' ]; then printf 'MYQU_ClARITY_API_KEY=%s\n' '$MYQU_ClARITY_API_KEY' >> .env && echo '[insert] MYQU_ClARITY_API_KEY (from CI var)'; else echo '[MISSING] MYQU_ClARITY_API_KEY (not in .env and no CI var)'; fi &&
+      if grep -qE '^QU_WEBSITE_ClARITY_API_KEY[[:space:]]*=' .env; then echo '[exists] QU_WEBSITE_ClARITY_API_KEY (kept)'; elif [ -n '$QU_WEBSITE_ClARITY_API_KEY' ]; then printf 'QU_WEBSITE_ClARITY_API_KEY=%s\n' '$QU_WEBSITE_ClARITY_API_KEY' >> .env && echo '[insert] QU_WEBSITE_ClARITY_API_KEY (from CI var)'; else echo '[MISSING] QU_WEBSITE_ClARITY_API_KEY (not in .env and no CI var)'; fi &&
+      echo \"--- .env key total matched=\$(grep -cE '^(QU_API_KEY|FACULTY_ClARITY_API_KEY|MYQU_ClARITY_API_KEY|QU_WEBSITE_ClARITY_API_KEY)[[:space:]]*=' .env)\" &&
+      php artisan migrate --force &&
+      php artisan dashboard:import &&
+      php artisan dashboard:import --one-by-one &&
+      php artisan permission:cache-reset &&
+      php artisan filament:optimize &&
+      php artisan optimize:clear &&
+      echo '--- refreshing dashboard data ---' &&
+      php artisan service-tasks:import-json --fresh || echo '[warn] service-tasks:import-json failed (deploy continues)' &&
+      php artisan db:seed --class=ClarityProjectSeeder --force &&
+      php artisan clarity:import --days=3 || echo '[warn] clarity:import failed (deploy continues)' &&
+      php artisan qu-feedback:import --status=all || echo '[warn] qu-feedback:import failed (deploy continues)' &&
+      echo '--- installing daily cron ---' &&
+      ( crontab -l 2>/dev/null | grep -vE 'php artisan (clarity|qu-feedback):import' ; echo '0 2 * * * cd \$HOME/public_html && php artisan clarity:import --days=1 >> storage/logs/clarity.log 2>&1' ; echo '15 2 * * * cd \$HOME/public_html && php artisan qu-feedback:import --status=all >> storage/logs/feedback.log 2>&1' ) | crontab - &&
+      echo '[ok] crontab updated' && crontab -l | grep -E 'clarity:import|qu-feedback:import'"
+
+  environment:
+    name: Production
+  only:
+    - main
+  when: manual

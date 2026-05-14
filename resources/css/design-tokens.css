@@ -1,0 +1,228 @@
+/* ========================================
+   QUAI Design System Tokens
+   Unified CSS variables for the entire app
+   ======================================== */
+
+:root {
+    /* === Brand Colors (DGA Official Palette) === */
+    --q-primary: #25935F;
+    --q-primary-dark: #1B8354;
+    --q-primary-light: #54C08A;
+    --q-primary-lighter: #88D8AD;
+    --q-secondary: #25935F;
+    --q-secondary-light: #54C08A;
+    --q-secondary-dark: #166A45;
+    --q-accent: #F5BD02;
+    --q-accent-light: #F7D54D;
+    --q-accent-dark: #DBA102;
+    --q-purple: #80519F;
+    --q-purple-light: #A57BBA;
+    --q-purple-dark: #6D428F;
+
+    /* === DGA Extended Palette === */
+    --q-sa-50: #F3FCF6;
+    --q-sa-100: #DFF6E7;
+    --q-sa-200: #B8EACB;
+    --q-sa-500: #25935F;
+    --q-sa-600: #1B8354;
+    --q-sa-700: #166A45;
+    --q-sa-800: #14573A;
+    --q-sa-900: #104631;
+    --q-sa-950: #092A1E;
+    --q-gold-50: #FFFEF2;
+    --q-gold-100: #FFFCE6;
+    --q-gold-200: #FCF3BD;
+    --q-gold-300: #FAE996;
+    --q-gold-400: #F7D54D;
+    --q-gold-500: #F5BD02;
+    --q-gold-600: #DBA102;
+    --q-lavender-500: #80519F;
+    --q-lavender-100: #F2E9F5;
+
+    /* === Neutral Palette === */
+    --q-white: #FFFFFF;
+    --q-black: #000000;
+    --q-gray-50: #F8FAFC;
+    --q-gray-100: #F1F5F9;
+    --q-gray-200: #E2E8F0;
+    --q-gray-300: #CBD5E1;
+    --q-gray-400: #94A3B8;
+    --q-gray-500: #64748B;
+    --q-gray-600: #475569;
+    --q-gray-700: #334155;
+    --q-gray-800: #1E293B;
+    --q-gray-900: #0F172A;
+
+    /* === Semantic Colors (DGA System Status) === */
+    --q-success: #17B26A;
+    --q-success-light: #DCFAE6;
+    --q-warning: #F79009;
+    --q-warning-light: #FEF0C7;
+    --q-error: #F04438;
+    --q-error-light: #FEE4E2;
+    --q-info: #2E90FA;
+    --q-info-light: #D1E9FF;
+
+    /* === Typography (DGA: IBM Plex Sans Arabic) === */
+    --q-font-family: 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+    --q-font-mono: 'Courier New', ui-monospace, monospace;
+    --q-font-xs: 0.75rem;
+    --q-font-sm: 0.875rem;
+    --q-font-base: 1rem;
+    --q-font-lg: 1.125rem;
+    --q-font-xl: 1.25rem;
+    --q-font-2xl: 1.5rem;
+    --q-font-3xl: 1.875rem;
+    --q-font-4xl: 2.25rem;
+    --q-line-height: 1.8;
+    --q-line-height-tight: 1.4;
+
+    /* === Spacing Scale === */
+    --q-space-1: 0.25rem;
+    --q-space-2: 0.5rem;
+    --q-space-3: 0.75rem;
+    --q-space-4: 1rem;
+    --q-space-5: 1.25rem;
+    --q-space-6: 1.5rem;
+    --q-space-8: 2rem;
+    --q-space-10: 2.5rem;
+    --q-space-12: 3rem;
+
+    /* === Border Radius === */
+    --q-radius-sm: 0.375rem;
+    --q-radius-md: 0.5rem;
+    --q-radius-lg: 0.75rem;
+    --q-radius-xl: 1rem;
+    --q-radius-2xl: 1.25rem;
+    --q-radius-full: 9999px;
+
+    /* === Shadows === */
+    --q-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --q-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --q-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --q-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --q-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* === Layout === */
+    --q-sidebar-width: 272px;
+    --q-sidebar-collapsed: 72px;
+    --q-topbar-height: 64px;
+    --q-content-max: 1280px;
+
+    /* === Transitions === */
+    --q-transition-fast: 150ms ease;
+    --q-transition-normal: 200ms ease;
+    --q-transition-slow: 300ms ease-in-out;
+
+    /* === Z-Index === */
+    --q-z-dropdown: 20;
+    --q-z-topbar: 30;
+    --q-z-sidebar: 40;
+    --q-z-overlay: 50;
+    --q-z-modal: 60;
+    --q-z-toast: 70;
+}
+
+/* ========================================
+   Light Theme (default)
+   ======================================== */
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+    --q-bg: var(--q-white);
+    --q-bg-secondary: var(--q-gray-50);
+    --q-bg-tertiary: var(--q-gray-100);
+    --q-bg-sidebar: var(--q-secondary);
+    --q-bg-sidebar-hover: rgba(255, 255, 255, 0.1);
+    --q-bg-sidebar-active: rgba(255, 255, 255, 0.2);
+    --q-bg-topbar: var(--q-white);
+
+    --q-text: var(--q-gray-900);
+    --q-text-secondary: var(--q-gray-600);
+    --q-text-muted: var(--q-gray-400);
+    --q-text-inverse: var(--q-white);
+    --q-text-sidebar: rgba(255, 255, 255, 0.85);
+    --q-text-sidebar-active: var(--q-white);
+
+    --q-border: var(--q-gray-200);
+    --q-border-light: var(--q-gray-100);
+
+    --q-card-bg: var(--q-white);
+    --q-card-shadow: var(--q-shadow-sm);
+    --q-card-hover-shadow: var(--q-shadow-md);
+
+    --q-input-bg: var(--q-gray-50);
+    --q-input-border: var(--q-gray-300);
+    --q-input-focus-border: var(--q-primary);
+    --q-input-focus-ring: rgba(0, 108, 53, 0.15);
+
+    --q-msg-user-bg: var(--q-secondary);
+    --q-msg-user-text: var(--q-white);
+    --q-msg-ai-bg: var(--q-gray-50);
+    --q-msg-ai-text: var(--q-gray-900);
+
+    --q-code-bg: #1e1e1e;
+    --q-code-text: #e5e7eb;
+    --q-code-inline-bg: var(--q-gray-100);
+    --q-code-inline-text: var(--q-gray-800);
+}
+
+/* ========================================
+   Dark Theme
+   ======================================== */
+[data-theme="dark"] {
+    --q-bg: #121212;
+    --q-bg-secondary: #1a1a1a;
+    --q-bg-tertiary: #252525;
+    --q-bg-sidebar: var(--q-secondary-dark);
+    --q-bg-sidebar-hover: rgba(255, 255, 255, 0.08);
+    --q-bg-sidebar-active: rgba(255, 255, 255, 0.15);
+    --q-bg-topbar: #1a1a1a;
+
+    --q-text: #E8E8E8;
+    --q-text-secondary: #A0A0A0;
+    --q-text-muted: #666666;
+    --q-text-inverse: var(--q-gray-900);
+    --q-text-sidebar: rgba(255, 255, 255, 0.75);
+    --q-text-sidebar-active: var(--q-white);
+
+    --q-border: #333333;
+    --q-border-light: #2a2a2a;
+
+    --q-card-bg: #1e1e1e;
+    --q-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --q-card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    --q-input-bg: #252525;
+    --q-input-border: #404040;
+    --q-input-focus-border: var(--q-primary-light);
+    --q-input-focus-ring: rgba(0, 140, 71, 0.2);
+
+    --q-msg-user-bg: var(--q-secondary);
+    --q-msg-user-text: var(--q-white);
+    --q-msg-ai-bg: #252525;
+    --q-msg-ai-text: #E8E8E8;
+
+    --q-code-bg: #0d0d0d;
+    --q-code-text: #e5e7eb;
+    --q-code-inline-bg: #333333;
+    --q-code-inline-text: #e5e7eb;
+}
+
+/* ========================================
+   Selection styling
+   ======================================== */
+::selection { background: var(--q-secondary-light); color: var(--q-white); }
+::-moz-selection { background: var(--q-secondary-light); color: var(--q-white); }
+
+/* ========================================
+   Scrollbar styling
+   ======================================== */
+.q-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.q-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.q-scrollbar::-webkit-scrollbar-thumb { background: var(--q-gray-300); border-radius: 3px; }
+.q-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--q-gray-400); }
+[data-theme="dark"] .q-scrollbar::-webkit-scrollbar-thumb { background: var(--q-gray-600); }
+[data-theme="dark"] .q-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--q-gray-500); }
+
+.q-scrollbar-hide::-webkit-scrollbar { display: none; }
+.q-scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

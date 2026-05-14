@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('voice_calls', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('conversation_id');
+            $table->string('caller_session_id');
+            $table->string('receiver_session_id');
+            $table->string('status'); // pending, ringing, active, ended, missed, rejected
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('ended_at')->nullable();
+            $table->integer('duration_seconds')->nullable();
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+
+            $table->foreign('conversation_id')
+                  ->references('id')
+                  ->on('conversations')
+                  ->onDelete('cascade');
+
+            $table->index(['caller_session_id', 'receiver_session_id']);
+            $table->index('status');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('voice_calls');
+    }
+};

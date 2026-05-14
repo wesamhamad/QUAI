@@ -1,0 +1,69 @@
+[
+    {
+        "id": "5668ec78-4e08-4dd4-9376-ccb22cef2884",
+        "platform": "google_play",
+        "external_id": "edu.qu.app",
+        "name": "MyQU - تطبيق جامعة القصيم (Google Play)",
+        "config": {
+            "locale": "ar",
+            "country": "sa"
+        },
+        "is_active": true,
+        "last_scraped_at": "2026-04-06T04:27:56.000000Z",
+        "created_at": "2026-04-06T04:27:56.000000Z",
+        "updated_at": "2026-04-06T04:27:56.000000Z"
+    },
+    {
+        "id": "3f596ae3-abbc-4dbd-92b4-43b035b01acc",
+        "platform": "app_store",
+        "external_id": "6739521806",
+        "name": "MyQU - تطبيق جامعة القصيم (App Store)",
+        "config": {
+            "country": "sa"
+        },
+        "is_active": true,
+        "last_scraped_at": "2026-04-06T04:27:56.000000Z",
+        "created_at": "2026-04-06T04:27:56.000000Z",
+        "updated_at": "2026-04-06T04:27:56.000000Z"
+    },
+    {
+        "id": "3cd7ddd9-73c6-4901-88b0-7628581e1470",
+        "platform": "google_maps",
+        "external_id": "ChIJYaYe5aIBghQRmT1lwLu_demo",
+        "name": "جامعة القصيم (Google Maps)",
+        "config": {
+            "country": "sa"
+        },
+        "is_active": true,
+        "last_scraped_at": "2026-04-06T04:27:56.000000Z",
+        "created_at": "2026-04-06T04:27:56.000000Z",
+        "updated_at": "2026-04-06T04:27:56.000000Z"
+    },
+    {
+        "id": "2549d013-e9ea-420e-9ee2-50a01c45157d",
+        "platform": "reddit",
+        "external_id": "r-uniksa-qu",
+        "name": "Reddit r/UniKSA – Qassim University",
+        "config": {
+            "locale": "ar",
+            "country": "sa"
+        },
+        "is_active": true,
+        "last_scraped_at": "2026-04-06T04:27:56.000000Z",
+        "created_at": "2026-04-06T04:27:56.000000Z",
+        "updated_at": "2026-04-06T04:27:56.000000Z"
+    },
+    {
+        "id": "d5a76187-beb6-4b46-9ee0-abd75769a304",
+        "platform": "news",
+        "external_id": "news-qu",
+        "name": "Qassim University in the News",
+        "config": {
+            "locale": "ar"
+        },
+        "is_active": true,
+        "last_scraped_at": "2026-04-06T04:27:56.000000Z",
+        "created_at": "2026-04-06T04:27:56.000000Z",
+        "updated_at": "2026-04-06T04:27:56.000000Z"
+    }
+]

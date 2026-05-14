@@ -1,0 +1,55 @@
+[project]
+name = "qu-assistant"
+version = "0.1.0"
+description = "Production-grade Arabic Qassim University assistant — OpenAI + RAG"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "openai>=1.50",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "gradio>=5.6",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-dotenv>=1.0",
+    "lancedb>=0.16",
+    "pyarrow>=18",
+    "sentence-transformers>=3.3",
+    "httpx>=0.28",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.3",
+    "pypdf>=5.1",
+    "trafilatura>=2.0",
+    "tenacity>=9.0",
+    "tqdm>=4.67",
+    "rich>=13.9",
+    "typer>=0.15",
+    "langdetect>=1.0.9",
+]
+
+[project.optional-dependencies]
+voyage = ["voyageai>=0.3"]
+dev = ["pytest>=8.3", "pytest-asyncio>=0.24", "ruff>=0.8", "mypy>=1.13"]
+
+[project.scripts]
+qu = "qu_assistant.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qu_assistant"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

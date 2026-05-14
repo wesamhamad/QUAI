@@ -1,0 +1,789 @@
+{
+  "_AnimatedTab-C_1T7H3O.js": {
+    "file": "assets/AnimatedTab-C_1T7H3O.js",
+    "name": "AnimatedTab",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_AreaChart-GU51xt8K.js": {
+    "file": "assets/AreaChart-GU51xt8K.js",
+    "name": "AreaChart",
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js"
+    ]
+  },
+  "_ArrowPathIcon-D8zwXeY0.js": {
+    "file": "assets/ArrowPathIcon-D8zwXeY0.js",
+    "name": "ArrowPathIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ArrowTrendingDownIcon-LWojnpMX.js": {
+    "file": "assets/ArrowTrendingDownIcon-LWojnpMX.js",
+    "name": "ArrowTrendingDownIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ArrowTrendingUpIcon-cfYURjrC.js": {
+    "file": "assets/ArrowTrendingUpIcon-cfYURjrC.js",
+    "name": "ArrowTrendingUpIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ArrowUpCircleIcon-bY_8zNqf.js": {
+    "file": "assets/ArrowUpCircleIcon-bY_8zNqf.js",
+    "name": "ArrowUpCircleIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_BarChart-Dp2h8ETD.js": {
+    "file": "assets/BarChart-Dp2h8ETD.js",
+    "name": "BarChart",
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js"
+    ]
+  },
+  "_CalendarIcon-dyxONqLh.js": {
+    "file": "assets/CalendarIcon-dyxONqLh.js",
+    "name": "CalendarIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_Card-BBNI6640.js": {
+    "file": "assets/Card-BBNI6640.js",
+    "name": "Card",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_CategoricalChart-u5zXQXjw.js": {
+    "file": "assets/CategoricalChart-u5zXQXjw.js",
+    "name": "CategoricalChart",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_CheckBadgeIcon-ClJi-Txy.js": {
+    "file": "assets/CheckBadgeIcon-ClJi-Txy.js",
+    "name": "CheckBadgeIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_CheckIcon-BgjeXVOb.js": {
+    "file": "assets/CheckIcon-BgjeXVOb.js",
+    "name": "CheckIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ChevronUpIcon-D6eE7Om3.js": {
+    "file": "assets/ChevronUpIcon-D6eE7Om3.js",
+    "name": "ChevronUpIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ClockIcon-DHrB6kWT.js": {
+    "file": "assets/ClockIcon-DHrB6kWT.js",
+    "name": "ClockIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ClockIcon-Dx7SZkd-.js": {
+    "file": "assets/ClockIcon-Dx7SZkd-.js",
+    "name": "ClockIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_ComputerDesktopIcon-Dc5KV2MS.js": {
+    "file": "assets/ComputerDesktopIcon-Dc5KV2MS.js",
+    "name": "ComputerDesktopIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_DataSourceBadge-DpHI4qfd.js": {
+    "file": "assets/DataSourceBadge-DpHI4qfd.js",
+    "name": "DataSourceBadge"
+  },
+  "_DevicePhoneMobileIcon-B4uRIin6.js": {
+    "file": "assets/DevicePhoneMobileIcon-B4uRIin6.js",
+    "name": "DevicePhoneMobileIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_DeviceTabletIcon-BnS1verh.js": {
+    "file": "assets/DeviceTabletIcon-BnS1verh.js",
+    "name": "DeviceTabletIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_EnvelopeIcon-BEhnfP02.js": {
+    "file": "assets/EnvelopeIcon-BEhnfP02.js",
+    "name": "EnvelopeIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_FunnelIcon-0L3VWmas.js": {
+    "file": "assets/FunnelIcon-0L3VWmas.js",
+    "name": "FunnelIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_HeartIcon-Cpnqg37j.js": {
+    "file": "assets/HeartIcon-Cpnqg37j.js",
+    "name": "HeartIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_Legend-BexRxdqO.js": {
+    "file": "assets/Legend-BexRxdqO.js",
+    "name": "Legend",
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js"
+    ]
+  },
+  "_LineChart-DeLbs4eC.js": {
+    "file": "assets/LineChart-DeLbs4eC.js",
+    "name": "LineChart",
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_CategoricalChart-u5zXQXjw.js"
+    ]
+  },
+  "_MapPinIcon-B56VBsws.js": {
+    "file": "assets/MapPinIcon-B56VBsws.js",
+    "name": "MapPinIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_PageHeader-Ddex7iOq.js": {
+    "file": "assets/PageHeader-Ddex7iOq.js",
+    "name": "PageHeader",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_PaperAirplaneIcon-DiWtSKwL.js": {
+    "file": "assets/PaperAirplaneIcon-DiWtSKwL.js",
+    "name": "PaperAirplaneIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_PencilSquareIcon-CY0v-K6S.js": {
+    "file": "assets/PencilSquareIcon-CY0v-K6S.js",
+    "name": "PencilSquareIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_PieChart-Cjr90yHo.js": {
+    "file": "assets/PieChart-Cjr90yHo.js",
+    "name": "PieChart",
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "_PlusIcon-Ec0Ku5Dc.js": {
+    "file": "assets/PlusIcon-Ec0Ku5Dc.js",
+    "name": "PlusIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_PolarChart-CaSJhqEC.js": {
+    "file": "assets/PolarChart-CaSJhqEC.js",
+    "name": "PolarChart",
+    "imports": [
+      "_CategoricalChart-u5zXQXjw.js",
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_RadarChart-DiyQ6wjf.js": {
+    "file": "assets/RadarChart-DiyQ6wjf.js",
+    "name": "RadarChart",
+    "imports": [
+      "_CategoricalChart-u5zXQXjw.js",
+      "resources/js/qmentor/main.tsx",
+      "_LineChart-DeLbs4eC.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "_StarIcon-CFOWDKEs.js": {
+    "file": "assets/StarIcon-CFOWDKEs.js",
+    "name": "StarIcon",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_calendar-BImYSV5F.js": {
+    "file": "assets/calendar-BImYSV5F.js",
+    "name": "calendar",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_chevron-right-D9vRKT0t.js": {
+    "file": "assets/chevron-right-D9vRKT0t.js",
+    "name": "chevron-right",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_circle-check-DKkqjQVM.js": {
+    "file": "assets/circle-check-DKkqjQVM.js",
+    "name": "circle-check",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_circle-check-big-BD9iqeN-.js": {
+    "file": "assets/circle-check-big-BD9iqeN-.js",
+    "name": "circle-check-big",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_circle-x-DcM4sNLj.js": {
+    "file": "assets/circle-x-DcM4sNLj.js",
+    "name": "circle-x",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_clipboard-list-BaQ0X_Z6.js": {
+    "file": "assets/clipboard-list-BaQ0X_Z6.js",
+    "name": "clipboard-list",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_clock-DMM6cXu_.js": {
+    "file": "assets/clock-DMM6cXu_.js",
+    "name": "clock",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_lightbulb-CgaUxPWh.js": {
+    "file": "assets/lightbulb-CgaUxPWh.js",
+    "name": "lightbulb",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_mail-DksYl7da.js": {
+    "file": "assets/mail-DksYl7da.js",
+    "name": "mail",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_map-pin-BCmitDLw.js": {
+    "file": "assets/map-pin-BCmitDLw.js",
+    "name": "map-pin",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_minus-BOqw9sNA.js": {
+    "file": "assets/minus-BOqw9sNA.js",
+    "name": "minus",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_monitor-Dvc5ZC-v.js": {
+    "file": "assets/monitor-Dvc5ZC-v.js",
+    "name": "monitor",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_shield-alert-BLxDMchg.js": {
+    "file": "assets/shield-alert-BLxDMchg.js",
+    "name": "shield-alert",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_trending-down-DmVIodJo.js": {
+    "file": "assets/trending-down-DmVIodJo.js",
+    "name": "trending-down",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_trending-up-SzXJUdCL.js": {
+    "file": "assets/trending-up-SzXJUdCL.js",
+    "name": "trending-up",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "_video-DEeRY9XK.js": {
+    "file": "assets/video-DEeRY9XK.js",
+    "name": "video",
+    "imports": [
+      "resources/js/qmentor/main.tsx"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-gdr2LsGf.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-K-CGM9-9.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/qmentor/main.tsx": {
+    "file": "assets/main-BvLSSILs.js",
+    "name": "main",
+    "src": "resources/js/qmentor/main.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/qmentor/pages/DigitalTwin/index.tsx",
+      "resources/js/qmentor/pages/AdvisorDashboard/index.tsx",
+      "resources/js/qmentor/pages/RiskAnalytics/index.tsx",
+      "resources/js/qmentor/pages/StudyPlan/index.tsx",
+      "resources/js/qmentor/pages/Chatbot/index.tsx",
+      "resources/js/qmentor/pages/Alerts/index.tsx",
+      "resources/js/qmentor/pages/Faculty/index.tsx",
+      "resources/js/qmentor/pages/PeerTutoring/index.tsx",
+      "resources/js/qmentor/pages/Recovery/index.tsx",
+      "resources/js/qmentor/pages/Benchmarking/index.tsx",
+      "resources/js/qmentor/pages/Settings/index.tsx",
+      "resources/js/qmentor/pages/Mobile/index.tsx",
+      "resources/js/qmentor/pages/AgentActivity/index.tsx",
+      "resources/js/qmentor/pages/StudentDashboard/index.tsx",
+      "resources/js/qmentor/pages/StudentDashboard/IndicatorDetail.tsx",
+      "resources/js/qmentor/pages/StudentDashboard/ActionPlan.tsx",
+      "resources/js/qmentor/pages/StudentDashboard/Schedule.tsx",
+      "resources/js/qmentor/pages/StudentDashboard/ContactAdvisor.tsx",
+      "resources/js/qmentor/pages/Grades/index.tsx"
+    ],
+    "css": [
+      "assets/main-Cp_ShdIx.css"
+    ]
+  },
+  "resources/js/qmentor/pages/AdvisorDashboard/index.tsx": {
+    "file": "assets/index-yHMjHwlO.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/AdvisorDashboard/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_Card-BBNI6640.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_ChevronUpIcon-D6eE7Om3.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_PieChart-Cjr90yHo.js",
+      "_LineChart-DeLbs4eC.js",
+      "_Legend-BexRxdqO.js",
+      "_PencilSquareIcon-CY0v-K6S.js",
+      "_HeartIcon-Cpnqg37j.js",
+      "_EnvelopeIcon-BEhnfP02.js",
+      "_CalendarIcon-dyxONqLh.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_ArrowPathIcon-D8zwXeY0.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_mail-DksYl7da.js",
+      "_calendar-BImYSV5F.js",
+      "_clock-DMM6cXu_.js",
+      "_shield-alert-BLxDMchg.js",
+      "_circle-check-big-BD9iqeN-.js",
+      "_video-DEeRY9XK.js",
+      "_trending-down-DmVIodJo.js",
+      "_trending-up-SzXJUdCL.js",
+      "_circle-check-DKkqjQVM.js",
+      "_circle-x-DcM4sNLj.js",
+      "_ArrowTrendingDownIcon-LWojnpMX.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/AgentActivity/index.tsx": {
+    "file": "assets/index-z64rtAcx.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/AgentActivity/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_circle-check-big-BD9iqeN-.js",
+      "_minus-BOqw9sNA.js",
+      "_clock-DMM6cXu_.js",
+      "_shield-alert-BLxDMchg.js",
+      "_chevron-right-D9vRKT0t.js",
+      "_circle-x-DcM4sNLj.js",
+      "_circle-check-DKkqjQVM.js",
+      "_AreaChart-GU51xt8K.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js",
+      "_PieChart-Cjr90yHo.js",
+      "_RadarChart-DiyQ6wjf.js",
+      "_Legend-BexRxdqO.js",
+      "_trending-up-SzXJUdCL.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Alerts/index.tsx": {
+    "file": "assets/index-B8ftjFiJ.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Alerts/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_FunnelIcon-0L3VWmas.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_ArrowUpCircleIcon-bY_8zNqf.js",
+      "_DeviceTabletIcon-BnS1verh.js",
+      "_DevicePhoneMobileIcon-B4uRIin6.js",
+      "_EnvelopeIcon-BEhnfP02.js",
+      "_CheckBadgeIcon-ClJi-Txy.js",
+      "_CheckIcon-BgjeXVOb.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_LineChart-DeLbs4eC.js",
+      "_Legend-BexRxdqO.js",
+      "_PieChart-Cjr90yHo.js",
+      "_PlusIcon-Ec0Ku5Dc.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Benchmarking/index.tsx": {
+    "file": "assets/index-CS_N0Mjl.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Benchmarking/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_Legend-BexRxdqO.js",
+      "_RadarChart-DiyQ6wjf.js",
+      "_ChevronUpIcon-D6eE7Om3.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Chatbot/index.tsx": {
+    "file": "assets/index-S1jGMMgM.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Chatbot/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_ChevronUpIcon-D6eE7Om3.js",
+      "_CheckIcon-BgjeXVOb.js",
+      "_PaperAirplaneIcon-DiWtSKwL.js",
+      "_PlusIcon-Ec0Ku5Dc.js",
+      "_MapPinIcon-B56VBsws.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_DataSourceBadge-DpHI4qfd.js"
+    ]
+  },
+  "resources/js/qmentor/pages/DigitalTwin/index.tsx": {
+    "file": "assets/index-BGiEQxdv.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/DigitalTwin/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_clock-DMM6cXu_.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_mail-DksYl7da.js",
+      "_calendar-BImYSV5F.js",
+      "_clipboard-list-BaQ0X_Z6.js",
+      "_trending-up-SzXJUdCL.js",
+      "_AreaChart-GU51xt8K.js",
+      "_PieChart-Cjr90yHo.js",
+      "_RadarChart-DiyQ6wjf.js",
+      "_map-pin-BCmitDLw.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Faculty/index.tsx": {
+    "file": "assets/index-C2pM7qcU.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Faculty/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_Card-BBNI6640.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_LineChart-DeLbs4eC.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_Legend-BexRxdqO.js",
+      "_ChevronUpIcon-D6eE7Om3.js",
+      "_PieChart-Cjr90yHo.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Grades/index.tsx": {
+    "file": "assets/index-CHmpkDJG.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Grades/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_clipboard-list-BaQ0X_Z6.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Mobile/index.tsx": {
+    "file": "assets/index-CP2aP3TS.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Mobile/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DevicePhoneMobileIcon-B4uRIin6.js",
+      "_DeviceTabletIcon-BnS1verh.js",
+      "_ComputerDesktopIcon-Dc5KV2MS.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_PaperAirplaneIcon-DiWtSKwL.js"
+    ]
+  },
+  "resources/js/qmentor/pages/PeerTutoring/index.tsx": {
+    "file": "assets/index-CkDwYxW6.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/PeerTutoring/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_monitor-Dvc5ZC-v.js",
+      "_clipboard-list-BaQ0X_Z6.js",
+      "_StarIcon-CFOWDKEs.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_ClockIcon-DHrB6kWT.js",
+      "_CheckIcon-BgjeXVOb.js",
+      "_CalendarIcon-dyxONqLh.js",
+      "_MapPinIcon-B56VBsws.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Recovery/index.tsx": {
+    "file": "assets/index-V3Mi3L1H.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Recovery/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_Card-BBNI6640.js",
+      "_PencilSquareIcon-CY0v-K6S.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_ClockIcon-DHrB6kWT.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_LineChart-DeLbs4eC.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_HeartIcon-Cpnqg37j.js",
+      "_MapPinIcon-B56VBsws.js"
+    ]
+  },
+  "resources/js/qmentor/pages/RiskAnalytics/index.tsx": {
+    "file": "assets/index-DP7HCWX_.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/RiskAnalytics/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_Card-BBNI6640.js",
+      "_ArrowTrendingDownIcon-LWojnpMX.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_ChevronUpIcon-D6eE7Om3.js",
+      "_monitor-Dvc5ZC-v.js",
+      "_clipboard-list-BaQ0X_Z6.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_PieChart-Cjr90yHo.js",
+      "_LineChart-DeLbs4eC.js",
+      "_RadarChart-DiyQ6wjf.js",
+      "_Legend-BexRxdqO.js",
+      "_BarChart-Dp2h8ETD.js",
+      "_FunnelIcon-0L3VWmas.js",
+      "_ArrowUpCircleIcon-bY_8zNqf.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  },
+  "resources/js/qmentor/pages/Settings/index.tsx": {
+    "file": "assets/index-CmG6ypiy.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/Settings/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_CheckIcon-BgjeXVOb.js",
+      "_ComputerDesktopIcon-Dc5KV2MS.js",
+      "_EnvelopeIcon-BEhnfP02.js",
+      "_DevicePhoneMobileIcon-B4uRIin6.js",
+      "_CheckBadgeIcon-ClJi-Txy.js",
+      "_CalendarIcon-dyxONqLh.js",
+      "_HeartIcon-Cpnqg37j.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudentDashboard/ActionPlan.tsx": {
+    "file": "assets/ActionPlan-_gBOwsyV.js",
+    "name": "ActionPlan",
+    "src": "resources/js/qmentor/pages/StudentDashboard/ActionPlan.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_trending-up-SzXJUdCL.js",
+      "_circle-check-DKkqjQVM.js",
+      "_clock-DMM6cXu_.js",
+      "_calendar-BImYSV5F.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudentDashboard/ContactAdvisor.tsx": {
+    "file": "assets/ContactAdvisor-gRP-0p5n.js",
+    "name": "ContactAdvisor",
+    "src": "resources/js/qmentor/pages/StudentDashboard/ContactAdvisor.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_map-pin-BCmitDLw.js",
+      "_clock-DMM6cXu_.js",
+      "_mail-DksYl7da.js",
+      "_video-DEeRY9XK.js",
+      "_calendar-BImYSV5F.js",
+      "_circle-check-big-BD9iqeN-.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudentDashboard/IndicatorDetail.tsx": {
+    "file": "assets/IndicatorDetail-BfP26CAv.js",
+    "name": "IndicatorDetail",
+    "src": "resources/js/qmentor/pages/StudentDashboard/IndicatorDetail.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_calendar-BImYSV5F.js",
+      "_clipboard-list-BaQ0X_Z6.js",
+      "_shield-alert-BLxDMchg.js",
+      "_trending-down-DmVIodJo.js",
+      "_trending-up-SzXJUdCL.js",
+      "_minus-BOqw9sNA.js",
+      "_lightbulb-CgaUxPWh.js",
+      "_chevron-right-D9vRKT0t.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudentDashboard/Schedule.tsx": {
+    "file": "assets/Schedule-D6q2prDV.js",
+    "name": "Schedule",
+    "src": "resources/js/qmentor/pages/StudentDashboard/Schedule.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_calendar-BImYSV5F.js",
+      "_clock-DMM6cXu_.js",
+      "_map-pin-BCmitDLw.js",
+      "_chevron-right-D9vRKT0t.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudentDashboard/index.tsx": {
+    "file": "assets/index-CrvOF0b5.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/StudentDashboard/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_clock-DMM6cXu_.js",
+      "_clipboard-list-BaQ0X_Z6.js",
+      "_trending-up-SzXJUdCL.js",
+      "_trending-down-DmVIodJo.js",
+      "_lightbulb-CgaUxPWh.js"
+    ]
+  },
+  "resources/js/qmentor/pages/StudyPlan/index.tsx": {
+    "file": "assets/index-CAVbHjvs.js",
+    "name": "index",
+    "src": "resources/js/qmentor/pages/StudyPlan/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/qmentor/main.tsx",
+      "_AnimatedTab-C_1T7H3O.js",
+      "_PageHeader-Ddex7iOq.js",
+      "_DataSourceBadge-DpHI4qfd.js",
+      "_Card-BBNI6640.js",
+      "_CategoricalChart-u5zXQXjw.js",
+      "_PieChart-Cjr90yHo.js",
+      "_ClockIcon-Dx7SZkd-.js",
+      "_PlusIcon-Ec0Ku5Dc.js",
+      "_ArrowTrendingUpIcon-cfYURjrC.js",
+      "_ArrowPathIcon-D8zwXeY0.js",
+      "_FunnelIcon-0L3VWmas.js",
+      "_StarIcon-CFOWDKEs.js",
+      "_ArrowTrendingDownIcon-LWojnpMX.js",
+      "_MapPinIcon-B56VBsws.js",
+      "_PolarChart-CaSJhqEC.js"
+    ]
+  }
+}
