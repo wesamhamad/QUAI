@@ -466,6 +466,7 @@
     </style>
 </head>
 <body>
+    @include('layouts.partials.page-loader')
     <div class="page-wrapper">
         {{-- Logo --}}
         <div class="logo-area">

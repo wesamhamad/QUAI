@@ -18,6 +18,9 @@
     @stack('styles')
 </head>
 <body>
+    {{-- Global light-green page loader; visible until the page finishes loading and on internal navigations. --}}
+    @include('layouts.partials.page-loader')
+
     <div class="q-dashboard">
         {{-- Sidebar --}}
         @include('layouts.partials.sidebar')

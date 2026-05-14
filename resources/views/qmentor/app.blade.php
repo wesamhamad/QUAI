@@ -12,6 +12,7 @@
     @vite('resources/js/qmentor/main.tsx')
 </head>
 <body class="antialiased">
+    @include('layouts.partials.page-loader')
     <div id="qmentor-app"></div>
 
     @auth

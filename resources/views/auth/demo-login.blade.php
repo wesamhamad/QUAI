@@ -20,6 +20,7 @@
     <style>body { font-family: 'Tajawal', system-ui, sans-serif; }</style>
 </head>
 <body class="min-h-screen flex bg-gray-50">
+    @include('layouts.partials.page-loader')
 
     {{-- Brand hero (right side in RTL) --}}
     <section class="hidden md:flex flex-col justify-center w-1/2 p-12 relative overflow-hidden"
