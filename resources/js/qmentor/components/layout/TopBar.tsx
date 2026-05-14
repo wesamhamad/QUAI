@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { Bars3Icon, SunIcon, MoonIcon, LanguageIcon, MagnifyingGlassIcon, ChevronDownIcon, UsersIcon, HomeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, SunIcon, MoonIcon, LanguageIcon, MagnifyingGlassIcon, ChevronDownIcon, UsersIcon, HomeIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Bot, GraduationCap, Shield, User, type LucideIcon } from 'lucide-react';
 
 interface DemoStudent {
@@ -16,7 +16,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useRole, type Role } from '../../contexts/RoleContext';
 import GlobalSearch from '../../pages/Settings/GlobalSearch';
-import { dropdownTrigger, dropdownPanel, dropdownHeader, dropdownItem } from '../ui/dropdownStyles';
+import { dropdownTrigger, dropdownPanel, dropdownHeader, dropdownItem, dropdownItemBase } from '../ui/dropdownStyles';
 
 const roleConfig: { value: Role; ar: string; en: string; icon: LucideIcon }[] = [
   { value: 'student', ar: 'طالب', en: 'Student', icon: User },
@@ -45,6 +45,30 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
   const [searchOpen, setSearchOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [studentMenuOpen, setStudentMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  // Links/credentials injected by the Blade shell — let the SPA return to the
+  // QUAI platform home and sign out from any page.
+  const appLinks = (window as { __qmentor_links?: { home?: string; logout?: string } }).__qmentor_links;
+  const csrfToken = (window as { __qmentor_csrf?: string }).__qmentor_csrf ?? '';
+  const homeUrl = appLinks?.home ?? '/';
+  const logoutUrl = appLinks?.logout;
+
+  // Logout is a state-changing POST, so submit a CSRF-protected form rather
+  // than navigating — mirrors the Blade topbar's logout form.
+  const handleLogout = () => {
+    if (!logoutUrl) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = logoutUrl;
+    const token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '_token';
+    token.value = csrfToken;
+    form.appendChild(token);
+    document.body.appendChild(form);
+    form.submit();
+  };
 
   const currentRoleConfig = roleConfig.find(r => r.value === role)!;
   const CurrentRoleIcon = currentRoleConfig.icon;
@@ -259,11 +283,50 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
             {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
           </button>
 
-          {/* User avatar */}
-          <div className="w-8 h-8 rounded-full bg-sa-500 flex items-center justify-center ms-2">
-            <span className="text-white text-sm font-medium">
-              {(window as any).__qmentor_user?.name?.[0] || 'U'}
-            </span>
+          {/* User menu — avatar dropdown with home shortcut + logout, so both
+              are reachable from every SPA page (QMentor and QSpark+). */}
+          <div className="relative ms-2">
+            <button
+              onClick={() => setUserMenuOpen(prev => !prev)}
+              className="w-8 h-8 rounded-full bg-sa-500 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sa-500"
+              title={(window as { __qmentor_user?: { name?: string } }).__qmentor_user?.name || t('الحساب', 'Account')}
+            >
+              <span className="text-white text-sm font-medium">
+                {(window as { __qmentor_user?: { name?: string } }).__qmentor_user?.name?.[0] || 'U'}
+              </span>
+            </button>
+            {userMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                <div className={`absolute end-0 top-full mt-1 z-50 w-60 ${dropdownPanel}`}>
+                  <div className={`${dropdownHeader} border-b border-gray-100 dark:border-gray-700 normal-case`}>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {(window as { __qmentor_user?: { name?: string } }).__qmentor_user?.name || t('مستخدم', 'User')}
+                    </div>
+                    <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 truncate">
+                      {(window as { __qmentor_user?: { email?: string } }).__qmentor_user?.email || ''}
+                    </div>
+                  </div>
+                  <a
+                    href={homeUrl}
+                    className={dropdownItem(false)}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <HomeIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                    <span>{t('الرئيسية', 'Home')}</span>
+                  </a>
+                  {logoutUrl && (
+                    <button
+                      onClick={() => { setUserMenuOpen(false); handleLogout(); }}
+                      className={`${dropdownItemBase} px-3 items-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40`}
+                    >
+                      <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
+                      <span>{t('تسجيل الخروج', 'Log out')}</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
