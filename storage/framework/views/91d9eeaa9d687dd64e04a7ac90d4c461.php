@@ -7,6 +7,9 @@
     <title><?php echo $__env->yieldContent('title', 'QUAI - منصة الذكاء الاصطناعي'); ?></title>
 
     
+    <?php echo $__env->make('partials.meta-og', ['ogTitle' => trim(View::yieldContent('og-title')) ?: null], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+    
     <script>
         (function(){var t=localStorage.getItem('quai-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
     </script>
@@ -18,6 +21,9 @@
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>
+    
+    <?php echo $__env->make('layouts.partials.page-loader', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
     <div class="q-dashboard">
         
         <?php echo $__env->make('layouts.partials.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

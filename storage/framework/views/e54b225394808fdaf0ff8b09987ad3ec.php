@@ -20,7 +20,8 @@
                 <span class="qr"><?php echo e($q['range']); ?></span>
             </button>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-        <span class="demo-flag">بيانات تجريبية — ليست بيانات حقيقية</span>
+                 <span class="demo-flag">بيانات تجريبية </span>
+
     </div>
 
     <p style="font-size:.88rem;color:#6b7280;margin:-.5rem 0 0;">

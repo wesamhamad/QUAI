@@ -23,15 +23,15 @@
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
         <div class="q-user-menu" id="userMenu">
-            <button class="q-user-menu-btn" id="userMenuBtn" title="<?php echo e(auth()->user()->name); ?>">
-                <span class="q-avatar q-avatar-sm"><?php echo e(mb_substr(auth()->user()->name, 0, 1)); ?></span>
+            <button class="q-user-menu-btn" id="userMenuBtn" title="<?php echo e(auth()->user()->displayName()); ?>">
+                <span class="q-avatar q-avatar-sm"><?php echo e(mb_substr(auth()->user()->displayName(), 0, 1)); ?></span>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px; color: var(--q-text-muted);">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
             <div class="q-dropdown" id="userDropdown">
                 <div class="q-dropdown-header">
-                    <div style="font-weight: 700; font-size: var(--q-font-sm);"><?php echo e(auth()->user()->name); ?></div>
+                    <div style="font-weight: 700; font-size: var(--q-font-sm);"><?php echo e(auth()->user()->displayName()); ?></div>
                     <div style="font-size: var(--q-font-xs); color: var(--q-text-muted);"><?php echo e(auth()->user()->email); ?></div>
                 </div>
                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('access_admin_panel')): ?>
