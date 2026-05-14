@@ -11,7 +11,8 @@
                 <span class="qr">{{ $q['range'] }}</span>
             </button>
         @endforeach
-        <span class="demo-flag">بيانات تجريبية — ليست بيانات حقيقية</span>
+                 <span class="demo-flag">بيانات تجريبية </span>
+
     </div>
 
     @if (!empty($section['subtitle']))

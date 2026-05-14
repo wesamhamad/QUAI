@@ -11,7 +11,8 @@
                 <span class="qr">{{ $q['range'] }}</span>
             </button>
         @endforeach
-        <span class="demo-flag">بيانات تجريبية — ليست بيانات حقيقية</span>
+                 <span class="demo-flag">بيانات تجريبية </span>
+
     </div>
 
     <p style="font-size:.88rem;color:#6b7280;margin:-.5rem 0 0;">
