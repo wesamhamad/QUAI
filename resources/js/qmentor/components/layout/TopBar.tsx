@@ -121,9 +121,9 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
 
   return (
     <>
-      <header className="flex items-center justify-between h-16 px-4 lg:px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <header className="flex items-center justify-between h-16 px-2 sm:px-4 lg:px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         {/* Left: Mobile menu + Title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {!hideMenuButton && (
             <button
               onClick={onMenuClick}
@@ -152,11 +152,11 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
         </button>
 
         {/* Right: Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2 min-w-0">
           {/* Mobile search */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="md:hidden p-1.5 sm:p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
           </button>
@@ -217,14 +217,15 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               view with no role switcher. */}
           {!canSwitchRole && viewOnly && (
             <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-300"
+              className="relative flex items-center gap-1.5 px-1.5 sm:px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-300"
               title={t('عرض للقراءة فقط', 'Read-only view')}
             >
               <CurrentRoleIcon className="w-4 h-4 text-sa-600 dark:text-sa-400" />
               <span className="hidden sm:inline">{t(currentRoleConfig.ar, currentRoleConfig.en)}</span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+              <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                 {t('للعرض فقط', 'View only')}
               </span>
+              <span className="sm:hidden absolute -top-1 -end-1 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-white dark:ring-gray-800" aria-hidden="true" />
             </div>
           )}
 
@@ -267,7 +268,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
           {/* Language toggle */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title={t('التبديل إلى الإنجليزية', 'Switch to Arabic')}
           >
             <LanguageIcon className="w-4 h-4" />
@@ -277,7 +278,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
           {/* Dark mode toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title={t('تبديل الوضع', 'Toggle theme')}
           >
             {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
@@ -285,7 +286,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
 
           {/* User menu — avatar dropdown with home shortcut + logout, so both
               are reachable from every SPA page (QMentor and QSpark+). */}
-          <div className="relative ms-2">
+          <div className="relative ms-1 sm:ms-2">
             <button
               onClick={() => setUserMenuOpen(prev => !prev)}
               className="w-8 h-8 rounded-full bg-sa-500 flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sa-500"

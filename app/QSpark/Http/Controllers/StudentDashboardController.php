@@ -237,17 +237,24 @@ class StudentDashboardController extends Controller
 
         $studentProfile = $this->getStudentProfile();
 
-        // Cache Blackboard grades data for 30 minutes - only cache if we get data
-        $cacheKey = 'blackboard_grades_v3_'.md5($this->token);
-        $coursesWithGrades = Cache::get($cacheKey);
+        // Demo mode: skip the live Blackboard fetch entirely and synthesize a
+        // per-course breakdown from the StudentFixture course bundle so the
+        // page renders with realistic grades instead of "no grades available".
+        if (config('app.demo_mode')) {
+            $coursesWithGrades = $this->demoBlackboardCoursesWithGrades();
+        } else {
+            // Cache Blackboard grades data for 30 minutes - only cache if we get data
+            $cacheKey = 'blackboard_grades_v3_'.md5($this->token);
+            $coursesWithGrades = Cache::get($cacheKey);
 
-        if ($coursesWithGrades === null) {
-            $blackboardService = new BlackboardService;
-            $coursesWithGrades = $blackboardService->getCoursesWithGrades($this->token);
+            if ($coursesWithGrades === null) {
+                $blackboardService = new BlackboardService;
+                $coursesWithGrades = $blackboardService->getCoursesWithGrades($this->token);
 
-            // Only cache if we got actual data
-            if (! empty($coursesWithGrades)) {
-                Cache::put($cacheKey, $coursesWithGrades, 1800);
+                // Only cache if we got actual data
+                if (! empty($coursesWithGrades)) {
+                    Cache::put($cacheKey, $coursesWithGrades, 1800);
+                }
             }
         }
 
@@ -255,6 +262,65 @@ class StudentDashboardController extends Controller
             'courses' => $coursesWithGrades,
             'studentProfile' => $studentProfile['data']['profile'] ?? [],
         ]);
+    }
+
+    /**
+     * Build a deterministic dummy Blackboard grades payload from the demo
+     * course fixture. Each course gets the same set of weighted items
+     * (quizzes, assignment, midterm, project, final); the per-course score
+     * offset is seeded from the course code so reloads stay stable.
+     */
+    private function demoBlackboardCoursesWithGrades(): array
+    {
+        $bundle = \App\QSpark\Support\StudentFixture::courses();
+        $rows = $bundle['data'] ?? [];
+        if (empty($rows)) {
+            return [];
+        }
+
+        $items = [
+            ['name' => 'الاختبار القصير الأول', 'possible' => 10, 'pct' => 0.92],
+            ['name' => 'الواجب الأول',           'possible' => 15, 'pct' => 0.88],
+            ['name' => 'الاختبار النصفي',         'possible' => 30, 'pct' => 0.86],
+            ['name' => 'الاختبار القصير الثاني', 'possible' => 10, 'pct' => 0.95],
+            ['name' => 'مشروع المقرر',            'possible' => 15, 'pct' => 0.90],
+            ['name' => 'الاختبار النهائي',        'possible' => 40, 'pct' => 0.84],
+        ];
+
+        $accessedBase = strtotime('2026-04-20');
+        $courses = [];
+        foreach ($rows as $row) {
+            $code = (string) ($row['course_code'] ?? '');
+            if ($code === '') {
+                continue;
+            }
+
+            // ±6 percentage-point offset per course so each card differs but
+            // the same course always shows the same numbers across reloads.
+            $seed = (abs(crc32($code)) % 13) - 6;
+            $grades = [];
+            foreach ($items as $i => $item) {
+                $variance = ((abs(crc32($code.'_'.$i)) % 11) - 5) / 100;
+                $pct = max(0.55, min(1.0, $item['pct'] + ($seed / 100) + $variance));
+                $grades[] = [
+                    'name'     => $item['name'],
+                    'score'    => round($item['possible'] * $pct, 1),
+                    'possible' => $item['possible'],
+                ];
+            }
+
+            $courses[] = [
+                'course_id'     => $row['external_id'] ?? $code,
+                'course_name'   => $row['course_name'] ?? $code,
+                'course_code'   => $code,
+                'external_id'   => $row['external_id'] ?? $code,
+                'details'       => [],
+                'grades'        => $grades,
+                'last_accessed' => date('Y-m-d H:i:s', $accessedBase - ((abs(crc32($code)) % 21) * 86400)),
+            ];
+        }
+
+        return $courses;
     }
 
     private function getDashboardData()

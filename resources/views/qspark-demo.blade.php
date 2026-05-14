@@ -24,17 +24,17 @@
             </span>
         </div>
         <div class="qspark-embed__actions">
-            <button type="button" class="qspark-embed__btn" id="qsparkReload" title="إعادة تحميل">
+            <button type="button" class="qspark-embed__btn" id="qsparkReload" title="إعادة تحميل" aria-label="إعادة تحميل">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>
                 </svg>
-                إعادة تحميل
+                <span class="qspark-embed__btn-label">إعادة تحميل</span>
             </button>
-            <a href="{{ $qsparkUrl }}" target="_blank" rel="noopener" class="qspark-embed__btn qspark-embed__btn--ghost" title="فتح في نافذة جديدة">
+            <a href="{{ $qsparkUrl }}" target="_blank" rel="noopener" class="qspark-embed__btn qspark-embed__btn--ghost" title="فتح في نافذة جديدة" aria-label="فتح في نافذة جديدة">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/>
                 </svg>
-                فتح في نافذة جديدة
+                <span class="qspark-embed__btn-label">فتح في نافذة جديدة</span>
             </a>
         </div>
     </header>
@@ -76,7 +76,12 @@
         display: flex;
         flex-direction: column;
         height: calc(100vh - var(--q-topbar-height, 64px));
+        /* Use dynamic viewport height on supported browsers so the iframe doesn't
+           overflow when iOS Safari's URL bar collapses/expands. */
+        height: calc(100dvh - var(--q-topbar-height, 64px));
         min-height: 600px;
+        max-width: 100%;
+        overflow: hidden;
         background: var(--q-bg-secondary, #f5f6f8);
     }
     .qspark-embed__bar {
@@ -88,6 +93,7 @@
         background: var(--q-bg-primary, #fff);
         border-bottom: 1px solid var(--q-border-color, #e5e7eb);
         flex-wrap: wrap;
+        min-width: 0;
     }
     .qspark-embed__title {
         display: flex;
@@ -95,6 +101,17 @@
         gap: var(--q-space-3, 12px);
         font-size: var(--q-font-sm, 0.875rem);
         color: var(--q-text-secondary, #4b5563);
+        flex-wrap: wrap;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .qspark-embed__role {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
     }
     .qspark-embed__badge {
         display: inline-flex;
@@ -108,7 +125,13 @@
         letter-spacing: 0.02em;
     }
     .qspark-embed__role strong { color: var(--q-text-primary, #111); }
-    .qspark-embed__actions { display: flex; gap: var(--q-space-2, 8px); }
+    .qspark-embed__actions {
+        display: flex;
+        gap: var(--q-space-2, 8px);
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
     .qspark-embed__btn {
         display: inline-flex;
         align-items: center;
@@ -123,20 +146,29 @@
         cursor: pointer;
         text-decoration: none;
         transition: filter 0.15s ease;
+        white-space: nowrap;
     }
     .qspark-embed__btn:hover { filter: brightness(0.95); }
     .qspark-embed__btn--ghost {
         background: transparent;
         color: var(--q-text-primary, #111);
     }
+    .qspark-embed__btn-label { display: inline; }
     .qspark-embed__tabs {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 4px;
         padding: 8px var(--q-space-5, 20px);
         background: var(--q-bg-primary, #fff);
         border-bottom: 1px solid var(--q-border-color, #e5e7eb);
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .qspark-embed__tabs::-webkit-scrollbar { height: 4px; }
+    .qspark-embed__tabs::-webkit-scrollbar-thumb {
+        background: var(--q-border-color, #e5e7eb);
+        border-radius: 999px;
     }
     .qspark-embed__tab {
         display: inline-flex;
@@ -201,6 +233,71 @@
     }
     @keyframes qsparkSpin {
         to { transform: rotate(360deg); }
+    }
+
+    /* Tablet: lighter chrome so the iframe gets more vertical room. */
+    @media (max-width: 1024px) {
+        .qspark-embed__bar { padding: 10px 16px; }
+        .qspark-embed__tabs { padding: 6px 12px; }
+    }
+
+    /* Mobile: tighter padding and smaller controls so the iframe gets more room. */
+    @media (max-width: 640px) {
+        .qspark-embed {
+            height: calc(100vh - var(--q-topbar-height, 64px));
+            height: calc(100dvh - var(--q-topbar-height, 64px));
+            min-height: 0;
+        }
+        .qspark-embed__bar {
+            padding: 8px 12px;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        .qspark-embed__title {
+            font-size: 0.8125rem;
+            gap: 8px;
+            flex-wrap: nowrap;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .qspark-embed__role {
+            font-size: 0.75rem;
+        }
+        .qspark-embed__badge { padding: 3px 8px; font-size: 0.6875rem; }
+        .qspark-embed__actions { gap: 6px; flex-wrap: nowrap; }
+        .qspark-embed__btn { padding: 6px 8px; font-size: 0.75rem; }
+        .qspark-embed__tabs {
+            padding: 6px 10px;
+            gap: 4px;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        .qspark-embed__tab { padding: 5px 10px; font-size: 0.8125rem; }
+    }
+
+    /* Small phones: collapse buttons to icon-only and hide secondary chrome
+       text so the bar fits on one row without truncation. */
+    @media (max-width: 480px) {
+        .qspark-embed__bar { padding: 6px 10px; gap: 6px; }
+        .qspark-embed__btn-label { display: none; }
+        .qspark-embed__btn { padding: 6px; gap: 0; }
+        .qspark-embed__btn svg { width: 18px; height: 18px; }
+        .qspark-embed__role { font-size: 0.7rem; }
+        .qspark-embed__badge { font-size: 0.65rem; padding: 2px 7px; }
+    }
+
+    /* Very small phones: drop the role text label entirely. */
+    @media (max-width: 360px) {
+        .qspark-embed__role { display: none; }
+        .qspark-embed__tabs { padding: 6px 8px; }
+        .qspark-embed__tab { padding: 4px 8px; font-size: 0.75rem; }
+    }
+
+    /* Landscape phones: hide tabs/bar text isn't needed; keep iframe usable. */
+    @media (max-height: 480px) and (orientation: landscape) {
+        .qspark-embed { min-height: 0; }
+        .qspark-embed__bar { padding: 4px 10px; }
+        .qspark-embed__tabs { padding: 4px 10px; }
     }
 </style>
 @endpush

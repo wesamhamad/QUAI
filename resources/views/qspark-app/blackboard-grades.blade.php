@@ -3,29 +3,29 @@
 @section('title', __('messages.blackboard_grades') . ' - Q SPARK')
 
 @section('content')
-<div class="p-4 sm:p-6 space-y-6">
+<div class="p-3 sm:p-6 space-y-4 sm:space-y-6">
   <!-- Title -->
   <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-    <h2 class="text-2xl sm:text-3xl font-extrabold" data-translate="blackboard_grades">{{ __('messages.blackboard_grades') }}</h2>
-    <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-dga-primary-600 text-sm sm:text-base self-start sm:self-auto">
+    <h2 class="text-xl sm:text-3xl font-extrabold" data-translate="blackboard_grades">{{ __('messages.blackboard_grades') }}</h2>
+    <a href="{{ route('qspark.dashboard.student') }}" class="bg-dga-primary-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-dga-primary-600 text-xs sm:text-base self-start sm:self-auto inline-flex items-center">
       {{ __('messages.back_to_dashboard') }}
     </a>
   </div>
 
   <!-- Student Info -->
   @if(isset($studentProfile) && !empty($studentProfile))
-    <div class="bg-white rounded-2xl p-6 shadow">
-      <h3 class="font-bold text-xl mb-4">{{ __('messages.student_info') }}</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div>
+    <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+      <h3 class="font-bold text-base sm:text-xl mb-3 sm:mb-4">{{ __('messages.student_info') }}</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 text-sm sm:text-base">
+        <div class="min-w-0">
           <span class="text-gray-600">{{ __('messages.name') }}:</span>
-          <span class="font-semibold">{{ $studentProfile['name'] ?? __('messages.not_available') }}</span>
+          <span class="font-semibold break-words">{{ $studentProfile['name'] ?? __('messages.not_available') }}</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-gray-600">{{ __('messages.student_id') }}:</span>
           <span class="font-semibold en-numbers">{{ $studentProfile['id'] ?? $studentProfile['student_id'] ?? __('messages.not_available') }}</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-gray-600">{{ __('messages.gpa') }}:</span>
           <span class="font-semibold en-numbers">{{ $studentProfile['academic']['last_recorded_gpa'] ?? __('messages.not_available') }}</span>
         </div>
@@ -36,12 +36,12 @@
   <!-- Courses with Grades -->
   @if(isset($courses) && !empty($courses))
     @foreach($courses as $course)
-      <div class="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition-shadow">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow hover:shadow-lg transition-shadow">
         <!-- Course Header -->
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3 sm:mb-4">
           <div class="min-w-0">
-            <h3 class="font-bold text-xl sm:text-2xl text-dga-primary-600 mb-2 break-words">{{ $course['course_name'] }}</h3>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+            <h3 class="font-bold text-base sm:text-2xl text-dga-primary-600 mb-1 sm:mb-2 break-words">{{ $course['course_name'] }}</h3>
+            <div class="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600">
               <span>
                 <span class="font-semibold" data-translate="course_code">{{ __('messages.course_code') }}:</span>
                 <span class="en-numbers">{{ $course['course_code'] }}</span>
@@ -56,22 +56,52 @@
           </div>
         </div>
 
-        <!-- Grades Table -->
+        <!-- Grades -->
         @if(!empty($course['grades']))
-          <div class="overflow-x-auto">
+          {{-- Mobile: stacked rows so columns don't crush. --}}
+          <ul class="sm:hidden space-y-2">
+            @foreach($course['grades'] as $gradeItem)
+              @php
+                $score = $gradeItem['score'] ?? $gradeItem['grade'] ?? 0;
+                $possible = $gradeItem['possible'] ?? $gradeItem['max_grade'] ?? 1;
+                $percentage = $possible > 0 ? round(($score / $possible) * 100, 1) : 0;
+              @endphp
+              <li class="rounded-xl border border-gray-200 p-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="text-sm text-gray-900 break-words min-w-0">
+                    {{ $gradeItem['name'] ?? $gradeItem['title'] ?? 'N/A' }}
+                  </div>
+                  <span class="shrink-0 px-2.5 py-0.5 rounded-full text-white text-xs font-semibold en-numbers
+                    @if($percentage >= 90) bg-green-500
+                    @elseif($percentage >= 60) bg-dga-primary-500
+                    @else bg-red-500
+                    @endif
+                  ">{{ $percentage }}%</span>
+                </div>
+                <div class="mt-1 text-xs text-gray-500 en-numbers">
+                  <span class="font-semibold text-dga-primary-600">{{ $gradeItem['score'] ?? $gradeItem['grade'] ?? '-' }}</span>
+                  <span class="mx-1">/</span>
+                  <span>{{ $gradeItem['possible'] ?? $gradeItem['max_grade'] ?? '-' }}</span>
+                </div>
+              </li>
+            @endforeach
+          </ul>
+
+          {{-- Tablet/desktop: traditional table. --}}
+          <div class="hidden sm:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase" data-translate="grade_item">
+                  <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase" data-translate="grade_item">
                     {{ __('messages.grade_item') }}
                   </th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="score">
+                  <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="score">
                     {{ __('messages.score') }}
                   </th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="possible">
+                  <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="possible">
                     {{ __('messages.possible') }}
                   </th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="percentage">
+                  <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" data-translate="percentage">
                     {{ __('messages.percentage') }}
                   </th>
                 </tr>
@@ -79,18 +109,18 @@
               <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($course['grades'] as $gradeItem)
                   <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-900">
+                    <td class="px-4 lg:px-6 py-3 lg:py-4 text-sm text-gray-900">
                       {{ $gradeItem['name'] ?? $gradeItem['title'] ?? 'N/A' }}
                     </td>
-                    <td class="px-6 py-4 text-center text-sm">
+                    <td class="px-4 lg:px-6 py-3 lg:py-4 text-center text-sm">
                       <span class="font-semibold en-numbers text-dga-primary-600">
                         {{ $gradeItem['score'] ?? $gradeItem['grade'] ?? '-' }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-center text-sm en-numbers text-gray-600">
+                    <td class="px-4 lg:px-6 py-3 lg:py-4 text-center text-sm en-numbers text-gray-600">
                       {{ $gradeItem['possible'] ?? $gradeItem['max_grade'] ?? '-' }}
                     </td>
-                    <td class="px-6 py-4 text-center text-sm">
+                    <td class="px-4 lg:px-6 py-3 lg:py-4 text-center text-sm">
                       @php
                         $score = $gradeItem['score'] ?? $gradeItem['grade'] ?? 0;
                         $possible = $gradeItem['possible'] ?? $gradeItem['max_grade'] ?? 1;
@@ -113,21 +143,21 @@
             </table>
           </div>
         @else
-          <div class="text-center py-8 text-gray-500">
-            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="text-center py-6 sm:py-8 text-gray-500">
+            <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <p data-translate="no_grades_available">{{ __('messages.no_grades_available') }}</p>
+            <p class="text-sm sm:text-base" data-translate="no_grades_available">{{ __('messages.no_grades_available') }}</p>
           </div>
         @endif
       </div>
     @endforeach
   @else
-    <div class="bg-white rounded-2xl p-6 shadow text-center">
-      <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white rounded-2xl p-4 sm:p-6 shadow text-center">
+      <svg class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
       </svg>
-      <p class="text-gray-500 text-lg" data-translate="no_grades_available">{{ __('messages.no_grades_available') }}</p>
+      <p class="text-gray-500 text-base sm:text-lg" data-translate="no_grades_available">{{ __('messages.no_grades_available') }}</p>
     </div>
   @endif
 </div>

@@ -3,73 +3,73 @@
 @section('title', __('messages.faculty_dashboard_page_title'))
 
 @section('content')
-<div class="p-4 sm:p-6 space-y-6">
+<div class="p-3 sm:p-6 space-y-4 sm:space-y-6">
   <!-- Title -->
   <div class="flex justify-between items-center">
-    <h2 class="text-2xl sm:text-3xl font-extrabold">{{ __('messages.faculty_dashboard_title') }}</h2>
+    <h2 class="text-xl sm:text-3xl font-extrabold">{{ __('messages.faculty_dashboard_title') }}</h2>
   </div>
 
   <!-- Top Row - Statistics Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
     <!-- Total Students -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-4">
+    <div class="bg-[#DFF6E7] rounded-2xl p-3 sm:p-4">
       <div class="flex items-center gap-2">
-        <div class="bg-[#25935F] p-2 rounded-full">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-[#25935F] p-1.5 sm:p-2 rounded-full shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
           </svg>
         </div>
-        <div class="text-sm font-semibold">{{ __('messages.faculty_total_students') }}</div>
+        <div class="text-xs sm:text-sm font-semibold leading-tight">{{ __('messages.faculty_total_students') }}</div>
       </div>
-      <div class="text-3xl font-extrabold number">{{ $stats['total_students'] }}</div>
+      <div class="text-2xl sm:text-3xl font-extrabold number mt-1">{{ $stats['total_students'] }}</div>
       <div class="flex flex-wrap gap-2 mt-2">
-        <span class="bg-[#25935F] text-white text-xs py-1 px-2 rounded-full">{{ __('messages.faculty_active_student') }}</span>
+        <span class="bg-[#25935F] text-white text-[10px] sm:text-xs py-0.5 sm:py-1 px-2 rounded-full">{{ __('messages.faculty_active_student') }}</span>
       </div>
     </div>
 
     <!-- Average GPA -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-4">
+    <div class="bg-[#DFF6E7] rounded-2xl p-3 sm:p-4">
       <div class="flex items-center gap-2">
-        <div class="bg-[#54C08A] p-2 rounded-full">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-[#54C08A] p-1.5 sm:p-2 rounded-full shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2L2 7l10 5 10-5-10-5zM12 9.5L4.5 7 12 3l7.5 4L12 9.5zM2 17l10 5 10-5v-2l-10 5-10-5v2z"/>
           </svg>
         </div>
-        <div class="text-sm font-semibold">{{ __('messages.faculty_average_gpa') }}</div>
+        <div class="text-xs sm:text-sm font-semibold leading-tight">{{ __('messages.faculty_average_gpa') }}</div>
       </div>
-      <div class="text-3xl font-extrabold number">{{ number_format($stats['average_gpa'], 2) }} / 5</div>
+      <div class="text-2xl sm:text-3xl font-extrabold number mt-1">{{ number_format($stats['average_gpa'], 2) }} / 5</div>
       <div class="w-full bg-white rounded-full h-2 mt-2">
         <div class="bg-[#54C08A] h-2 rounded-full" style="width: {{ ($stats['average_gpa'] / 5 * 100) }}%"></div>
       </div>
     </div>
 
     <!-- Average Attendance -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-4">
+    <div class="bg-[#DFF6E7] rounded-2xl p-3 sm:p-4">
       <div class="flex items-center gap-2">
-        <div class="bg-[#25935F] p-2 rounded-full">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-[#25935F] p-1.5 sm:p-2 rounded-full shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
           </svg>
         </div>
-        <div class="text-sm font-semibold">{{ __('messages.faculty_average_attendance') }}</div>
+        <div class="text-xs sm:text-sm font-semibold leading-tight">{{ __('messages.faculty_average_attendance') }}</div>
       </div>
-      <div class="text-3xl font-extrabold number">{{ number_format($stats['average_attendance'], 1) }} %</div>
+      <div class="text-2xl sm:text-3xl font-extrabold number mt-1">{{ number_format($stats['average_attendance'], 1) }} %</div>
       <div class="flex flex-wrap gap-2 mt-2">
-        <span class="bg-[#88D8AD] text-white text-xs py-1 px-2 rounded-full">{{ __('messages.attendance_percentage_label') }}</span>
+        <span class="bg-[#88D8AD] text-white text-[10px] sm:text-xs py-0.5 sm:py-1 px-2 rounded-full">{{ __('messages.attendance_percentage_label') }}</span>
       </div>
     </div>
 
     <!-- At Risk Students -->
-    <div class="bg-[#FECDCA] rounded-2xl p-4">
+    <div class="bg-[#FECDCA] rounded-2xl p-3 sm:p-4">
       <div class="flex items-center gap-2">
-        <div class="bg-[#F04438] p-2 rounded-full">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-[#F04438] p-1.5 sm:p-2 rounded-full shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
           </svg>
         </div>
-        <div class="text-sm font-semibold">{{ __('messages.faculty_students_at_risk') }}</div>
+        <div class="text-xs sm:text-sm font-semibold leading-tight">{{ __('messages.faculty_students_at_risk') }}</div>
       </div>
-      <div class="text-3xl font-extrabold number">{{ $stats['students_at_risk'] }}</div>
+      <div class="text-2xl sm:text-3xl font-extrabold number mt-1">{{ $stats['students_at_risk'] }}</div>
       <div class="w-full bg-white rounded-full h-2 mt-2">
         <div class="bg-[#F04438] h-2 rounded-full" style="width: {{ $stats['total_students'] > 0 ? ($stats['students_at_risk'] / $stats['total_students'] * 100) : 0 }}%"></div>
       </div>
@@ -78,9 +78,9 @@
 
   <!-- Faculty Courses from Oracle -->
   @if(!empty($facultyCourses))
-  <div class="bg-white rounded-2xl p-6 shadow">
-    <h3 class="font-bold text-xl mb-6">{{ __('messages.faculty_courses_section') }}</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+    <h3 class="font-bold text-base sm:text-xl mb-4 sm:mb-6">{{ __('messages.faculty_courses_section') }}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       @foreach($facultyCourses as $course)
         <div class="bg-gradient-to-br from-dga-primary-50 to-dga-primary-50 rounded-xl p-4 border border-dga-primary-200 hover:shadow-md transition">
           <div class="flex items-start justify-between mb-3">
@@ -121,26 +121,26 @@
   @endif
 
   <!-- NEW: Faculty-Specific Metrics -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
     <!-- Engagement Level -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-6 shadow">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <div class="bg-[#25935F] p-3 rounded-full">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+    <div class="bg-[#DFF6E7] rounded-2xl p-4 sm:p-6 shadow">
+      <div class="flex items-center justify-between mb-3 sm:mb-4">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="bg-[#25935F] p-2 sm:p-3 rounded-full shrink-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800">{{ __('messages.engagement_level') }}</h3>
+          <h3 class="text-sm sm:text-lg font-bold text-gray-800 leading-tight">{{ __('messages.engagement_level') }}</h3>
         </div>
-        <button class="info-icon bg-[#25935F]/10 hover:bg-[#25935F]/20 rounded-full p-2 transition"
+        <button class="info-icon bg-[#25935F]/10 hover:bg-[#25935F]/20 rounded-full p-1.5 sm:p-2 transition shrink-0"
                 data-tooltip="{{ __('messages.engagement_level_tooltip') }}">
-          <svg class="w-5 h-5 text-[#25935F]" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#25935F]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
         </button>
       </div>
-      <div class="text-4xl font-extrabold mb-2 text-gray-800 number">{{ $engagementLevel['score'] }}%</div>
+      <div class="text-3xl sm:text-4xl font-extrabold mb-2 text-gray-800 number">{{ $engagementLevel['score'] }}%</div>
       <div class="text-sm text-gray-600 mb-3">{{ $engagementLevel['level'] }}</div>
       <div class="w-full bg-white rounded-full h-3">
         <div class="bg-[#88D8AD] h-3 rounded-full transition-all duration-500" style="width: {{ $engagementLevel['score'] }}%"></div>
@@ -155,24 +155,24 @@
     </div>
 
     <!-- Suggested Improvement Plans -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-6 shadow">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <div class="bg-[#25935F] p-3 rounded-full">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-[#DFF6E7] rounded-2xl p-4 sm:p-6 shadow">
+      <div class="flex items-center justify-between mb-3 sm:mb-4">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="bg-[#25935F] p-2 sm:p-3 rounded-full shrink-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800">{{ __('messages.improvement_suggestions') }}</h3>
+          <h3 class="text-sm sm:text-lg font-bold text-gray-800 leading-tight">{{ __('messages.improvement_suggestions') }}</h3>
         </div>
-        <button class="info-icon bg-[#25935F]/10 hover:bg-[#25935F]/20 rounded-full p-2 transition"
+        <button class="info-icon bg-[#25935F]/10 hover:bg-[#25935F]/20 rounded-full p-1.5 sm:p-2 transition shrink-0"
                 data-tooltip="{{ __('messages.improvement_suggestions_tooltip') }}">
-          <svg class="w-5 h-5 text-[#25935F]" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#25935F]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
         </button>
       </div>
-      <div class="text-4xl font-extrabold mb-1 text-gray-800 number">{{ number_format($totalQuestionsGenerated) }}</div>
+      <div class="text-3xl sm:text-4xl font-extrabold mb-1 text-gray-800 number">{{ number_format($totalQuestionsGenerated) }}</div>
       <div class="text-sm text-gray-600 mb-4">{{ __('messages.suggested_question') }}</div>
       <div class="mt-4 space-y-2">
         <div class="flex justify-between text-sm bg-white rounded-lg p-2">
@@ -187,19 +187,19 @@
     </div>
 
     <!-- Weak Areas -->
-    <div class="bg-[#DFF6E7] rounded-2xl p-6 shadow">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <div class="bg-[#54C08A] p-3 rounded-full">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+    <div class="bg-[#DFF6E7] rounded-2xl p-4 sm:p-6 shadow">
+      <div class="flex items-center justify-between mb-3 sm:mb-4">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div class="bg-[#54C08A] p-2 sm:p-3 rounded-full shrink-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-bold text-gray-800">{{ __('messages.remedial_plan_suggestion') }}</h3>
+          <h3 class="text-sm sm:text-lg font-bold text-gray-800 leading-tight">{{ __('messages.remedial_plan_suggestion') }}</h3>
         </div>
-        <button class="info-icon bg-[#54C08A]/10 hover:bg-[#54C08A]/20 rounded-full p-2 transition"
+        <button class="info-icon bg-[#54C08A]/10 hover:bg-[#54C08A]/20 rounded-full p-1.5 sm:p-2 transition shrink-0"
                 data-tooltip="{{ __('messages.remedial_plan_tooltip') }}">
-          <svg class="w-5 h-5 text-[#54C08A]" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#54C08A]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
         </button>
@@ -237,10 +237,10 @@
   </div>
 
   <!-- Secondary metrics -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
     <!-- Top Students -->
-    <div class="bg-white rounded-2xl p-6 shadow">
-      <h3 class="font-bold text-xl mb-6">{{ __('messages.top_students') }}</h3>
+    <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+      <h3 class="font-bold text-base sm:text-xl mb-4 sm:mb-6">{{ __('messages.top_students') }}</h3>
       <div class="space-y-4">
         @forelse($topStudents as $index => $student)
           @if($index < 3)
@@ -277,9 +277,9 @@
     </div>
 
     <!-- GPA + Attendance Distribution -->
-    <div class="space-y-6">
-      <div class="bg-white rounded-2xl p-6 shadow">
-        <h3 class="font-bold text-xl mb-6">{{ __('messages.gpa_distribution') }}</h3>
+    <div class="space-y-4 sm:space-y-6">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+        <h3 class="font-bold text-base sm:text-xl mb-4 sm:mb-6">{{ __('messages.gpa_distribution') }}</h3>
         <div class="space-y-3">
           <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
             <span class="text-gray-700">{{ __('messages.gpa_excellent') }}</span>
@@ -304,8 +304,8 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl p-6 shadow">
-        <h3 class="font-bold text-xl mb-6">{{ __('messages.attendance_distribution') }}</h3>
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+        <h3 class="font-bold text-base sm:text-xl mb-4 sm:mb-6">{{ __('messages.attendance_distribution') }}</h3>
         <div class="space-y-3">
           <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl">
             <span class="text-gray-700">{{ __('messages.attendance_excellent') }}</span>
@@ -328,9 +328,9 @@
     </div>
 
     <!-- Quick Actions + Faculty Info -->
-    <div class="space-y-6">
-      <div class="bg-white rounded-2xl p-6 shadow">
-        <h3 class="font-bold text-xl mb-6">{{ __('messages.quick_actions') }}</h3>
+    <div class="space-y-4 sm:space-y-6">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
+        <h3 class="font-bold text-base sm:text-xl mb-4 sm:mb-6">{{ __('messages.quick_actions') }}</h3>
         <div class="space-y-3">
           <a href="{{ route('qspark.faculty.courses') }}" class="block w-full bg-dga-primary-500 text-white text-center py-3 rounded-xl hover:bg-dga-primary-600 transition flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -347,8 +347,8 @@
         </div>
       </div>
 
-      <div class="bg-gradient-to-br from-dga-primary-500 to-dga-primary-500 rounded-2xl p-6 shadow text-white">
-        <h3 class="font-bold text-xl mb-4">{{ __('messages.faculty_info') }}</h3>
+      <div class="bg-gradient-to-br from-dga-primary-500 to-dga-primary-500 rounded-2xl p-4 sm:p-6 shadow text-white">
+        <h3 class="font-bold text-base sm:text-xl mb-3 sm:mb-4">{{ __('messages.faculty_info') }}</h3>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-green-100">{{ __('messages.name') }}</span>
@@ -376,14 +376,14 @@
   </div>
 
   <!-- Students at Risk - full width -->
-  <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
-      <h3 class="font-bold text-xl text-red-600">{{ __('messages.faculty_students_at_risk') }}</h3>
-      <span class="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full">
+  <div class="bg-white rounded-2xl p-3 sm:p-6 shadow">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 sm:mb-6">
+      <h3 class="font-bold text-base sm:text-xl text-red-600">{{ __('messages.faculty_students_at_risk') }}</h3>
+      <span class="bg-red-100 text-red-800 text-xs sm:text-sm font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
         {{ count($studentsAtRisk) }} {{ __('messages.student_word') }}
       </span>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
       @forelse($studentsAtRisk as $index => $student)
         @if($index < 12)
         <div class="p-4 rounded-xl border-2 transition hover:shadow-md

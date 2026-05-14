@@ -55,11 +55,13 @@
     if (!loader) return;
 
     var hideTimer = null;
+    var safetyTimer = null;
 
     function hide() {
         if (!loader || loader.hasAttribute('hidden')) return;
         loader.classList.add('is-leaving');
         if (hideTimer) clearTimeout(hideTimer);
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
         hideTimer = setTimeout(function () {
             loader.setAttribute('hidden', '');
             loader.classList.remove('is-leaving');
@@ -71,6 +73,12 @@
         if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
         loader.removeAttribute('hidden');
         loader.classList.remove('is-leaving');
+        // Safety net: if a navigation never actually happens (e.g. the click
+        // was intercepted by a SPA router that calls preventDefault late, or
+        // the request is XHR/fetch instead of a real navigation), auto-hide
+        // the loader so it doesn't stick on screen forever.
+        if (safetyTimer) clearTimeout(safetyTimer);
+        safetyTimer = setTimeout(hide, 4000);
     }
 
     // Hide once the page is fully loaded.
@@ -80,6 +88,19 @@
     } else {
         window.addEventListener('load', function () { setTimeout(hide, 120); }, { once: true });
     }
+
+    // Detect SPA shells (QMentor / QSPARK-plus). Inside a SPA, in-app links
+    // are handled by the client router via preventDefault() — no real
+    // navigation occurs and `load` never refires, so re-showing the loader
+    // would leave it stuck on screen. We keep the initial overlay (it hides
+    // on first `load`) but skip ALL link/submit interception for SPA pages.
+    function isSpaShell() {
+        if (document.getElementById('qmentor-app')) return true;
+        var p = (window.location.pathname || '').toLowerCase();
+        return p === '/qmentor' || p.indexOf('/qmentor/') === 0
+            || p === '/qspark-plus' || p.indexOf('/qspark-plus/') === 0;
+    }
+    if (isSpaShell()) return;
 
     // Re-show on internal navigation (same-origin GET link clicks).
     document.addEventListener('click', function (e) {
@@ -95,7 +116,14 @@
             var url = new URL(link.href, window.location.href);
             if (url.origin !== window.location.origin) return;
         } catch (_) { return; }
-        show();
+        // Defer to a macrotask so any SPA router (React Router, etc.) has a
+        // chance to run its own click handler and call preventDefault(). If
+        // it did, no real navigation is happening and we must NOT show the
+        // loader — otherwise it would stay up forever since `load` won't fire.
+        setTimeout(function () {
+            if (e.defaultPrevented) return;
+            show();
+        }, 0);
     }, true);
 
     // Re-show on form submissions (POST/GET navigations).
@@ -103,12 +131,18 @@
         var form = e.target;
         if (!form || form.tagName !== 'FORM') return;
         if (form.target === '_blank') return;
-        show();
+        setTimeout(function () {
+            if (e.defaultPrevented) return;
+            show();
+        }, 0);
     }, true);
 
     // BFCache restore: ensure loader is hidden when returning via back/forward.
     window.addEventListener('pageshow', function (e) {
         if (e.persisted) hide();
     });
+
+    // SPA back/forward navigation: hide loader, since `load` won't refire.
+    window.addEventListener('popstate', function () { hide(); });
 })();
 </script>

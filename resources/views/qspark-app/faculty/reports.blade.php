@@ -27,16 +27,16 @@
     };
 @endphp
 
-<div class="p-6 space-y-6">
-    <div class="flex items-center justify-between">
-        <h2 class="text-3xl font-extrabold">{{ __('messages.faculty_reports_title') }}</h2>
-        <span class="text-sm text-gray-500">{{ __('messages.reports_total_students') }} <span class="number font-bold">{{ number_format($gpaTotal) }}</span></span>
+<div class="p-3 sm:p-6 space-y-4 sm:space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-xl sm:text-3xl font-extrabold">{{ __('messages.faculty_reports_title') }}</h2>
+        <span class="text-xs sm:text-sm text-gray-500">{{ __('messages.reports_total_students') }} <span class="number font-bold">{{ number_format($gpaTotal) }}</span></span>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-2xl shadow p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold">{{ __('messages.gpa_distribution_title') }}</h3>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-base sm:text-xl font-bold">{{ __('messages.gpa_distribution_title') }}</h3>
                 <span class="text-xs text-gray-500 number">{{ $reports['gpa_trends']->count() }} {{ __('messages.category_unit') }}</span>
             </div>
 
@@ -68,9 +68,9 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold">{{ __('messages.attendance_distribution_title') }}</h3>
+        <div class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 class="text-base sm:text-xl font-bold">{{ __('messages.attendance_distribution_title') }}</h3>
                 <span class="text-xs text-gray-500 number">{{ $reports['attendance_trends']->count() }} {{ __('messages.category_unit') }}</span>
             </div>
 
