@@ -68,6 +68,11 @@
         }, 280);
     }
 
+    // Exposed so the SPA can dismiss the overlay the instant React commits
+    // its first render, instead of waiting on `window.load` (which may be
+    // gated on slow third-party fonts / large JS chunks on mobile).
+    window.__qHidePageLoader = hide;
+
     function show() {
         if (!loader) return;
         if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
@@ -100,7 +105,38 @@
         return p === '/qmentor' || p.indexOf('/qmentor/') === 0
             || p === '/qspark-plus' || p.indexOf('/qspark-plus/') === 0;
     }
-    if (isSpaShell()) return;
+    if (isSpaShell()) {
+        // On SPA pages, `window.load` can be blocked for many seconds on
+        // mobile by external fonts / large JS chunks even though React has
+        // already mounted and rendered the page behind the overlay — leaving
+        // the spinner stuck on top of a usable page. Dismiss as soon as the
+        // React root has any children, and guarantee a hard ceiling so the
+        // overlay can never linger forever.
+        function watchSpaMount() {
+            var root = document.getElementById('qmentor-app')
+                || document.getElementById('app')
+                || document.getElementById('root');
+            if (!root) return;
+            if (root.children.length > 0) { hide(); return; }
+            try {
+                var mo = new MutationObserver(function () {
+                    if (root.children.length > 0) {
+                        mo.disconnect();
+                        hide();
+                    }
+                });
+                mo.observe(root, { childList: true });
+            } catch (_) { /* MutationObserver unavailable — safety timer below will still fire. */ }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', watchSpaMount, { once: true });
+        } else {
+            watchSpaMount();
+        }
+        // Absolute safety net: dismiss after 6s regardless of mount/load state.
+        setTimeout(hide, 6000);
+        return;
+    }
 
     // Re-show on internal navigation (same-origin GET link clicks).
     document.addEventListener('click', function (e) {

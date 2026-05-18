@@ -39,3 +39,11 @@ ReactDOM.createRoot(document.getElementById('qmentor-app')!).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Dismiss the blade-level page-loader overlay the moment the SPA has
+// committed its first frame — on mobile, `window.load` can stay pending for
+// many seconds behind external fonts / large chunks, leaving the overlay
+// stuck on top of an already-rendered dashboard.
+requestAnimationFrame(() => {
+  (window as unknown as { __qHidePageLoader?: () => void }).__qHidePageLoader?.();
+});
