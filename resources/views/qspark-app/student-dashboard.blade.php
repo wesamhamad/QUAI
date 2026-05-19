@@ -345,7 +345,7 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
         const taskItem = checkbox.closest('.flex');
         const taskText = taskItem.querySelector('.task-text');
         const taskDate = taskItem.querySelector('.task-date');
-        
+
         if (checkbox.checked) {
           taskText.classList.add('line-through', 'text-gray-500');
           if (taskDate) taskDate.classList.add('line-through', 'text-gray-400');
@@ -358,21 +358,57 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
       }
       </script>
 
-      <!-- روابط سريعة -->
-      <div class="bg-white rounded-2xl p-4 shadow">
-        <h3 class="font-bold mb-4" data-translate="quick_links">{{ __('messages.quick_links') }}</h3>
-        <div class="space-y-3">
-          <a href="/dashboard-student/courses"
-            class="w-full bg-[#DFF6E7] text-green-700 py-3 px-4 rounded-lg text-center block" data-translate="course_materials">
-            {{ __('messages.course_materials') }}
-          </a>
-          <button class="w-full bg-[#B8EACB] text-[#25935F] py-3 px-4 rounded-lg" data-translate="virtual_lab">{{ __('messages.virtual_lab') }}</button>
-          <a href="https://stu-gate.qu.edu.sa/qu/ui/guest/academic_calendar/index/academicCalendarIndex.faces"
-            class="w-full bg-[#DFF6E7] text-[#54C08A] py-3 px-4 rounded-lg text-center block" data-translate="add_delete_dates">
-            {{ __('messages.add_delete_dates') }}
-          </a>
+      <!-- Final Exams -->
+      <div class="bg-white rounded-2xl p-6 shadow">
+        <h3 class="font-bold text-xl mb-4" data-translate="final_exams">{{ __('messages.final_exams') }}</h3>
+
+        <div class="max-h-80 overflow-y-auto space-y-3 pr-2">
+          @php
+            $dotColors = ['bg-dga-primary-500', 'bg-dga-primary-500', 'bg-dga-primary-500', 'bg-green-500'];
+          @endphp
+
+          @forelse ($finalExamsCourses as $index => $exam)
+            @php
+              $dotColor = $dotColors[$index % count($dotColors)];
+              $examDetails = $exam['exam'];
+              $hasExamDate = isset($examDetails['exam_date']) && $examDetails['exam_date'] !== '-' && !str_contains($examDetails['exam_period'], 'There is no entered date');
+            @endphp
+
+            <div class="flex items-start justify-between border-b pb-2 last:border-b-0">
+              <div class="flex items-start space-x-3 rtl:space-x-reverse">
+                <span class="w-3 h-3 mt-1 {{ $dotColor }} rounded-full"></span>
+                <div>
+                  <p class="text-gray-800 font-medium">{{ $exam['course_code'] }} - {{ $exam['course_name'] }}</p>
+                  <p class="text-gray-500 text-xs">{{ $exam['activity']['name'] }}</p>
+                </div>
+              </div>
+
+              <div class="text-xs text-gray-700 text-right space-y-1">
+                @if ($hasExamDate)
+                  <div>
+                    <span class="font-semibold">{{ __('messages.date') }}:</span>
+                    <span>{{ $examDetails['exam_date_hijrah'] }}</span>
+                  </div>
+                  <div>
+                    <span class="font-semibold">{{ __('messages.time') }}:</span>
+                    <span>{{ $examDetails['start_time'] }} - {{ $examDetails['end_time'] }}</span>
+                  </div>
+                  <div>
+                    <span class="font-semibold">{{ __('messages.location') }}:</span>
+                    <span>{{ $examDetails['campus_name'] }}</span>
+                  </div>
+                @else
+                  <p class="text-gray-400">{{ __('messages.no_final_exam_entered') }}</p>
+                @endif
+              </div>
+            </div>
+
+          @empty
+            <p class="text-gray-500 text-center">{{ __('messages.no_final_exams') }}</p>
+          @endforelse
         </div>
       </div>
+
     </div>
 
     <!-- Column 2 -->
@@ -386,10 +422,10 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
           <h3 class="font-bold text-lg mb-2">{{ __('messages.good_evening') }}, {{$studentArabicName}}!</h3>
         @endif
 
-        @if($gender === 'Male')
-          <p class="text-sm text-gray-500 mb-4">{{ __('messages.are_you_ready') }}</p>
-        @else
+        @if($gender === 'Female')
           <p class="text-sm text-gray-500 mb-4">{{ __('messages.are_you_ready_female') }}</p>
+        @else
+          <p class="text-sm text-gray-500 mb-4">{{ __('messages.are_you_ready') }}</p>
         @endif
 
         <a href="{{ route('qspark.dashboard.student.chat') }}" class="w-full bg-dga-primary-500 hover:bg-dga-primary-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
@@ -444,57 +480,6 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
           </div>
         </div>
       </div>
-
-      <!-- Final Exams -->
-    <div class="bg-white rounded-2xl p-6 shadow">
-    <h3 class="font-bold text-xl mb-4" data-translate="final_exams">{{ __('messages.final_exams') }}</h3>
-
-    <div class="max-h-80 overflow-y-auto space-y-3 pr-2">
-      @php
-        $dotColors = ['bg-dga-primary-500', 'bg-dga-primary-500', 'bg-dga-primary-500', 'bg-green-500'];
-      @endphp
-
-      @forelse ($finalExamsCourses as $index => $exam)
-        @php
-          $dotColor = $dotColors[$index % count($dotColors)];
-          $examDetails = $exam['exam'];
-          $hasExamDate = isset($examDetails['exam_date']) && $examDetails['exam_date'] !== '-' && !str_contains($examDetails['exam_period'], 'There is no entered date');
-        @endphp
-
-        <div class="flex items-start justify-between border-b pb-2 last:border-b-0">
-          <div class="flex items-start space-x-3 rtl:space-x-reverse">
-            <span class="w-3 h-3 mt-1 {{ $dotColor }} rounded-full"></span>
-            <div>
-              <p class="text-gray-800 font-medium">{{ $exam['course_code'] }} - {{ $exam['course_name'] }}</p>
-              <p class="text-gray-500 text-xs">{{ $exam['activity']['name'] }}</p>
-            </div>
-          </div>
-
-          <div class="text-xs text-gray-700 text-right space-y-1">
-            @if ($hasExamDate)
-              <div>
-                <span class="font-semibold">{{ __('messages.date') }}:</span>
-                <span>{{ $examDetails['exam_date_hijrah'] }}</span>
-              </div>
-              <div>
-                <span class="font-semibold">{{ __('messages.time') }}:</span>
-                <span>{{ $examDetails['start_time'] }} - {{ $examDetails['end_time'] }}</span>
-              </div>
-              <div>
-                <span class="font-semibold">{{ __('messages.location') }}:</span>
-                <span>{{ $examDetails['campus_name'] }}</span>
-              </div>
-            @else
-              <p class="text-gray-400">{{ __('messages.no_final_exam_entered') }}</p>
-            @endif
-          </div>
-        </div>
-
-      @empty
-        <p class="text-gray-500 text-center">{{ __('messages.no_final_exams') }}</p>
-      @endforelse
-    </div>
-  </div>
 
     </div>
 

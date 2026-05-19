@@ -55,8 +55,10 @@ Route::middleware(['auth'])->group(function () {
         $isFaculty = $user && method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['Faculty', 'Admin', 'Super Admin']);
         $qsparkRole = $isAdmin ? 'admin' : ($isFaculty ? 'faculty' : 'student');
         // QSPARK is merged into this app under the /qspark prefix, so the iframe
-        // is always same-origin — derive the base from this app's own URL.
-        $qsparkBaseUrl = rtrim(url('/qspark'), '/');
+        // is always same-origin. Use a root-relative path so the iframe loads
+        // from whatever host serves the wrapper page (ai.qu.sa, quailab.dev,
+        // localhost, …) instead of being pinned to config('app.url').
+        $qsparkBaseUrl = '/qspark';
 
         // Role-aware section catalogue: keys are stable section ids the home page
         // (or sidebar) can deep-link to; values are the paths the iframe should
