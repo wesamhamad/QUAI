@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'سجلك الرقمي - QUAI')
-@section('page-title', 'سجلك الرقمي')
+@section('title', __('messages.nav_digital_record') . ' - QUAI')
+@section('page-title', __('messages.nav_digital_record'))
 
 @push('styles')
 <style>
@@ -474,8 +474,8 @@
                 </svg>
             </div>
             <div style="flex:1; min-width:240px;">
-                <h1>سجلك الرقمي</h1>
-                <p>سجل ذكي يربط مهاراتك وساعاتك التدريبية باحتياجات سوق العمل، مدعوم بتحليلات الذكاء الاصطناعي.</p>
+                <h1>{{ __('messages.nav_digital_record') }}</h1>
+                <p>{{ __('messages.digital_record_hero_desc') }}</p>
                 @if($studentId)
                     <span class="dr-hero-badge">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,7 +495,7 @@
                     @endif
                     @if(!empty($profile['gpa']))
                         <span class="dr-hero-badge" style="margin-inline-start: var(--q-space-2);">
-                            معدل تراكمي · {{ number_format((float) $profile['gpa'], 2) }}
+                            {{ __('messages.cumulative_gpa') }} · {{ number_format((float) $profile['gpa'], 2) }}
                         </span>
                     @endif
                 @endif
@@ -510,7 +510,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
             </svg>
-            <div>خدمة سجل المهارات غير مهيأة. يرجى ضبط <code>SKILLS_RECORD_API_KEY</code> في ملف البيئة.</div>
+            <div>{!! __('messages.digital_record_not_configured') !!}</div>
         </div>
     @endif
 
@@ -520,7 +520,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364L5.636 5.636"/>
             </svg>
-            <div>هذه الخدمة متاحة للطلاب فقط. لم نتمكن من تحديد الرقم الجامعي للحساب الحالي.</div>
+            <div>{{ __('messages.digital_record_students_only') }}</div>
         </div>
     @endif
 
@@ -529,8 +529,8 @@
         $totalCourses = is_array($topCourses) && count($topCourses) > 0 ? count($topCourses) : 28;
         $gpaValue     = $profile['gpa'] ?? null;
         $gpaDisplay   = $gpaValue ? number_format((float) $gpaValue, 2) : '4.62';
-        $facultyName  = $profile['faculty'] ?? 'الأعمال والاقتصاد';
-        $majorName    = $profile['major']   ?? 'محاسبة';
+        $facultyName  = $profile['faculty'] ?? __('messages.dr_demo_faculty_business');
+        $majorName    = $profile['major']   ?? __('messages.dr_demo_major_accounting');
     @endphp
 
     <div class="dr-stats">
@@ -542,8 +542,8 @@
                 </svg>
             </div>
             <div class="dr-stat-value">1447</div>
-            <div class="dr-stat-label">الفصل الدراسي الحالي</div>
-            <div class="dr-stat-sub">الفصل الأول · العام الأكاديمي 1447</div>
+            <div class="dr-stat-label">{{ __('messages.current_semester') }}</div>
+            <div class="dr-stat-sub">{{ __('messages.current_semester_sub') }}</div>
         </div>
 
         <div class="dr-stat">
@@ -554,8 +554,8 @@
                 </svg>
             </div>
             <div class="dr-stat-value">{{ $totalCourses }}</div>
-            <div class="dr-stat-label">عدد المقررات الكلي</div>
-            <div class="dr-stat-sub">شامل المقررات المجتازة والحالية</div>
+            <div class="dr-stat-label">{{ __('messages.total_courses') }}</div>
+            <div class="dr-stat-sub">{{ __('messages.total_courses_sub') }}</div>
         </div>
 
         <div class="dr-stat">
@@ -566,7 +566,7 @@
                 </svg>
             </div>
             <div class="dr-stat-value">{{ $gpaDisplay }}</div>
-            <div class="dr-stat-label">المعدل التراكمي</div>
+            <div class="dr-stat-label">{{ __('messages.cumulative_gpa') }}</div>
             <div class="dr-stat-sub">{{ $facultyName }} · {{ $majorName }}</div>
         </div>
     </div>
@@ -582,19 +582,19 @@
                 foreach ((array) data_get($sem, 'skills', []) as $sk) { $skillsFlat[] = $sk; }
             }
             $reasonLabels = [
-                'no_token'           => 'لم يتم إصدار رمز API الجامعي بعد لهذا الحساب.',
-                'http_401'           => 'رمز الدخول للـ API الجامعي غير صالح أو منتهي الصلاحية.',
-                'http_403'           => 'الحساب الحالي لا يملك صلاحية لقراءة بيانات هذا الطالب من الـ API الجامعي.',
-                'http_404'           => 'لم يتم العثور على سجل أكاديمي لهذا الرقم في الـ API الجامعي.',
-                'http_500'           => 'الـ API الجامعي أرجع خطأ داخلي (HTTP 500).',
-                'v3_profile_broken'  => 'مسار /api/v3/me لم يتعرف على بياناتك (الطالب غير موجود في قاعدة بيانات Oracle المحلية).',
-                'empty_response'     => 'الـ API استجاب لكن لم يُرجع تخصصاً أو كلية لهذا الحساب.',
-                'no_passed_courses'  => 'لا توجد مقررات مجتازة بدرجات معترف بها في سجلك حتى الآن.',
-                'mint_failed'        => 'تعذّر إصدار رمز API الجامعي تلقائياً.',
-                'mint_http_403'      => 'الـ API الجامعي رفض إصدار الرمز: المنصة غير مسجلة كـ Origin (BLACKBOARD_ORIGIN_TOKEN).',
-                'mint_http_404'      => 'الـ API الجامعي لا يتعرف على هذا الرقم الجامعي (Student not found).',
-                'mint_http_401'      => 'الـ API الجامعي رفض إصدار الرمز: رمز الـ Origin غير صالح.',
-                'exception'          => 'تعذّر الاتصال بالـ API الجامعي حالياً.',
+                'no_token'           => __('messages.dr_reason_no_token'),
+                'http_401'           => __('messages.dr_reason_http_401'),
+                'http_403'           => __('messages.dr_reason_http_403'),
+                'http_404'           => __('messages.dr_reason_http_404'),
+                'http_500'           => __('messages.dr_reason_http_500'),
+                'v3_profile_broken'  => __('messages.dr_reason_v3_profile_broken'),
+                'empty_response'     => __('messages.dr_reason_empty_response'),
+                'no_passed_courses'  => __('messages.dr_reason_no_passed_courses'),
+                'mint_failed'        => __('messages.dr_reason_mint_failed'),
+                'mint_http_403'      => __('messages.dr_reason_mint_http_403'),
+                'mint_http_404'      => __('messages.dr_reason_mint_http_404'),
+                'mint_http_401'      => __('messages.dr_reason_mint_http_401'),
+                'exception'          => __('messages.dr_reason_exception'),
             ];
             $profileReason = $apiStatus['profile_reason'] ?? $apiStatus['reason'] ?? 'exception';
             $coursesReason = $apiStatus['courses_reason'] ?? $apiStatus['reason'] ?? 'exception';
@@ -606,27 +606,27 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                مصادر البيانات المستخدمة في التحليل
+                {{ __('messages.dr_data_sources_title') }}
             </div>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: var(--q-space-3);">
                 {{-- Skills source --}}
                 <div style="display:flex; align-items:center; gap: var(--q-space-2); padding: var(--q-space-2) var(--q-space-3); border:1px solid {{ $hasSkills ? '#B8EACB' : '#E5E7EB' }}; border-radius: var(--q-radius-lg); background: {{ $hasSkills ? '#F3FCF6' : '#F9FAFB' }};">
                     <span style="display:inline-flex; width:10px; height:10px; border-radius:50%; background: {{ $hasSkills ? '#25935F' : '#9CA3AF' }};"></span>
                     <div style="flex:1;">
-                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">سجلك المهاري</div>
-                        <div style="font-size: 11px; color: var(--q-text-secondary);">{{ count($skillsFlat) }} مهارة معتمدة من skill.qu.edu.sa</div>
+                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">{{ __('messages.dr_data_sources_skills_title') }}</div>
+                        <div style="font-size: 11px; color: var(--q-text-secondary);">{{ __('messages.dr_data_sources_skills_meta', ['count' => count($skillsFlat)]) }}</div>
                     </div>
                 </div>
                 {{-- Profile source --}}
                 <div style="display:flex; align-items:center; gap: var(--q-space-2); padding: var(--q-space-2) var(--q-space-3); border:1px solid {{ $hasProfile ? '#B8EACB' : '#B8EACB' }}; border-radius: var(--q-radius-lg); background: {{ $hasProfile ? '#F3FCF6' : '#F7FDF9' }};">
                     <span style="display:inline-flex; width:10px; height:10px; border-radius:50%; background: {{ $hasProfile ? '#25935F' : '#166A45' }};"></span>
                     <div style="flex:1;">
-                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">التخصص والكلية</div>
+                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">{{ __('messages.dr_data_sources_profile_title') }}</div>
                         <div style="font-size: 11px; color: var(--q-text-secondary);">
                             @if($hasProfile)
                                 {{ trim(implode(' · ', array_filter([$profile['faculty'] ?? null, $profile['major'] ?? null]))) }}
                             @else
-                                الأعمال والاقتصاد · محاسبة
+                                {{ __('messages.dr_demo_faculty_business') }} · {{ __('messages.dr_demo_major_accounting') }}
                             @endif
                         </div>
                     </div>
@@ -635,12 +635,12 @@
                 <div style="display:flex; align-items:center; gap: var(--q-space-2); padding: var(--q-space-2) var(--q-space-3); border:1px solid {{ $hasCourses ? '#B8EACB' : '#B8EACB' }}; border-radius: var(--q-radius-lg); background: {{ $hasCourses ? '#F3FCF6' : '#F7FDF9' }};">
                     <span style="display:inline-flex; width:10px; height:10px; border-radius:50%; background: {{ $hasCourses ? '#25935F' : '#166A45' }};"></span>
                     <div style="flex:1;">
-                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">المقررات المجتازة</div>
+                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">{{ __('messages.dr_data_sources_courses_title') }}</div>
                         <div style="font-size: 11px; color: var(--q-text-secondary);">
                             @if($hasCourses)
-                                {{ count($topCourses) }} مقرر — يتم تفضيل الوظائف القريبة من أعلاها درجة
+                                {{ __('messages.dr_data_sources_courses_meta', ['count' => count($topCourses)]) }}
                             @else
-                                {{ $reasonLabels[$coursesReason] ?? 'غير متاح' }}
+                                {{ $reasonLabels[$coursesReason] ?? __('messages.not_available') }}
                             @endif
                         </div>
                     </div>
@@ -649,13 +649,13 @@
                 <div style="display:flex; align-items:center; gap: var(--q-space-2); padding: var(--q-space-2) var(--q-space-3); border:1px solid {{ ($analysis['live_data']['jobs_count'] ?? 0) + ($analysis['live_data']['courses_count'] ?? 0) > 0 ? '#B8EACB' : '#E5E7EB' }}; border-radius: var(--q-radius-lg); background: {{ ($analysis['live_data']['jobs_count'] ?? 0) + ($analysis['live_data']['courses_count'] ?? 0) > 0 ? '#F3FCF6' : '#F9FAFB' }};">
                     <span style="display:inline-flex; width:10px; height:10px; border-radius:50%; background: {{ ($analysis['live_data']['jobs_count'] ?? 0) + ($analysis['live_data']['courses_count'] ?? 0) > 0 ? '#25935F' : '#9CA3AF' }};"></span>
                     <div style="flex:1;">
-                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">بيانات السوق الحيّة</div>
+                        <div style="font-size: var(--q-font-xs); font-weight:700; color: var(--q-text-primary);">{{ __('messages.dr_data_sources_market_title') }}</div>
                         <div style="font-size: 11px; color: var(--q-text-secondary);">
                             @php $liveJobs = (int) ($analysis['live_data']['jobs_count'] ?? 0); $liveCourses = (int) ($analysis['live_data']['courses_count'] ?? 0); @endphp
                             @if($liveJobs + $liveCourses > 0)
-                                {{ $liveJobs }} وظيفة + {{ $liveCourses }} دورة من المسح اليومي
+                                {{ __('messages.dr_data_sources_market_meta', ['jobs' => $liveJobs, 'courses' => $liveCourses]) }}
                             @else
-                                لم تُجمع بعد — يعتمد التحليل على القائمة المرجعية حالياً
+                                {{ __('messages.dr_data_sources_market_empty') }}
                             @endif
                         </div>
                     </div>
@@ -667,10 +667,12 @@
     {{-- === AI Analysis (Phase 1: gap analysis + word cloud + recommendations) === --}}
     @if($studentId && $analysis && !empty($analysis['market_skills']))
         @php
-            // Build word-cloud data: [word, weight, matched]
+            $drIsEn = app()->getLocale() === 'en';
+            // Build word-cloud data: [word, weight, matched]. In EN we render skill_en
+            // as the main word so the cloud doesn't leak Arabic in the English UI.
             $cloudData = collect($analysis['market_skills'])
                 ->map(fn ($m) => [
-                    'word'    => $m['skill'],
+                    'word'    => $drIsEn && !empty($m['skill_en']) ? $m['skill_en'] : $m['skill'],
                     'word_en' => $m['skill_en'] ?? null,
                     'weight'  => (int) $m['weight'],
                     'matched' => (bool) $m['matched'],
@@ -688,19 +690,24 @@
                     </svg>
                 </div>
                 <div style="flex:1;">
-                    <h2>تحليل الذكاء الاصطناعي · مهاراتك مقابل سوق العمل</h2>
+                    <h2>{{ __('messages.dr_ai_analysis_title') }}</h2>
                     <p>
                         @if($analysis['ok'] ?? false)
-                            مدعوم بـ QULLMs — يقارن مهاراتك المعتمدة بأبرز مهارات سوق العمل السعودي.
+                            {{ __('messages.dr_ai_analysis_subtitle') }}
                         @else
-                            عرض تقريبي بناءً على قائمة المهارات المرجعية (تعذّر الاتصال بمزوّد الذكاء الاصطناعي).
+                            {{ __('messages.dr_ai_analysis_fallback') }}
                         @endif
                     </p>
                 </div>
             </div>
 
-            @if(!empty($analysis['summary']))
-                <div class="dr-ai-summary">{{ $analysis['summary'] }}</div>
+            @php
+                $analysisSummary = $drIsEn && !empty($analysis['summary_en'])
+                    ? $analysis['summary_en']
+                    : ($analysis['summary'] ?? '');
+            @endphp
+            @if(!empty($analysisSummary))
+                <div class="dr-ai-summary">{{ $analysisSummary }}</div>
             @endif
 
             {{-- ===== Top 3 AI recommendations (featured) ===== --}}
@@ -714,24 +721,28 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                         </svg>
-                        أهم 3 توصيات بالذكاء الاصطناعي
+                        {{ __('messages.dr_top3_recs') }}
                     </div>
                     <div class="dr-top3-grid">
                         @foreach($top3 as $i => $rec)
+                            @php
+                                $recTitle = $drIsEn && !empty($rec['title_en']) ? $rec['title_en'] : ($rec['title'] ?? '');
+                                $recWhy   = $drIsEn && !empty($rec['why_en'])   ? $rec['why_en']   : ($rec['why']   ?? '');
+                            @endphp
                             <a href="{{ $rec['url'] ?: '#' }}" target="_blank" rel="noopener" class="dr-top3-card">
                                 <span class="dr-top3-rank">{{ $i + 1 }}</span>
                                 <span class="dr-top3-platform">
-                                    {{ $rec['platform'] ?? 'مرشّح' }}
+                                    {{ $rec['platform'] ?? __('messages.dr_default_platform') }}
                                     @if(!empty($rec['live']))
-                                        <span style="background:#14573A; color:#fff; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">Live</span>
+                                        <span style="background:#14573A; color:#fff; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">{{ __('messages.dr_live_badge') }}</span>
                                     @endif
                                 </span>
-                                <div class="dr-top3-card-title">{{ $rec['title'] }}</div>
-                                <div class="dr-top3-why">
-                                    {{ $rec['why'] ?: 'مرشّحة لسدّ فجوة مهارية مطلوبة في سوق العمل بناءً على سجلك.' }}
+                                <div class="dr-top3-card-title" dir="auto">{{ $recTitle }}</div>
+                                <div class="dr-top3-why" dir="auto">
+                                    {{ $recWhy ?: __('messages.dr_default_why') }}
                                 </div>
                                 <span class="dr-top3-link">
-                                    ابحث على {{ $rec['platform'] ?? '' }}
+                                    {{ __('messages.dr_search_on', ['platform' => $rec['platform'] ?? '']) }}
                                     <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                     </svg>
@@ -752,7 +763,13 @@
                     $charts['alignment'] = ['matched' => 7, 'gap' => 13, 'percent' => 35];
                 }
                 if (empty($charts['coursesBar'] ?? [])) {
-                    $charts['coursesBar'] = [
+                    $charts['coursesBar'] = app()->getLocale() === 'en' ? [
+                        ['label' => 'Advanced Financial Accounting', 'relevance' => 92, 'grade' => 'A+'],
+                        ['label' => 'Business Data Analytics',       'relevance' => 88, 'grade' => 'A'],
+                        ['label' => 'Project Management',            'relevance' => 80, 'grade' => 'A'],
+                        ['label' => 'Principles of Economics',       'relevance' => 72, 'grade' => 'B+'],
+                        ['label' => 'Accounting Information Systems','relevance' => 68, 'grade' => 'B+'],
+                    ] : [
                         ['label' => 'محاسبة مالية متقدمة',  'relevance' => 92, 'grade' => 'A+'],
                         ['label' => 'تحليل البيانات للأعمال', 'relevance' => 88, 'grade' => 'A'],
                         ['label' => 'إدارة المشاريع',         'relevance' => 80, 'grade' => 'A'],
@@ -761,7 +778,13 @@
                     ];
                 }
                 if (empty($charts['topGaps'] ?? [])) {
-                    $charts['topGaps'] = [
+                    $charts['topGaps'] = app()->getLocale() === 'en' ? [
+                        ['label' => 'Data Analytics',         'weight' => 95],
+                        ['label' => 'Python',                 'weight' => 88],
+                        ['label' => 'SQL',                    'weight' => 85],
+                        ['label' => 'Power BI',               'weight' => 78],
+                        ['label' => 'Artificial Intelligence','weight' => 72],
+                    ] : [
                         ['label' => 'تحليل البيانات',     'weight' => 95],
                         ['label' => 'بايثون',             'weight' => 88],
                         ['label' => 'SQL',                'weight' => 85],
@@ -779,7 +802,12 @@
                     ];
                 }
                 if (empty($charts['skillsByCategory'] ?? [])) {
-                    $charts['skillsByCategory'] = [
+                    $charts['skillsByCategory'] = app()->getLocale() === 'en' ? [
+                        ['label' => 'Extracurricular activities', 'count' => 6],
+                        ['label' => 'Training & development',     'count' => 4],
+                        ['label' => 'Community engagement',        'count' => 3],
+                        ['label' => 'Scientific research',         'count' => 2],
+                    ] : [
                         ['label' => 'الأنشطة اللاصفية',  'count' => 6],
                         ['label' => 'التدريب والتطوير',  'count' => 4],
                         ['label' => 'المشاركة المجتمعية','count' => 3],
@@ -787,7 +815,14 @@
                     ];
                 }
                 if (empty($charts['gradesDistribution'] ?? [])) {
-                    $charts['gradesDistribution'] = [
+                    $charts['gradesDistribution'] = app()->getLocale() === 'en' ? [
+                        ['label' => 'Intermediate Financial Accounting (1)', 'grade' => 'A+', 'score' => 96],
+                        ['label' => 'Cost Accounting',                       'grade' => 'A',  'score' => 92],
+                        ['label' => 'Applied Business Statistics',           'grade' => 'A',  'score' => 91],
+                        ['label' => 'Management Information Systems',        'grade' => 'A+', 'score' => 95],
+                        ['label' => 'Professional Ethics',                   'grade' => 'A',  'score' => 94],
+                        ['label' => 'Commercial Law',                        'grade' => 'B+', 'score' => 89],
+                    ] : [
                         ['label' => 'محاسبة مالية متوسطة (1)', 'grade' => 'A+', 'score' => 96],
                         ['label' => 'محاسبة التكاليف',          'grade' => 'A',  'score' => 92],
                         ['label' => 'إحصاء تطبيقي للأعمال',     'grade' => 'A',  'score' => 91],
@@ -806,14 +841,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        التوافق مع سوق العمل
+                        {{ __('messages.dr_market_alignment') }}
                     </h3>
                     <canvas id="dr-alignment-chart" class="dr-chart-canvas"
                             data-chart='@json($charts['alignment'] ?? ['matched' => 0, 'gap' => 0, 'percent' => 0], JSON_UNESCAPED_UNICODE)'></canvas>
                     <div class="dr-alignment-center">
                         <div class="dr-alignment-pct">{{ $charts['alignment']['percent'] ?? 0 }}%</div>
                         <div class="dr-alignment-sub">
-                            {{ $charts['alignment']['matched'] ?? 0 }} مطابقة · {{ $charts['alignment']['gap'] ?? 0 }} فجوة
+                            {{ __('messages.dr_market_alignment_meta', ['matched' => $charts['alignment']['matched'] ?? 0, 'gap' => $charts['alignment']['gap'] ?? 0]) }}
                         </div>
                     </div>
                 </div>
@@ -825,7 +860,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 3v18h18M7 14l4-4 4 4 5-5"/>
                         </svg>
-                        أعلى مقرراتك توافقاً مع السوق
+                        {{ __('messages.dr_top_courses_align') }}
                     </h3>
                     <canvas id="dr-courses-chart" class="dr-chart-canvas"
                             data-chart='@json($charts['coursesBar'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -840,7 +875,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                         </svg>
-                        ترتيب الفجوات حسب طلب السوق
+                        {{ __('messages.dr_gaps_ranked') }}
                     </h3>
                     <canvas id="dr-gaps-chart" class="dr-chart-canvas-tall"
                             data-chart='@json($charts['topGaps'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -853,7 +888,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        ساعاتك التدريبية حسب الفصل
+                        {{ __('messages.dr_training_hours_by_term') }}
                     </h3>
                     <canvas id="dr-semesters-chart" class="dr-chart-canvas-tall"
                             data-chart='@json($charts['semestersLine'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -869,7 +904,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M12 3v9l6.36 6.36"/>
                         </svg>
-                        توزيع المهارات حسب الفئة
+                        {{ __('messages.dr_skills_by_category') }}
                     </h3>
                     <canvas id="dr-categories-chart" class="dr-chart-canvas-tall"
                             data-chart='@json($charts['skillsByCategory'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -882,7 +917,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 19V6h13v13H9zm0 0L3 13l6-7"/>
                         </svg>
-                        درجاتك حسب المقررات
+                        {{ __('messages.dr_grades_by_course') }}
                     </h3>
                     <canvas id="dr-grades-chart" class="dr-chart-canvas-tall"
                             data-chart='@json($charts['gradesDistribution'] ?? [], JSON_UNESCAPED_UNICODE)'></canvas>
@@ -902,14 +937,14 @@
                                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                         @if($hasRelevance)
-                            مقرراتك الأقرب لاحتياجات سوق العمل
+                            {{ __('messages.dr_closest_courses') }}
                             <span style="font-weight: 500; color: var(--q-text-secondary); font-size: 11px; margin-inline-start: var(--q-space-2);">
-                                — مرتّبة بالتوافق مع المهارات المطلوبة، ثم بالدرجة
+                                {{ __('messages.dr_closest_courses_meta') }}
                             </span>
                         @else
-                            أعلى المقررات التي اجتزتها
+                            {{ __('messages.dr_top_passed_courses') }}
                             <span style="font-weight: 500; color: var(--q-text-secondary); font-size: 11px; margin-inline-start: var(--q-space-2);">
-                                — لم نلتقط مهارات سوق متطابقة، نعرض الأعلى درجةً
+                                {{ __('messages.dr_top_passed_courses_meta') }}
                             </span>
                         @endif
                     </div>
@@ -919,22 +954,31 @@
                                 <span class="dr-rec-platform">
                                     {{ $tc['letter_grade'] ?? '—' }}
                                     @if(!empty($tc['credit_hours']))
-                                        · {{ $tc['credit_hours'] }} ساعة
+                                        · {{ __('messages.dr_credit_hours_long', ['n' => $tc['credit_hours']]) }}
                                     @endif
                                     @if(!empty($tc['relevance']) && $tc['relevance'] > 0)
-                                        <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;" title="درجة التوافق مع سوق العمل">
-                                            توافق {{ $tc['relevance'] }}
+                                        <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;" title="{{ __('messages.dr_top_course_relevance_title') }}">
+                                            {{ __('messages.dr_top_course_relevance_short', ['n' => $tc['relevance']]) }}
                                         </span>
                                     @endif
                                 </span>
-                                <div class="dr-rec-title">{{ $tc['course_name'] ?? $tc['course_code'] ?? 'مقرر' }}</div>
-                                @if(!empty($tc['course_name_en']))
-                                    <div class="dr-rec-why">{{ $tc['course_name_en'] }}</div>
+                                @php
+                                    $tcIsEn = app()->getLocale() === 'en';
+                                    $tcPrimary = $tcIsEn && !empty($tc['course_name_en'])
+                                        ? $tc['course_name_en']
+                                        : ($tc['course_name'] ?? $tc['course_code'] ?? __('messages.dr_default_course'));
+                                    $tcSecondary = $tcIsEn
+                                        ? ($tc['course_name'] ?? null)
+                                        : ($tc['course_name_en'] ?? null);
+                                @endphp
+                                <div class="dr-rec-title" dir="auto">{{ $tcPrimary }}</div>
+                                @if(!empty($tcSecondary) && $tcSecondary !== $tcPrimary)
+                                    <div class="dr-rec-why" dir="auto">{{ $tcSecondary }}</div>
                                 @endif
                                 @if(!empty($tc['matched_skills']))
                                     <div class="dr-rec-why" style="color:#14573A;">
-                                        <strong>يطابق:</strong>
-                                        {{ implode('، ', array_slice($tc['matched_skills'], 0, 4)) }}
+                                        <strong>{{ __('messages.dr_matches_label') }}</strong>
+                                        {{ implode(app()->getLocale() === 'en' ? ', ' : '، ', array_slice($tc['matched_skills'], 0, 4)) }}
                                     </div>
                                 @endif
                                 @if(!empty($tc['semester']))
@@ -956,7 +1000,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
                         </svg>
-                        سحابة المهارات (سوق العمل)
+                        {{ __('messages.dr_skill_cloud') }}
                     </div>
                     <div class="dr-cloud" dir="rtl">
                         @php
@@ -985,8 +1029,8 @@
                         @endforeach
                     </div>
                     <div class="dr-cloud-legend">
-                        <span class="dr-leg-match">مهارات تمتلكها (متطابقة مع السوق)</span>
-                        <span class="dr-leg-gap">مهارات مطلوبة (فجوة مهارية)</span>
+                        <span class="dr-leg-match">{{ __('messages.dr_legend_match') }}</span>
+                        <span class="dr-leg-gap">{{ __('messages.dr_legend_gap') }}</span>
                     </div>
                 </div>
 
@@ -997,25 +1041,33 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
                         </svg>
-                        أهم الفجوات المهارية
+                        {{ __('messages.dr_top_gaps') }}
                     </div>
                     @if(!empty($analysis['gap_skills']))
                         <div class="dr-gap-list">
                             @foreach($analysis['gap_skills'] as $gap)
+                                @php
+                                    $gapLabel = $drIsEn && !empty($gap['skill_en'])
+                                        ? $gap['skill_en']
+                                        : ($gap['skill'] ?? '');
+                                    $gapReason = $drIsEn && !empty($gap['reason_en'])
+                                        ? $gap['reason_en']
+                                        : ($gap['reason'] ?? __('messages.dr_default_gap_reason'));
+                                @endphp
                                 <div class="dr-gap">
                                     <div>
-                                        <div class="dr-gap-title">{{ $gap['skill'] }}{{ !empty($gap['skill_en']) ? ' · '.$gap['skill_en'] : '' }}</div>
-                                        <div class="dr-gap-reason">
-                                            {{ $gap['reason'] ?? 'مهارة مطلوبة في سوق العمل السعودي ولم نلاحظها في سجلك بعد.' }}
+                                        <div class="dr-gap-title" dir="auto">{{ $gapLabel }}</div>
+                                        <div class="dr-gap-reason" dir="auto">
+                                            {{ $gapReason }}
                                         </div>
                                     </div>
-                                    <span class="dr-gap-weight" title="نسبة الطلب في السوق">{{ $gap['weight'] }}%</span>
+                                    <span class="dr-gap-weight" title="{{ __('messages.dr_market_weight_title') }}">{{ $gap['weight'] }}%</span>
                                 </div>
                             @endforeach
                         </div>
                     @else
                         <div class="dr-empty" style="padding: var(--q-space-5);">
-                            لا توجد فجوات مهارية واضحة — استمرّ على نفس المسار 👌
+                            {{ __('messages.dr_no_gaps') }}
                         </div>
                     @endif
                 </div>
@@ -1025,10 +1077,10 @@
             @if(!empty($analysis['courses']) || !empty($analysis['jobs']))
                 <div class="dr-ai-tabs" role="tablist">
                     <button type="button" class="dr-tab active" data-tab="courses">
-                        دورات مقترحة @if(!empty($analysis['courses']))<span style="opacity:.6;">({{ count($analysis['courses']) }})</span>@endif
+                        {{ __('messages.dr_recommended_courses') }} @if(!empty($analysis['courses']))<span style="opacity:.6;">({{ count($analysis['courses']) }})</span>@endif
                     </button>
                     <button type="button" class="dr-tab" data-tab="jobs">
-                        وظائف مرشحة @if(!empty($analysis['jobs']))<span style="opacity:.6;">({{ count($analysis['jobs']) }})</span>@endif
+                        {{ __('messages.dr_recommended_jobs') }} @if(!empty($analysis['jobs']))<span style="opacity:.6;">({{ count($analysis['jobs']) }})</span>@endif
                     </button>
                 </div>
 
@@ -1036,6 +1088,10 @@
                     @if(!empty($analysis['courses']))
                         <div class="dr-recs">
                             @foreach($analysis['courses'] as $c)
+                                @php
+                                    $cTitle = $drIsEn && !empty($c['title_en']) ? $c['title_en'] : ($c['title'] ?? '');
+                                    $cWhy   = $drIsEn && !empty($c['why_en'])   ? $c['why_en']   : ($c['why']   ?? '');
+                                @endphp
                                 <a href="{{ $c['url'] }}" target="_blank" rel="noopener" class="dr-rec">
                                     <span class="dr-rec-platform">
                                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1044,19 +1100,19 @@
                                         </svg>
                                         {{ $c['platform'] }}
                                         @if(!empty($c['live']))
-                                            <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">Live</span>
+                                            <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">{{ __('messages.dr_live_badge') }}</span>
                                         @endif
                                     </span>
-                                    <div class="dr-rec-title">{{ $c['title'] }}</div>
-                                    <div class="dr-rec-why">
+                                    <div class="dr-rec-title" dir="auto">{{ $cTitle }}</div>
+                                    <div class="dr-rec-why" dir="auto">
                                         <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; margin-inline-end:4px; color:#25935F;">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                        <strong>سبب الترشيح:</strong>
-                                        {{ $c['why'] ?: 'يساعد على سدّ فجوة مهارية مطلوبة في سوق العمل بناءً على سجلك.' }}
+                                        <strong>{{ __('messages.dr_recommendation_reason') }}</strong>
+                                        {{ $cWhy ?: __('messages.dr_default_course_reason') }}
                                     </div>
                                     <div class="dr-rec-link">
-                                        ابحث على {{ $c['platform'] }}
+                                        {{ __('messages.dr_search_on', ['platform' => $c['platform']]) }}
                                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                         </svg>
@@ -1065,7 +1121,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="dr-empty" style="padding: var(--q-space-5);">لا توجد توصيات دورات حالياً.</div>
+                        <div class="dr-empty" style="padding: var(--q-space-5);">{{ __('messages.dr_no_course_recs') }}</div>
                     @endif
                 </div>
 
@@ -1073,27 +1129,31 @@
                     @if(!empty($analysis['jobs']))
                         <div class="dr-recs">
                             @foreach($analysis['jobs'] as $j)
+                                @php
+                                    $jTitle = $drIsEn && !empty($j['title_en']) ? $j['title_en'] : ($j['title'] ?? '');
+                                    $jWhy   = $drIsEn && !empty($j['why_en'])   ? $j['why_en']   : ($j['why']   ?? '');
+                                @endphp
                                 <a href="{{ $j['url'] }}" target="_blank" rel="noopener" class="dr-rec">
                                     <span class="dr-rec-platform" style="background:#E0E7FF; color:#3730A3;">
                                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                         </svg>
-                                        Google Jobs
+                                        {{ __('messages.dr_google_jobs') }}
                                         @if(!empty($j['live']))
-                                            <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">Live</span>
+                                            <span style="background:#DFF6E7; color:#14573A; padding:1px 6px; border-radius:999px; margin-inline-start:4px; font-size:10px;">{{ __('messages.dr_live_badge') }}</span>
                                         @endif
                                     </span>
-                                    <div class="dr-rec-title">{{ $j['title'] }}</div>
-                                    <div class="dr-rec-why">
+                                    <div class="dr-rec-title" dir="auto">{{ $jTitle }}</div>
+                                    <div class="dr-rec-why" dir="auto">
                                         <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; margin-inline-end:4px; color:#3730A3;">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                        <strong>لماذا تناسبك:</strong>
-                                        {{ $j['why'] ?: 'مرشّحة بناءً على المهارات التي أتقنتها أو فجوة قابلة للسدّ بسرعة.' }}
+                                        <strong>{{ __('messages.dr_why_fit_label') }}</strong>
+                                        {{ $jWhy ?: __('messages.dr_default_job_reason') }}
                                     </div>
                                     <div class="dr-rec-link" style="color:#3730A3;">
-                                        ابحث عن الوظيفة
+                                        {{ __('messages.dr_search_for_job') }}
                                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                                         </svg>
@@ -1102,7 +1162,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="dr-empty" style="padding: var(--q-space-5);">لا توجد توصيات وظائف حالياً.</div>
+                        <div class="dr-empty" style="padding: var(--q-space-5);">{{ __('messages.dr_no_job_recs') }}</div>
                     @endif
                 </div>
             @endif
@@ -1116,19 +1176,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
-            تفاصيل المهارات حسب الفصل
+            {{ __('messages.dr_skills_by_semester_title') }}
         </h2>
         <form method="get" class="dr-form">
-            <input type="text" name="semester" value="{{ $semesterId }}" placeholder="رقم الفصل (اختياري)" class="dr-input">
+            <input type="text" name="semester" value="{{ $semesterId }}" placeholder="{{ __('messages.dr_semester_input_placeholder') }}" class="dr-input">
             <button type="submit" class="dr-btn">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                 </svg>
-                تصفية
+                {{ __('messages.dr_filter_action') }}
             </button>
             @if($semesterId)
-                <a href="{{ route('digital-record.index') }}" class="dr-btn dr-btn-outline">إعادة تعيين</a>
+                <a href="{{ route('digital-record.index') }}" class="dr-btn dr-btn-outline">{{ __('messages.dr_reset_action') }}</a>
             @endif
         </form>
     </div>
@@ -1139,31 +1199,32 @@
 
         // بيانات تجريبية تُعرض في حال تعذّر جلب البيانات من النظام
         if (! is_array($semesters) || empty($semesters)) {
+            $__isEn = app()->getLocale() === 'en';
             $semesters = [
                 [
-                    'semester_name' => 'الفصل الأول 1446هـ',
+                    'semester_name' => __('messages.dr_demo_sem_first_1446'),
                     'total_hours' => 24,
                     'skills' => [
-                        ['skill_name' => 'تحليل البيانات المالية', 'category_name' => 'المهارات التحليلية', 'hours' => 8, 'status' => 'accepted'],
-                        ['skill_name' => 'إعداد التقارير المالية', 'category_name' => 'المحاسبة', 'hours' => 6, 'status' => 'accepted'],
-                        ['skill_name' => 'Excel متقدم', 'category_name' => 'المهارات التقنية', 'hours' => 10, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'Financial Data Analysis' : 'تحليل البيانات المالية', 'category_name' => $__isEn ? 'Analytical skills' : 'المهارات التحليلية', 'hours' => 8, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'Financial Reporting' : 'إعداد التقارير المالية', 'category_name' => $__isEn ? 'Accounting' : 'المحاسبة', 'hours' => 6, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'Advanced Excel' : 'Excel متقدم', 'category_name' => $__isEn ? 'Technical skills' : 'المهارات التقنية', 'hours' => 10, 'status' => 'accepted'],
                     ],
                 ],
                 [
-                    'semester_name' => 'الفصل الثاني 1446هـ',
+                    'semester_name' => __('messages.dr_demo_sem_second_1446'),
                     'total_hours' => 18,
                     'skills' => [
-                        ['skill_name' => 'لغة إنجليزية مهنية', 'category_name' => 'المهارات اللغوية', 'hours' => 8, 'status' => 'accepted'],
-                        ['skill_name' => 'إدارة المشاريع', 'category_name' => 'المهارات الإدارية', 'hours' => 6, 'status' => 'pending'],
-                        ['skill_name' => 'Power BI', 'category_name' => 'المهارات التقنية', 'hours' => 4, 'status' => 'pending'],
+                        ['skill_name' => $__isEn ? 'Professional English' : 'لغة إنجليزية مهنية', 'category_name' => $__isEn ? 'Language skills' : 'المهارات اللغوية', 'hours' => 8, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'Project Management' : 'إدارة المشاريع', 'category_name' => $__isEn ? 'Management skills' : 'المهارات الإدارية', 'hours' => 6, 'status' => 'pending'],
+                        ['skill_name' => 'Power BI', 'category_name' => $__isEn ? 'Technical skills' : 'المهارات التقنية', 'hours' => 4, 'status' => 'pending'],
                     ],
                 ],
                 [
-                    'semester_name' => 'الفصل الصيفي 1446هـ',
+                    'semester_name' => __('messages.dr_demo_sem_summer_1446'),
                     'total_hours' => 12,
                     'skills' => [
-                        ['skill_name' => 'مبادئ المراجعة الداخلية', 'category_name' => 'المحاسبة', 'hours' => 7, 'status' => 'accepted'],
-                        ['skill_name' => 'أساسيات IFRS', 'category_name' => 'المحاسبة', 'hours' => 5, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'Internal Audit Principles' : 'مبادئ المراجعة الداخلية', 'category_name' => $__isEn ? 'Accounting' : 'المحاسبة', 'hours' => 7, 'status' => 'accepted'],
+                        ['skill_name' => $__isEn ? 'IFRS Fundamentals' : 'أساسيات IFRS', 'category_name' => $__isEn ? 'Accounting' : 'المحاسبة', 'hours' => 5, 'status' => 'accepted'],
                     ],
                 ],
             ];
@@ -1179,14 +1240,14 @@
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
-                <div style="font-weight:600; color: var(--q-text-primary);">لا توجد مهارات مسجلة بعد</div>
-                <div style="margin-top: 6px;">ستظهر مهاراتك المعتمدة هنا فور إضافتها في نظام سجل المهارات.</div>
+                <div style="font-weight:600; color: var(--q-text-primary);">{{ __('messages.dr_no_skills_registered_title') }}</div>
+                <div style="margin-top: 6px;">{{ __('messages.dr_no_skills_registered_sub') }}</div>
             </div>
         </div>
     @else
         @foreach($semesters as $semester)
             @php
-                $semesterName = data_get($semester, 'semester_name', data_get($semester, 'name', 'فصل غير محدد'));
+                $semesterName = data_get($semester, 'semester_name', data_get($semester, 'name', __('messages.dr_unspecified_semester')));
                 $semesterSkills = data_get($semester, 'skills', data_get($semester, 'items', [])) ?: [];
                 $semesterHours = data_get($semester, 'total_hours');
                 if ($semesterHours === null) {
@@ -1203,12 +1264,12 @@
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     <h3>{{ $semesterName }}</h3>
-                    <span class="dr-pill">{{ number_format((float) $semesterHours, 0) }} ساعة</span>
+                    <span class="dr-pill">{{ __('messages.dr_credit_hours_long', ['n' => number_format((float) $semesterHours, 0)]) }}</span>
                 </div>
                 <div class="dr-skill-list">
                     @forelse(($semesterSkills ?? []) as $skill)
                         @php
-                            $title = data_get($skill, 'skill_name', data_get($skill, 'name', 'مهارة'));
+                            $title = data_get($skill, 'skill_name', data_get($skill, 'name', __('messages.dr_default_skill')));
                             $rawCategory = data_get($skill, 'category_name', data_get($skill, 'skill_category'));
                             $category = is_array($rawCategory) || is_object($rawCategory)
                                 ? data_get($rawCategory, 'name')
@@ -1222,9 +1283,9 @@
                                 default    => 'dr-status-accepted',
                             };
                             $statusLabel = match ($status) {
-                                'pending'  => 'قيد المراجعة',
-                                'rejected' => 'مرفوض',
-                                default    => 'معتمد',
+                                'pending'  => __('messages.dr_status_pending'),
+                                'rejected' => __('messages.dr_status_rejected'),
+                                default    => __('messages.dr_status_accepted'),
                             };
                         @endphp
                         <div class="dr-skill">
@@ -1240,11 +1301,11 @@
                                     <div class="dr-skill-meta">{{ $category }}</div>
                                 @endif
                             </div>
-                            <span class="dr-skill-hours">{{ number_format((float) $hours, 0) }} س</span>
+                            <span class="dr-skill-hours">{{ number_format((float) $hours, 0) }} {{ __('messages.dr_hours_short_unit') }}</span>
                             <span class="dr-status {{ $statusClass }}">{{ $statusLabel }}</span>
                         </div>
                     @empty
-                        <div class="dr-empty" style="padding: var(--q-space-5);">لا توجد مهارات في هذا الفصل.</div>
+                        <div class="dr-empty" style="padding: var(--q-space-5);">{{ __('messages.dr_no_skills_in_semester') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -1254,9 +1315,27 @@
 </div>
 
 @push('scripts')
+@php
+    $drI18nData = [
+        'matched'       => __('messages.dr_chart_label_match'),
+        'gap'           => __('messages.dr_chart_label_gap'),
+        'relevance'     => __('messages.dr_chart_label_relevance'),
+        'market_weight' => __('messages.dr_chart_label_market_weight'),
+        'hours'         => __('messages.dr_chart_label_hours'),
+        'grade'         => __('messages.dr_chart_label_grade'),
+        'fit_prefix'    => __('messages.dr_chart_tooltip_fit_prefix'),
+        'grade_suffix'  => __('messages.dr_chart_tooltip_grade_suffix'),
+        'hours_unit'    => __('messages.dr_chart_tooltip_hours_unit'),
+        'skill_suffix'  => __('messages.dr_chart_tooltip_skill_suffix'),
+        'score_prefix'  => __('messages.dr_chart_tooltip_score_prefix'),
+        'rating_suffix' => __('messages.dr_chart_tooltip_rating_suffix'),
+    ];
+@endphp
 <script>
 (function () {
     // (AI loader overlay logic now lives in resources/views/digital-record/_loader.blade.php)
+    var drI18n = @json($drI18nData);
+    var drIsRtl = @json(app()->getLocale() === 'ar');
 
     // Tab switching for AI recommendations
     document.querySelectorAll('.dr-ai-tabs .dr-tab').forEach(function (btn) {
@@ -1286,7 +1365,7 @@
         new Chart(canvas, {
             type: 'doughnut',
             data: {
-                labels: ['مطابقة', 'فجوة'],
+                labels: [drI18n.matched, drI18n.gap],
                 datasets: [{
                     data: [data.matched || 0, data.gap || 0],
                     backgroundColor: ['#25935F', '#B8EACB'],
@@ -1301,8 +1380,8 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        rtl: true,
-                        textDirection: 'rtl',
+                        rtl: drIsRtl,
+                        textDirection: drIsRtl ? 'rtl' : 'ltr',
                         callbacks: { label: function (ctx) { return ' ' + ctx.label + ': ' + ctx.parsed; } },
                     },
                 },
@@ -1321,7 +1400,7 @@
             data: {
                 labels: ordered.map(function (d) { return d.label; }),
                 datasets: [{
-                    label: 'درجة التوافق',
+                    label: drI18n.relevance,
                     data: ordered.map(function (d) { return d.relevance; }),
                     backgroundColor: '#25935F',
                     borderRadius: 6,
@@ -1335,12 +1414,12 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        rtl: true,
-                        textDirection: 'rtl',
+                        rtl: drIsRtl,
+                        textDirection: drIsRtl ? 'rtl' : 'ltr',
                         callbacks: {
                             label: function (ctx) {
                                 var row = ordered[ctx.dataIndex] || {};
-                                return ' توافق: ' + ctx.parsed.x + '  · درجة: ' + (row.grade || '—');
+                                return drI18n.fit_prefix + ctx.parsed.x + drI18n.grade_suffix + (row.grade || '—');
                             },
                         },
                     },
@@ -1363,7 +1442,7 @@
             data: {
                 labels: ordered.map(function (d) { return d.label; }),
                 datasets: [{
-                    label: 'وزن السوق',
+                    label: drI18n.market_weight,
                     data: ordered.map(function (d) { return d.weight; }),
                     backgroundColor: '#9FD1B0',
                     borderRadius: 6,
@@ -1376,7 +1455,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { rtl: true, textDirection: 'rtl' },
+                    tooltip: { rtl: drIsRtl, textDirection: drIsRtl ? 'rtl' : 'ltr' },
                 },
                 scales: {
                     x: { beginAtZero: true, max: 100, grid: { display: false }, ticks: { color: '#6B7280', callback: function (v) { return v + '%'; } } },
@@ -1395,7 +1474,7 @@
             data: {
                 labels: data.map(function (d) { return d.label; }),
                 datasets: [{
-                    label: 'الساعات',
+                    label: drI18n.hours,
                     data: data.map(function (d) { return d.hours; }),
                     borderColor: '#25935F',
                     backgroundColor: 'rgba(37,147,95,0.12)',
@@ -1412,12 +1491,12 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        rtl: true,
-                        textDirection: 'rtl',
+                        rtl: drIsRtl,
+                        textDirection: drIsRtl ? 'rtl' : 'ltr',
                         callbacks: {
                             label: function (ctx) {
                                 var row = data[ctx.dataIndex] || {};
-                                return ' ' + ctx.parsed.y + ' ساعة · ' + (row.count || 0) + ' مهارة';
+                                return ' ' + ctx.parsed.y + drI18n.hours_unit + (row.count || 0) + drI18n.skill_suffix;
                             },
                         },
                     },
@@ -1451,8 +1530,8 @@
                 maintainAspectRatio: false,
                 cutout: '55%',
                 plugins: {
-                    legend: { position: 'bottom', rtl: true, textDirection: 'rtl', labels: { boxWidth: 10, padding: 8, font: { size: 11 } } },
-                    tooltip: { rtl: true, textDirection: 'rtl' },
+                    legend: { position: 'bottom', rtl: drIsRtl, textDirection: drIsRtl ? 'rtl' : 'ltr', labels: { boxWidth: 10, padding: 8, font: { size: 11 } } },
+                    tooltip: { rtl: drIsRtl, textDirection: drIsRtl ? 'rtl' : 'ltr' },
                 },
             },
         });
@@ -1469,7 +1548,7 @@
             data: {
                 labels: ordered.map(function (d) { return d.label; }),
                 datasets: [{
-                    label: 'الدرجة',
+                    label: drI18n.grade,
                     data: ordered.map(function (d) { return d.score; }),
                     backgroundColor: '#25935F',
                     borderRadius: 6,
@@ -1483,12 +1562,12 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        rtl: true,
-                        textDirection: 'rtl',
+                        rtl: drIsRtl,
+                        textDirection: drIsRtl ? 'rtl' : 'ltr',
                         callbacks: {
                             label: function (ctx) {
                                 var row = ordered[ctx.dataIndex] || {};
-                                return ' الدرجة: ' + ctx.parsed.x + '  · التقدير: ' + (row.grade || '—');
+                                return drI18n.score_prefix + ctx.parsed.x + drI18n.rating_suffix + (row.grade || '—');
                             },
                         },
                     },

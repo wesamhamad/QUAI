@@ -55,7 +55,10 @@ class DigitalRecordController extends Controller
 
         $semesterId  = $request->query('semester');
         $student     = DemoData::findStudent($studentId) ?? DemoData::students()[0];
-        $studentName = $student['name'];
+        $isEnLocale  = app()->getLocale() === 'en';
+        $studentName = $isEnLocale && !empty($student['name_en'])
+            ? $student['name_en']
+            : $student['name'];
 
         $skillsResult = DemoData::skills($studentId);
         $countsResult = DemoData::skillsCount($studentId);
@@ -63,10 +66,10 @@ class DigitalRecordController extends Controller
         $topCourses   = DemoData::topCourses($studentId);
 
         $profile = [
-            'major'      => $student['major'],
-            'major_en'   => $student['major'],
-            'faculty'    => $student['faculty'],
-            'faculty_en' => $student['faculty'],
+            'major'      => $isEnLocale && !empty($student['major_en'])   ? $student['major_en']   : $student['major'],
+            'major_en'   => $student['major_en']   ?? $student['major'],
+            'faculty'    => $isEnLocale && !empty($student['faculty_en']) ? $student['faculty_en'] : $student['faculty'],
+            'faculty_en' => $student['faculty_en'] ?? $student['faculty'],
             'gpa'        => $student['gpa'],
         ];
 
@@ -104,6 +107,8 @@ class DigitalRecordController extends Controller
      */
     private function buildCharts(?array $analysis, array $topCourses, ?array $skillsResult, array $grades = []): array
     {
+        $isEn = app()->getLocale() === 'en';
+
         // 1) Market alignment — matched vs gap (count + percentage)
         $marketSkills = $analysis['market_skills'] ?? [];
         $matchedCount = count(array_filter($marketSkills, fn ($m) => !empty($m['matched'])));
@@ -115,7 +120,12 @@ class DigitalRecordController extends Controller
             ->filter(fn ($c) => ($c['relevance'] ?? 0) > 0)
             ->take(6)
             ->map(fn ($c) => [
-                'label'     => mb_substr((string) ($c['course_name'] ?? $c['course_code'] ?? '—'), 0, 32),
+                'label'     => mb_substr(
+                    (string) (($isEn && !empty($c['course_name_en']))
+                        ? $c['course_name_en']
+                        : ($c['course_name'] ?? $c['course_code'] ?? '—')),
+                    0, 32
+                ),
                 'relevance' => (int) ($c['relevance'] ?? 0),
                 'grade'     => (string) ($c['letter_grade'] ?? '—'),
             ])
@@ -139,7 +149,9 @@ class DigitalRecordController extends Controller
         $topGaps = collect($analysis['gap_skills'] ?? [])
             ->take(5)
             ->map(fn ($g) => [
-                'label'  => (string) ($g['skill'] ?? ''),
+                'label'  => (string) (($isEn && !empty($g['skill_en']))
+                    ? $g['skill_en']
+                    : ($g['skill'] ?? '')),
                 'weight' => (int) ($g['weight'] ?? 0),
             ])
             ->values()

@@ -1,34 +1,34 @@
 @extends('qspark::layouts.app')
 
-@section('title', 'قائمة الطلاب - Q SPARK')
+@section('title', __('messages.student_list_page_title'))
 
 @section('content')
 <div class="p-3 sm:p-6 space-y-4 sm:space-y-6">
-    <h2 class="text-xl sm:text-3xl font-extrabold">قائمة الطلاب</h2>
+    <h2 class="text-xl sm:text-3xl font-extrabold">{{ __('messages.student_list_heading') }}</h2>
 
     <div class="bg-white rounded-2xl shadow overflow-hidden">
         <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-            <h3 class="text-base sm:text-xl font-bold">جميع الطلاب</h3>
+            <h3 class="text-base sm:text-xl font-bold">{{ __('messages.all_students') }}</h3>
         </div>
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الطالب</th>
-                        <th class="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                        <th class="hidden md:table-cell px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
-                        <th class="hidden sm:table-cell px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">المقررات</th>
+                        <th class="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.student_number') }}</th>
+                        <th class="px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.student_name_label') }}</th>
+                        <th class="hidden md:table-cell px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.student_email_label') }}</th>
+                        <th class="hidden sm:table-cell px-3 sm:px-6 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.courses') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($students as $student)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap align-top">
-                                <div class="text-xs sm:text-sm font-medium text-gray-900 number">{{ $student->student_id ?? 'غير متوفر' }}</div>
+                                <div class="text-xs sm:text-sm font-medium text-gray-900 number">{{ $student->student_id ?? __('messages.not_available') }}</div>
                             </td>
                             <td class="px-3 sm:px-6 py-3 sm:py-4 align-top">
-                                <div class="text-xs sm:text-sm font-medium text-gray-900 break-words">{{ $student->student_name ?? 'غير متوفر' }}</div>
+                                <div class="text-xs sm:text-sm font-medium text-gray-900 break-words">{{ $student->student_name ?? __('messages.not_available') }}</div>
                                 {{-- On phones, surface email + courses inline since the dedicated columns are hidden. --}}
                                 <div class="md:hidden text-[11px] text-gray-500 mt-1 break-all">{{ $student->student_email ?? '' }}</div>
                                 <div class="sm:hidden flex flex-wrap gap-1 mt-1">
@@ -42,7 +42,7 @@
                                 </div>
                             </td>
                             <td class="hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap align-top">
-                                <div class="text-sm text-gray-500">{{ $student->student_email ?? 'غير متوفر' }}</div>
+                                <div class="text-sm text-gray-500">{{ $student->student_email ?? __('messages.not_available') }}</div>
                             </td>
                             <td class="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 align-top">
                                 <div class="flex flex-wrap gap-1">
@@ -53,7 +53,7 @@
                                             </span>
                                         @endforeach
                                     @else
-                                        <span class="text-xs text-gray-400">لا توجد مقررات</span>
+                                        <span class="text-xs text-gray-400">{{ __('messages.no_courses_short') }}</span>
                                     @endif
                                 </div>
                             </td>
@@ -61,7 +61,7 @@
                     @empty
                         <tr>
                             <td colspan="4" class="px-3 sm:px-6 py-4 text-center text-gray-500">
-                                لا يوجد طلاب
+                                {{ __('messages.no_students_found') }}
                             </td>
                         </tr>
                     @endforelse

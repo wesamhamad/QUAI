@@ -33,7 +33,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 text-sm sm:text-base">
         <div class="min-w-0">
           <span class="text-gray-600">{{ __('messages.name_label_colon') }}</span>
-          <span class="font-semibold break-words">{{ $studentProfile['name'] ?? __('messages.not_available') }}</span>
+          @php
+            $profileName = app()->getLocale() === 'en'
+              ? (($studentProfile['name_en'] ?? null) ?: ($studentProfile['name'] ?? __('messages.not_available')))
+              : (($studentProfile['name'] ?? null) ?: ($studentProfile['name_en'] ?? __('messages.not_available')));
+          @endphp
+          <span class="font-semibold break-words" dir="auto">{{ $profileName }}</span>
         </div>
         <div class="min-w-0">
           <span class="text-gray-600">{{ __('messages.student_id_label_colon') }}</span>
@@ -51,21 +56,21 @@
   @if(isset($groupedCourses) && !empty($groupedCourses))
     @foreach($groupedCourses as $categoryName => $groupTypes)
       <div class="bg-white rounded-2xl p-4 sm:p-6 shadow">
-        <h3 class="font-bold text-lg sm:text-2xl mb-3 sm:mb-4 text-dga-primary-600 break-words">{{ $categoryName }}</h3>
+        <h3 class="font-bold text-lg sm:text-2xl mb-3 sm:mb-4 text-dga-primary-600 break-words" dir="auto">{{ $sisLabel($categoryName) }}</h3>
 
         @foreach($groupTypes as $groupTypeName => $courses)
           <div class="mb-4 sm:mb-6 last:mb-0">
-            <h4 class="font-semibold text-sm sm:text-lg mb-2 sm:mb-3 text-gray-700 break-words">{{ $groupTypeName }}</h4>
+            <h4 class="font-semibold text-sm sm:text-lg mb-2 sm:mb-3 text-gray-700 break-words" dir="auto">{{ $sisLabel($groupTypeName) }}</h4>
 
             {{-- Mobile: stacked cards (one per course). --}}
             <ul class="sm:hidden space-y-2">
               @foreach($courses as $course)
                 <li class="rounded-xl border border-gray-200 p-3 text-sm">
                   <div class="flex items-start justify-between gap-2">
-                    <div class="font-medium text-gray-900 break-words min-w-0">
-                      {{ $course->course_name ?? __('messages.not_available') }}
+                    <div class="font-medium text-gray-900 break-words min-w-0" dir="auto">
+                      {{ ($course->course_name ?? null) ? $courseLabel($course->course_code ?? '', $course->course_name) : __('messages.not_available') }}
                     </div>
-                    <span class="font-semibold text-dga-primary-600 shrink-0">
+                    <span class="font-semibold text-dga-primary-600 shrink-0" dir="auto">
                       {{ $course->letter_grade ?? __('messages.not_available') }}
                     </span>
                   </div>
@@ -94,13 +99,13 @@
                       <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {{ $course->course_code ?? __('messages.not_available') }}
                       </td>
-                      <td class="px-4 lg:px-6 py-3 lg:py-4 text-sm text-gray-900">
-                        {{ $course->course_name ?? __('messages.not_available') }}
+                      <td class="px-4 lg:px-6 py-3 lg:py-4 text-sm text-gray-900" dir="auto">
+                        {{ ($course->course_name ?? null) ? $courseLabel($course->course_code ?? '', $course->course_name) : __('messages.not_available') }}
                       </td>
                       <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ $course->semester ?? __('messages.not_available') }}
                       </td>
-                      <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-semibold">
+                      <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-semibold" dir="auto">
                         {{ $course->letter_grade ?? __('messages.not_available') }}
                       </td>
                     </tr>
@@ -128,10 +133,10 @@
         @foreach($courses as $course)
           <li class="rounded-xl border border-gray-200 p-3 text-sm">
             <div class="flex items-start justify-between gap-2">
-              <div class="font-medium text-gray-900 break-words min-w-0">
-                {{ $course->course_name ?? __('messages.not_available') }}
+              <div class="font-medium text-gray-900 break-words min-w-0" dir="auto">
+                {{ ($course->course_name ?? null) ? $courseLabel($course->course_code ?? '', $course->course_name) : __('messages.not_available') }}
               </div>
-              <span class="font-semibold text-dga-primary-600 shrink-0">
+              <span class="font-semibold text-dga-primary-600 shrink-0" dir="auto">
                 {{ $course->letter_grade ?? __('messages.not_available') }}
               </span>
             </div>
@@ -139,10 +144,10 @@
               <span>{{ $course->course_code ?? __('messages.not_available') }}</span>
               <span>{{ $course->semester ?? __('messages.not_available') }}</span>
               @if(!empty($course->category_name))
-                <span class="break-words">{{ $course->category_name }}</span>
+                <span class="break-words" dir="auto">{{ $sisLabel($course->category_name) }}</span>
               @endif
               @if(!empty($course->group_type_name))
-                <span class="break-words">{{ $course->group_type_name }}</span>
+                <span class="break-words" dir="auto">{{ $sisLabel($course->group_type_name) }}</span>
               @endif
             </div>
           </li>
@@ -168,13 +173,13 @@
             @foreach($courses as $course)
               <tr class="hover:bg-gray-50">
                 <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-medium">{{ $course->course_code ?? __('messages.not_available') }}</td>
-                <td class="px-4 lg:px-6 py-3 lg:py-4 text-sm">{{ $course->course_name ?? __('messages.not_available') }}</td>
-                <td class="hidden lg:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm">{{ $course->faculty_name ?? __('messages.not_available') }}</td>
-                <td class="hidden lg:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm">{{ $course->major_name ?? __('messages.not_available') }}</td>
-                <td class="hidden md:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm">{{ $course->category_name ?? __('messages.not_available') }}</td>
-                <td class="hidden md:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm">{{ $course->group_type_name ?? __('messages.not_available') }}</td>
+                <td class="px-4 lg:px-6 py-3 lg:py-4 text-sm" dir="auto">{{ ($course->course_name ?? null) ? $courseLabel($course->course_code ?? '', $course->course_name) : __('messages.not_available') }}</td>
+                <td class="hidden lg:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm" dir="auto">{{ $course->faculty_name ?? __('messages.not_available') }}</td>
+                <td class="hidden lg:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm" dir="auto">{{ $course->major_name ?? __('messages.not_available') }}</td>
+                <td class="hidden md:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm" dir="auto">{{ $sisLabel($course->category_name ?? '') ?: __('messages.not_available') }}</td>
+                <td class="hidden md:table-cell px-4 lg:px-6 py-3 lg:py-4 text-sm" dir="auto">{{ $sisLabel($course->group_type_name ?? '') ?: __('messages.not_available') }}</td>
                 <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm">{{ $course->semester ?? __('messages.not_available') }}</td>
-                <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-semibold">{{ $course->letter_grade ?? __('messages.not_available') }}</td>
+                <td class="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap text-sm font-semibold" dir="auto">{{ $course->letter_grade ?? __('messages.not_available') }}</td>
               </tr>
             @endforeach
           </tbody>

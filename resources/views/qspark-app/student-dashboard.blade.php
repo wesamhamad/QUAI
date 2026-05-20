@@ -140,14 +140,14 @@
       <div class="mt-4">
   <div class="flex flex-wrap gap-2">
     @if($nearestExam)
-      <span class="bg-[#88D8AD] text-white text-xs py-1 px-2 rounded-full">
-        {{ $nearestExam['course'] ?? '' }} : {{ intval($nearestExam['days_left']) }} {{ __('messages.days') }}
+      <span class="bg-[#88D8AD] text-white text-xs py-1 px-2 rounded-full" dir="auto">
+        {{ $courseLabel($nearestExam['course_code'] ?? '', $nearestExam['course'] ?? '') }} : {{ intval($nearestExam['days_left']) }} {{ __('messages.days') }}
       </span>
     @endif
 
     @forelse ($nextTwoExams as $exam)
-      <span class="bg-[#88D8AD] text-white text-xs py-1 px-2 rounded-full">
-        {{ $exam['course'] }} : {{ intval($exam['days_left']) }} {{ __('messages.days') }}
+      <span class="bg-[#88D8AD] text-white text-xs py-1 px-2 rounded-full" dir="auto">
+        {{ $courseLabel($exam['course_code'] ?? '', $exam['course'] ?? '') }} : {{ intval($exam['days_left']) }} {{ __('messages.days') }}
       </span>
     @empty
       <span class="text-xs text-gray-500">{{ __('messages.no_upcoming_exams') }}</span>
@@ -253,11 +253,11 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
                             <span class="w-3 h-3 {{ $dotColor }} rounded-full"></span>
                             <div>
-                                <p class="text-gray-800 font-medium">{{ $class['course_name'] }}</p>
+                                <p class="text-gray-800 font-medium" dir="auto">{{ $courseLabel($class['course_code'] ?? '', $class['course_name'] ?? '') }}</p>
                                 <p class="text-gray-500 text-sm time">{{ $class['start'] }} - {{ $class['end'] }}</p>
                             </div>
                         </div>
-                        <span class="text-xs px-3 py-1 rounded-full {{ $badgeColor }}">{{ $class['activity_desc'] }}</span>
+                        <span class="text-xs px-3 py-1 rounded-full {{ $badgeColor }}" dir="auto">{{ $sisLabel($class['activity_desc'] ?? '') }}</span>
                     </div>
                 @endforeach
             @else
@@ -273,11 +273,11 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
                             <span class="w-3 h-3 {{ $dotColor }} rounded-full"></span>
                             <div>
-                                <p class="text-gray-800 font-medium">{{ $class['course_name'] }}</p>
+                                <p class="text-gray-800 font-medium" dir="auto">{{ $courseLabel($class['course_code'] ?? '', $class['course_name'] ?? '') }}</p>
                                 <p class="text-gray-500 text-sm time">{{ $class['start'] }} - {{ $class['end'] }}</p>
                             </div>
                         </div>
-                        <span class="text-xs px-3 py-1 rounded-full {{ $badgeColor }}">{{ $class['activity_desc'] }}</span>
+                        <span class="text-xs px-3 py-1 rounded-full {{ $badgeColor }}" dir="auto">{{ $sisLabel($class['activity_desc'] ?? '') }}</span>
                     </div>
                 @empty
                     <div class="text-center py-8">
@@ -378,8 +378,8 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
               <div class="flex items-start space-x-3 rtl:space-x-reverse">
                 <span class="w-3 h-3 mt-1 {{ $dotColor }} rounded-full"></span>
                 <div>
-                  <p class="text-gray-800 font-medium">{{ $exam['course_code'] }} - {{ $exam['course_name'] }}</p>
-                  <p class="text-gray-500 text-xs">{{ $exam['activity']['name'] }}</p>
+                  <p class="text-gray-800 font-medium" dir="auto">{{ $exam['course_code'] }} - {{ $courseLabel($exam['course_code'] ?? '', $exam['course_name'] ?? '') }}</p>
+                  <p class="text-gray-500 text-xs" dir="auto">{{ $sisLabel($exam['activity']['name'] ?? '') }}</p>
                 </div>
               </div>
 
@@ -395,7 +395,7 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
                   </div>
                   <div>
                     <span class="font-semibold">{{ __('messages.location') }}:</span>
-                    <span>{{ $examDetails['campus_name'] }}</span>
+                    <span dir="auto">{{ $sisLabel($examDetails['campus_name'] ?? '') }}</span>
                   </div>
                 @else
                   <p class="text-gray-400">{{ __('messages.no_final_exam_entered') }}</p>
@@ -416,10 +416,18 @@ $todayName = \Carbon\Carbon::now()->locale('en')->format('l'); // "Thursday", "M
       <!-- المساعد الذكي -->
       <div class="bg-white rounded-2xl p-4 shadow text-center">
         <img src="{{ asset('game/images/waving_character_transparent.png') }}" alt="Character" class="w-48 h-60 mx-auto mb-4 object-contain">
+        @php
+          // Greet by the locale-appropriate name, falling back to the other
+          // language when one side is missing so a single-language profile
+          // never renders an empty greeting.
+          $greetingName = app()->getLocale() === 'en'
+            ? (($studentEnglishName ?? null) ?: ($studentArabicName ?? ''))
+            : (($studentArabicName ?? null) ?: ($studentEnglishName ?? ''));
+        @endphp
         @if($timePeriod === 'AM')
-          <h3 class="font-bold text-lg mb-2">{{ __('messages.good_morning') }}, {{$studentArabicName}}!</h3>
+          <h3 class="font-bold text-lg mb-2">{{ __('messages.good_morning') }}, <span dir="auto">{{ $greetingName }}</span>!</h3>
         @else
-          <h3 class="font-bold text-lg mb-2">{{ __('messages.good_evening') }}, {{$studentArabicName}}!</h3>
+          <h3 class="font-bold text-lg mb-2">{{ __('messages.good_evening') }}, <span dir="auto">{{ $greetingName }}</span>!</h3>
         @endif
 
         @if($gender === 'Female')

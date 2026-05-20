@@ -11,9 +11,18 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
-        // Demo is Arabic-only — always render in Arabic regardless of session.
-        App::setLocale('ar');
-        Session::put('locale', 'ar');
+        // Locale resolution: explicit ?lang= override, then session, then default (ar).
+        $supported = ['ar', 'en'];
+        $locale = $request->query('lang')
+            ?? Session::get('locale')
+            ?? config('app.locale', 'ar');
+
+        if (! \in_array($locale, $supported, true)) {
+            $locale = 'ar';
+        }
+
+        App::setLocale($locale);
+        Session::put('locale', $locale);
 
         return $next($request);
     }

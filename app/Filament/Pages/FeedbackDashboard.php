@@ -8,10 +8,6 @@ class FeedbackDashboard extends DecisionDashboardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-light-bulb';
 
-    protected static ?string $navigationLabel = 'لوحة الأفكار — تطبيق MyQU';
-
-    protected static ?string $title = 'لوحة الأفكار — تطبيق MyQU';
-
     protected static ?int $navigationSort = 6;
 
     protected static ?string $slug = 'dashboards/feedback';
@@ -19,5 +15,15 @@ class FeedbackDashboard extends DecisionDashboardPage
     protected function dashboardSlug(): string
     {
         return 'feedback';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('messages.dashboard_feedback');
+    }
+
+    public function getTitle(): string
+    {
+        return __('messages.dashboard_feedback');
     }
 }

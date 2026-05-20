@@ -211,23 +211,43 @@ const severityFill: Record<Severity, string> = {
   critical: '#D92D20',
 };
 
+// Indicators where a higher numeric value means a *better* outcome (GPA-like).
+// Matches the inverted-gauge list so trend semantics and gauge zones stay consistent.
+const HIGHER_IS_BETTER_IDS = new Set(['G-02', 'G-04', 'G-07']);
+
 function getTrendDirection(data: number[]): 'up' | 'down' | 'flat' {
   if (data.length < 2) return 'flat';
+  const first = data[0];
   const last = data[data.length - 1];
-  const prev = data[data.length - 2];
-  if (last > prev) return 'up';
-  if (last < prev) return 'down';
+  const range = Math.max(...data) - Math.min(...data);
+  // Tolerance scales with the data range so tiny wiggles don't flip the label,
+  // but a clear 16.7→50 rise still registers as movement.
+  const tolerance = Math.max(range * 0.05, 0.001);
+  const diff = last - first;
+  if (diff > tolerance) return 'up';
+  if (diff < -tolerance) return 'down';
   return 'flat';
+}
+
+/** Maps raw direction to user-facing semantics. For absence/missing-assignments/
+ *  warnings, an upward trend is *worsening*; for GPA-like indicators it's improving. */
+function getSemanticTrend(indicator: Indicator): 'improving' | 'declining' | 'stable' {
+  const dir = getTrendDirection(indicator.weeklyData);
+  if (dir === 'flat') return 'stable';
+  const higherIsBetter = HIGHER_IS_BETTER_IDS.has(indicator.id);
+  const wentUp = dir === 'up';
+  return wentUp === higherIsBetter ? 'improving' : 'declining';
 }
 
 // ── Threshold Gauge Component ─────────────────────────────────────────
 
 function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string, en: string) => string }) {
+  const { dir } = useLanguage();
   const { thresholds, numericValue } = indicator;
   const { max } = thresholds;
 
   // For GPA-like indicators where lower thresholds mean worse (inverted)
-  const isInverted = indicator.id === 'G-02' || indicator.id === 'G-04' || indicator.id === 'G-07';
+  const isInverted = HIGHER_IS_BETTER_IDS.has(indicator.id);
 
   const segments = isInverted
     ? [
@@ -245,6 +265,10 @@ function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string
       ];
 
   const markerPercent = Math.min(Math.max((numericValue / max) * 100, 2), 98);
+  // In RTL the flex segments render right-to-left, so a `left` offset would land
+  // the marker on the wrong zone. Mirror the offset so the marker tracks the
+  // visual order of segments regardless of direction.
+  const markerLeftPercent = dir === 'rtl' ? 100 - markerPercent : markerPercent;
 
   return (
     <div className="space-y-3">
@@ -270,7 +294,7 @@ function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string
         {/* Marker */}
         <div
           className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
-          style={{ left: `${markerPercent}%` }}
+          style={{ left: `${markerLeftPercent}%` }}
         >
           <div className="w-0.5 h-5 bg-gray-900 dark:bg-white" />
           <div className="mt-1 w-3 h-3 rotate-45 bg-gray-900 dark:bg-white rounded-sm -translate-y-0.5" />
@@ -736,22 +760,37 @@ function overrideGpaIndicator(
   transactions: TransactionSemester[] | null,
 ): Indicator {
   const academic = profile?.profile?.academic ?? profile?.academic ?? null;
-  const cumulative = academic
+  const cumulativeRaw = academic
     ? parseFloat(String(academic.last_recorded_gpa ?? academic.cumulative_gpa ?? '0'))
     : 0;
-  if (cumulative === 0 && (!transactions || transactions.length === 0)) return base;
 
   const semesterGpas = (transactions ?? [])
     .map(s => parseFloat(String(s.semester_gpa ?? '0')))
     .filter(n => !Number.isNaN(n) && n > 0);
+
+  // Fall back to the most recent semester GPA when the cumulative isn't on
+  // file yet, so the card doesn't read 0.00 GPA while the chart shows real
+  // semester GPAs alongside it.
+  const cumulative = cumulativeRaw > 0
+    ? cumulativeRaw
+    : (semesterGpas.length > 0 ? semesterGpas[semesterGpas.length - 1] : 0);
+
+  if (cumulative === 0 && semesterGpas.length === 0) return base;
+
   const trendData = semesterGpas.length >= 2 ? semesterGpas.slice(-4) : [cumulative, cumulative, cumulative, cumulative];
 
-  const severity: Severity =
-    cumulative === 0 ? base.severity
-    : cumulative >= 3.5 ? 'low'
-    : cumulative >= 2.5 ? 'medium'
-    : cumulative >= 2.0 ? 'high'
-    : 'critical';
+  // Detect a 5-point grading scale (Saudi system) by looking at the largest
+  // observed value; swap to matching thresholds so the gauge zones line up
+  // with the actual data range.
+  const maxObserved = Math.max(cumulative, ...trendData);
+  const isFivePointScale = maxObserved > 4;
+  const thresholds = isFivePointScale
+    ? { low: 4.5, medium: 3.75, high: 2.75, critical: 2.0, max: 5.0 }
+    : base.thresholds;
+
+  const severity: Severity = isFivePointScale
+    ? (cumulative >= 4.5 ? 'low' : cumulative >= 3.75 ? 'medium' : cumulative >= 2.75 ? 'high' : 'critical')
+    : (cumulative >= 3.5 ? 'low' : cumulative >= 2.5 ? 'medium' : cumulative >= 2.0 ? 'high' : 'critical');
 
   const events: ContextualEvent[] = (transactions ?? [])
     .slice(-3)
@@ -767,6 +806,7 @@ function overrideGpaIndicator(
     value: cumulative.toFixed(2),
     numericValue: cumulative,
     severity,
+    thresholds,
     weeklyData: trendData,
     weekLabelsAr: trendData.map((_, i) => `الفصل ${i + 1}`),
     weekLabelsEn: trendData.map((_, i) => `Semester ${i + 1}`),
@@ -968,7 +1008,7 @@ export default function IndicatorDetail() {
 
   const selected = indicators.find((ind) => ind.id === selectedId) ?? indicators[0];
   const sev = severityConfig[selected.severity];
-  const trend = getTrendDirection(selected.weeklyData);
+  const trend = getSemanticTrend(selected);
   const Chevron = dir === 'rtl' ? ChevronLeft : ChevronRight;
 
   // Academic-standing escalation for the active student — drives the banner
@@ -1060,12 +1100,12 @@ export default function IndicatorDetail() {
 
             {/* Trend badge */}
             <div className="flex items-center justify-center gap-1.5 text-sm">
-              {trend === 'down' ? (
+              {trend === 'declining' ? (
                 <>
                   <TrendingDown className="w-4 h-4 text-red-500" />
                   <span className="text-red-600 dark:text-red-400 font-medium">{t('في تراجع', 'Declining')}</span>
                 </>
-              ) : trend === 'up' ? (
+              ) : trend === 'improving' ? (
                 <>
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
                   <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t('في تحسّن', 'Improving')}</span>
@@ -1151,8 +1191,8 @@ export default function IndicatorDetail() {
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
                 {t(
-                  `المؤشر ${selected.id} (${selected.nameAr}) بقيمة حالية ${selected.value} ومستوى ${sev.labelAr}. يُظهر الاتجاه ${trend === 'down' ? 'تراجعاً' : trend === 'up' ? 'تحسّناً' : 'استقراراً'} خلال الأسابيع الأربعة الماضية. يوجد ${selected.contextualEvents.length} أحداث سياقية مسجّلة.`,
-                  `Indicator ${selected.id} (${selected.nameEn}) has a current value of ${selected.value} at ${sev.labelEn} level. The trend shows ${trend === 'down' ? 'a decline' : trend === 'up' ? 'improvement' : 'stability'} over the past 4 weeks. There are ${selected.contextualEvents.length} contextual events recorded.`
+                  `المؤشر ${selected.id} (${selected.nameAr}) بقيمة حالية ${selected.value} ومستوى ${sev.labelAr}. يُظهر الاتجاه ${trend === 'declining' ? 'تراجعاً' : trend === 'improving' ? 'تحسّناً' : 'استقراراً'} خلال الأسابيع الأربعة الماضية. يوجد ${selected.contextualEvents.length} أحداث سياقية مسجّلة.`,
+                  `Indicator ${selected.id} (${selected.nameEn}) has a current value of ${selected.value} at ${sev.labelEn} level. The trend shows ${trend === 'declining' ? 'a decline' : trend === 'improving' ? 'improvement' : 'stability'} over the past 4 weeks. There are ${selected.contextualEvents.length} contextual events recorded.`
                 )}
               </p>
             </div>

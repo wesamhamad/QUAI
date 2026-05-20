@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'QUAI - منصة الذكاء الاصطناعي')
-@section('page-title', 'الرئيسية')
+@section('title', __('messages.app_title_default'))
+@section('page-title', __('messages.nav_home'))
 
 @section('content')
 @php
@@ -32,8 +32,7 @@
             <div style="flex: 1; min-width: 240px;">
                 <h1 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: white; margin: 0 0 var(--q-space-2) 0; line-height: 1.1; letter-spacing: -0.02em;">QUAI</h1>
                 <p style="font-size: var(--q-font-base); color: rgba(255,255,255,0.92); margin: 0; line-height: var(--q-line-height); max-width: 540px;">
-                    منصة متكاملة لتطبيقات الذكاء الاصطناعي.<br>
-                    اختر التطبيق المناسب لاحتياجاتك.
+                    {!! __('messages.home_hero_tagline') !!}
                 </p>
             </div>
             {{-- AI Brain Illustration (decorative) --}}
@@ -53,10 +52,10 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div style="flex:1;">
-            <div style="font-weight:800; font-size: var(--q-font-lg); color: var(--q-text-primary);">عرض بيانات الطلاب</div>
-            <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary);">استعرض QMentor و +QSpark والسجل الرقمي لأي طالب ضمن صفحة واحدة بعلامات تبويب.</div>
+            <div style="font-weight:800; font-size: var(--q-font-lg); color: var(--q-text-primary);">{{ __('messages.faculty_view_students_title') }}</div>
+            <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary);">{{ __('messages.faculty_view_students_desc') }}</div>
         </div>
-        <div style="color: var(--q-primary); font-weight:700;">←</div>
+        <div style="color: var(--q-primary); font-weight:700;">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</div>
     </a>
     @endif
 
@@ -72,7 +71,7 @@
                     <sup style="font-size: 0.85rem;">+</sup>Q
                     </div>
                     <div>
-                        <p style="font-size: var(--q-font-sm); color: var(--q-primary); font-weight: 600; margin: 0 0 var(--q-space-1) 0;">المنظومة الأكاديمية</p>
+                        <p style="font-size: var(--q-font-sm); color: var(--q-primary); font-weight: 600; margin: 0 0 var(--q-space-1) 0;">{{ __('messages.academic_system') }}</p>
                         <h2 style="font-size: var(--q-font-xl); font-weight: 800; color: var(--q-text-primary); margin: 0;"> +QSpark</h2>
                     </div>
                 </header>
@@ -91,10 +90,10 @@
                             <circle cx="22" cy="14" r="0.7" fill="currentColor" stroke="none"/>
                         </svg>
                     </div>
-                    <div class="q-sub-card-title">المرشد الأكاديمي</div>
+                    <div class="q-sub-card-title">{{ __('messages.qmentor_title') }}</div>
                     <div class="q-sub-card-subtitle">QMentor</div>
                     <p class="q-sub-card-desc">
-                        منصة الإرشاد الأكاديمي الذكي، توفر تحليلات تنبؤية، تنبيهات ذكية، وخطط دراسية مخصصة لكل طالب.
+                        {{ __('messages.qmentor_desc') }}
                     </p>
                 </a>
                 @endif
@@ -109,10 +108,10 @@
                             <line x1="9" y1="17" x2="15" y2="17"/>
                         </svg>
                     </div>
-                    <div class="q-sub-card-title">سجلك الرقمي</div>
-                    <div class="q-sub-card-subtitle">سجل مهاراتك وإنجازاتك</div>
+                    <div class="q-sub-card-title">{{ __('messages.nav_digital_record') }}</div>
+                    <div class="q-sub-card-subtitle">{{ __('messages.digital_record_subtitle') }}</div>
                     <p class="q-sub-card-desc">
-                        سجل ذكي يربط مهاراتك وإنجازاتك واحتياجات سوق العمل، مع تحليل الفجوات ومقترحات التطوير.
+                        {{ __('messages.digital_record_desc') }}
                     </p>
                 </a>
                 @endif
@@ -129,11 +128,11 @@
                             <path d="M13 2 L4 14 h7 l-2 8 9-12 h-7 z"/>
                         </svg>
                     </div>
-                    <div class="q-sub-card-title">منصة التعلم والتجربة الأكاديمية</div>
+                    <div class="q-sub-card-title">{{ __('messages.qspark_card_title') }}</div>
                     <div class="q-sub-card-subtitle">QSpark</div>
                     <p class="q-sub-card-desc">
-                        محتوى تعليمي ذكي، تجارب تعلم تفاعلية، اختبارات وتقييمات ذكية، ومجتمع تعلم تفاعلي.
-                        ستدخل تلقائيًا بنفس صلاحيتك الحالية ({{ $qsparkRole }}).
+                        {{ __('messages.qspark_card_desc') }}
+                        {{ __('messages.qspark_card_role_hint', ['role' => $qsparkRole]) }}
                     </p>
                 </a>
 
@@ -154,7 +153,7 @@
                     </svg>
                 </div>
                 <div>
-                    <p style="font-size: var(--q-font-sm); color: #6B46C1; font-weight: 600; margin: 0 0 var(--q-space-1) 0;">المنظومة الإدارية</p>
+                    <p style="font-size: var(--q-font-sm); color: #6B46C1; font-weight: 600; margin: 0 0 var(--q-space-1) 0;">{{ __('messages.admin_system') }}</p>
                     <h2 style="font-size: var(--q-font-xl); font-weight: 800; color: var(--q-text-primary); margin: 0;">Q Decision Support System</h2>
                 </div>
             </header>
@@ -168,10 +167,10 @@
                             <path d="M7 18h4"/>
                         </svg>
                     </div>
-                    <div class="q-sub-card-title">التقرير الذاتي</div>
+                    <div class="q-sub-card-title">{{ __('messages.self_report_title') }}</div>
                     <div class="q-sub-card-subtitle">Self-Report Dashboard</div>
                     <p class="q-sub-card-desc">
-                        مؤشرات أداء تفاعلية وتحليلات متقدمة للأداء الأكاديمي والمؤسسي مع رؤى لحظية تدعم اتخاذ القرار.
+                        {{ __('messages.self_report_desc') }}
                     </p>
                 </a>
 
@@ -184,10 +183,10 @@
                             <circle cx="15" cy="12" r="0.9" fill="currentColor"/>
                         </svg>
                     </div>
-                    <div class="q-sub-card-title">المستشار الرقمي</div>
+                    <div class="q-sub-card-title">{{ __('messages.nav_digital_advisor') }}</div>
                     <div class="q-sub-card-subtitle">Digital Advisor</div>
                     <p class="q-sub-card-desc">
-                        مساعد ذكي يقدّم توصيات مبنية على البيانات، ينبّه إلى المخاطر، ويقترح إجراءات تحسين فورية.
+                        {{ __('messages.digital_advisor_desc') }}
                     </p>
                 </a>
             </div>
@@ -201,7 +200,7 @@
         <div class="q-card" style="padding: var(--q-space-5); display: flex; align-items: center; gap: var(--q-space-4);">
             <div style="flex-shrink: 0;">
                 <div style="font-size: var(--q-font-3xl); font-weight: 800; color: var(--q-primary); line-height: 1;">24/7</div>
-                <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary); margin-top: var(--q-space-1);">متاح على مدار الساعة</div>
+                <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary); margin-top: var(--q-space-1);">{{ __('messages.available_24_7') }}</div>
             </div>
             <div style="margin-inline-start: auto; width: 48px; height: 48px; background: var(--q-primary-bg, rgba(37,147,95,0.08)); border-radius: var(--q-radius-xl); display: flex; align-items: center; justify-content: center;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--q-primary);">
@@ -213,8 +212,8 @@
 
         <div class="q-card" style="padding: var(--q-space-5); display: flex; align-items: center; gap: var(--q-space-4);">
             <div style="flex-shrink: 0;">
-                <div style="font-size: var(--q-font-lg); font-weight: 700; color: var(--q-text-primary); line-height: 1.2;">تطبيقات ذكية متكاملة</div>
-                <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary); margin-top: var(--q-space-1);">منظومة موحدة لذكاء الجامعة</div>
+                <div style="font-size: var(--q-font-lg); font-weight: 700; color: var(--q-text-primary); line-height: 1.2;">{{ __('messages.integrated_ai_apps') }}</div>
+                <div style="font-size: var(--q-font-sm); color: var(--q-text-secondary); margin-top: var(--q-space-1);">{{ __('messages.unified_university_system') }}</div>
             </div>
             <div style="margin-inline-start: auto; width: 48px; height: 48px; background: var(--q-primary-bg, rgba(37,147,95,0.08)); border-radius: var(--q-radius-xl); display: flex; align-items: center; justify-content: center;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--q-primary);">

@@ -347,6 +347,7 @@ class StudentDashboardController extends Controller
                 foreach ($class['times'] as $time) {
                     if ($time['day']['name'] === $today) {
                         $todayClasses[] = [
+                            'course_code' => $class['course_code'] ?? '',
                             'course_name' => $class['course_name'],
                             'activity_desc' => $class['activity_desc'],
                             'start' => $time['time_slot']['formatted']['start'],
@@ -449,6 +450,7 @@ class StudentDashboardController extends Controller
 
                 if ($daysLeft >= 0) {
                     $upcomingExams[] = [
+                        'course_code' => $exam['course_code'] ?? '',
                         'course' => $exam['course_name'] ?? '—',
                         'date' => $examDate->format('Y-m-d'),
                         'days_left' => $daysLeft,
@@ -1009,7 +1011,7 @@ class StudentDashboardController extends Controller
         return view('qspark::student-recommendations', [
             'studentName' => $dashboardData['studentArabicName'] ?? 'الطالب',
             'recommendation' => $recommendation,
-            'month' => Carbon::now('Asia/Riyadh')->locale('ar')->translatedFormat('F Y'),
+            'month' => Carbon::now('Asia/Riyadh')->locale(app()->getLocale())->translatedFormat('F Y'),
             'gpa' => $dashboardData['gpa'] ?? 0,
             'attendanceRate' => $dashboardData['attendanceRate'] ?? 0,
             'majorName' => $majorName,
@@ -1956,9 +1958,11 @@ class StudentDashboardController extends Controller
      */
     private function createFallbackRecommendation($studentId, $month, $studentData)
     {
-        // Demo dataset: a complete, fully-Arabic recommendation that populates
-        // every section the recommendations page renders. Lightly data-aware
-        // (GPA / attendance) for realism, but never leaves a section empty.
+        // Demo dataset: a complete recommendation that populates every section
+        // the recommendations page renders. Locale-aware (ar/en) and lightly
+        // data-aware (GPA / attendance) for realism.
+        $T = fn (string $ar, string $en) => app()->getLocale() === 'en' ? $en : $ar;
+
         $gpa = (float) ($studentData['gpa'] ?? 0);
         $attendanceRate = (float) ($studentData['attendance_rate'] ?? 0);
         $gpaText = $gpa > 0 ? rtrim(rtrim(number_format($gpa, 2), '0'), '.') : '—';
@@ -1968,87 +1972,136 @@ class StudentDashboardController extends Controller
 
         // ── Strengths ─────────────────────────────────────────────────────
         $strengths = [
-            'التزام واضح بحضور المحاضرات والتفاعل مع المحتوى التعليمي.',
-            'قدرة جيدة على إدارة الوقت بين المقررات المختلفة.',
-            'استخدام منصة كيو سبارك بشكل منتظم لمتابعة التقدم الأكاديمي.',
-            'دافعية عالية نحو تطوير المهارات والحصول على الشهادات المهنية.',
+            $T('التزام واضح بحضور المحاضرات والتفاعل مع المحتوى التعليمي.',
+               'Strong commitment to attending lectures and engaging with course material.'),
+            $T('قدرة جيدة على إدارة الوقت بين المقررات المختلفة.',
+               'Good ability to manage time across different courses.'),
+            $T('استخدام منصة كيو سبارك بشكل منتظم لمتابعة التقدم الأكاديمي.',
+               'Regular use of the QSpark platform to track academic progress.'),
+            $T('دافعية عالية نحو تطوير المهارات والحصول على الشهادات المهنية.',
+               'High motivation to develop skills and earn professional certifications.'),
         ];
         if ($gpa >= 3.5) {
-            array_unshift($strengths, "معدل تراكمي ممتاز ({$gpaText}) — استمر في هذا الأداء الرائع!");
+            array_unshift($strengths, $T(
+                "معدل تراكمي ممتاز ({$gpaText}) — استمر في هذا الأداء الرائع!",
+                "Excellent cumulative GPA ({$gpaText}) — keep up this outstanding performance!"
+            ));
         }
         if ($attendanceRate >= 90) {
-            $strengths[] = "نسبة حضور ممتازة ({$attendanceText}%) — حافظ على هذا الالتزام.";
+            $strengths[] = $T(
+                "نسبة حضور ممتازة ({$attendanceText}%) — حافظ على هذا الالتزام.",
+                "Excellent attendance rate ({$attendanceText}%) — keep up this commitment."
+            );
         }
 
         // ── Weaknesses ────────────────────────────────────────────────────
         $weaknesses = [
-            'تأخر في تسليم بعض الواجبات قرب موعد التسليم النهائي.',
-            'الاعتماد على المراجعة المكثفة قبل الاختبارات بدلاً من المراجعة المنتظمة.',
-            'قلة المشاركة في مجموعات الدراسة والأنشطة الجماعية.',
+            $T('تأخر في تسليم بعض الواجبات قرب موعد التسليم النهائي.',
+               'Some assignments are submitted close to the deadline.'),
+            $T('الاعتماد على المراجعة المكثفة قبل الاختبارات بدلاً من المراجعة المنتظمة.',
+               'Relying on cramming before exams instead of regular review.'),
+            $T('قلة المشاركة في مجموعات الدراسة والأنشطة الجماعية.',
+               'Limited participation in study groups and collaborative activities.'),
         ];
         if ($gpa > 0 && $gpa < 3.5) {
-            array_unshift($weaknesses, "المعدل التراكمي يحتاج إلى تحسين — حالياً {$gpaText} من 5.0.");
+            array_unshift($weaknesses, $T(
+                "المعدل التراكمي يحتاج إلى تحسين — حالياً {$gpaText} من 5.0.",
+                "Cumulative GPA needs improvement — currently {$gpaText} out of 5.0."
+            ));
         }
         if ($attendanceRate > 0 && $attendanceRate < 90) {
-            $weaknesses[] = "نسبة الحضور منخفضة ({$attendanceText}%) — يُنصح بالوصول إلى 95% على الأقل.";
+            $weaknesses[] = $T(
+                "نسبة الحضور منخفضة ({$attendanceText}%) — يُنصح بالوصول إلى 95% على الأقل.",
+                "Attendance rate is low ({$attendanceText}%) — aim for at least 95%."
+            );
         }
 
         // ── Top-level recommendations & treatment plans ───────────────────
         $recommendations = [
-            'ضع جدولاً دراسياً أسبوعياً ثابتاً وخصص وقتاً يومياً لكل مقرر.',
-            'راجع ملاحظات كل محاضرة في نفس اليوم لتثبيت المعلومات.',
-            'احرص على الحضور المنتظم لجميع المحاضرات — الحضور أساس النجاح.',
-            'استفد من الألعاب التعليمية والاختبارات القصيرة في المنصة لتعزيز الفهم.',
-            'ابدأ مبكراً بالتخطيط للشهادات المهنية والتدريب العملي.',
+            $T('ضع جدولاً دراسياً أسبوعياً ثابتاً وخصص وقتاً يومياً لكل مقرر.',
+               'Build a consistent weekly study schedule and dedicate daily time to each course.'),
+            $T('راجع ملاحظات كل محاضرة في نفس اليوم لتثبيت المعلومات.',
+               'Review each lecture\'s notes the same day to lock in the information.'),
+            $T('احرص على الحضور المنتظم لجميع المحاضرات — الحضور أساس النجاح.',
+               'Attend every lecture consistently — attendance is the foundation of success.'),
+            $T('استفد من الألعاب التعليمية والاختبارات القصيرة في المنصة لتعزيز الفهم.',
+               'Use the platform\'s educational games and quick quizzes to reinforce understanding.'),
+            $T('ابدأ مبكراً بالتخطيط للشهادات المهنية والتدريب العملي.',
+               'Start planning early for professional certifications and hands-on training.'),
         ];
         $treatmentPlans = [
-            'خصص 3 ساعات يومياً للمراجعة مع التركيز على المقررات الأكثر صعوبة.',
-            'استخدم تقنية بومودورو (25 دقيقة تركيز / 5 دقائق راحة) لرفع الإنتاجية.',
-            'حدد موعداً أسبوعياً ثابتاً لمراجعة شاملة لكل المقررات.',
-            'تواصل مع المرشد الأكاديمي عند مواجهة أي تعثر دراسي مبكراً.',
+            $T('خصص 3 ساعات يومياً للمراجعة مع التركيز على المقررات الأكثر صعوبة.',
+               'Dedicate 3 hours daily to review, focusing on the most challenging courses.'),
+            $T('استخدم تقنية بومودورو (25 دقيقة تركيز / 5 دقائق راحة) لرفع الإنتاجية.',
+               'Use the Pomodoro technique (25 min focus / 5 min break) to boost productivity.'),
+            $T('حدد موعداً أسبوعياً ثابتاً لمراجعة شاملة لكل المقررات.',
+               'Schedule a fixed weekly slot for a comprehensive review of all courses.'),
+            $T('تواصل مع المرشد الأكاديمي عند مواجهة أي تعثر دراسي مبكراً.',
+               'Reach out to your academic advisor early when you face any academic difficulty.'),
         ];
 
         // ── Tips ──────────────────────────────────────────────────────────
         $tips = [
-            'نظم وقتك بين الدراسة والراحة — التوازن مفتاح الاستمرارية.',
-            'استخدم تقنية بومودورو: 25 دقيقة دراسة مركزة، 5 دقائق راحة.',
-            'راجع ملاحظاتك بعد كل محاضرة مباشرة لتثبيت المعلومات.',
-            'كوّن مجموعات دراسية مع زملائك للمناقشة والتعلم التعاوني.',
-            'نم 7-8 ساعات يومياً — النوم الجيد يحسّن التركيز والذاكرة.',
+            $T('نظم وقتك بين الدراسة والراحة — التوازن مفتاح الاستمرارية.',
+               'Balance study time with rest — balance is the key to consistency.'),
+            $T('استخدم تقنية بومودورو: 25 دقيقة دراسة مركزة، 5 دقائق راحة.',
+               'Use the Pomodoro technique: 25 minutes of focused study, 5 minutes of rest.'),
+            $T('راجع ملاحظاتك بعد كل محاضرة مباشرة لتثبيت المعلومات.',
+               'Review your notes immediately after each lecture to retain information.'),
+            $T('كوّن مجموعات دراسية مع زملائك للمناقشة والتعلم التعاوني.',
+               'Form study groups with classmates for discussion and collaborative learning.'),
+            $T('نم 7-8 ساعات يومياً — النوم الجيد يحسّن التركيز والذاكرة.',
+               'Sleep 7–8 hours a night — good sleep improves focus and memory.'),
         ];
 
         // ── Improvement areas ─────────────────────────────────────────────
         $improvementAreas = [
-            'تنظيم الوقت: ضع خطة أسبوعية مكتوبة والتزم بها.',
-            'المراجعة المنتظمة: راجع المقررات أولاً بأول بدلاً من التراكم.',
-            'تسليم الواجبات مبكراً: ابدأ الواجب فور استلامه ولا تؤجله.',
-            'المشاركة الصفية: اطرح الأسئلة وشارك في النقاش داخل المحاضرة.',
-            'استخدام مصادر التعلم: استفد من الفيديوهات والتطبيقات التعليمية.',
-            'إدارة ضغط الاختبارات: وزّع المراجعة على فترات بدل المراجعة الليلية.',
+            $T('تنظيم الوقت: ضع خطة أسبوعية مكتوبة والتزم بها.',
+               'Time management: write down a weekly plan and stick to it.'),
+            $T('المراجعة المنتظمة: راجع المقررات أولاً بأول بدلاً من التراكم.',
+               'Regular review: keep courses up to date instead of letting them pile up.'),
+            $T('تسليم الواجبات مبكراً: ابدأ الواجب فور استلامه ولا تؤجله.',
+               'Submit assignments early: start each one as soon as you receive it, do not delay.'),
+            $T('المشاركة الصفية: اطرح الأسئلة وشارك في النقاش داخل المحاضرة.',
+               'In-class participation: ask questions and join the discussion during lectures.'),
+            $T('استخدام مصادر التعلم: استفد من الفيديوهات والتطبيقات التعليمية.',
+               'Use learning resources: take advantage of educational videos and apps.'),
+            $T('إدارة ضغط الاختبارات: وزّع المراجعة على فترات بدل المراجعة الليلية.',
+               'Manage exam pressure: spread out reviews instead of cramming the night before.'),
         ];
 
         // ── Learning paths ────────────────────────────────────────────────
         $learningPaths = [
             [
-                'title' => 'مسار تحسين الأداء الأكاديمي',
-                'description' => 'خطة شاملة لرفع المعدل التراكمي وتحسين الأداء العام.',
-                'duration' => '4 أشهر',
+                'title' => $T('مسار تحسين الأداء الأكاديمي', 'Academic Performance Improvement Track'),
+                'description' => $T('خطة شاملة لرفع المعدل التراكمي وتحسين الأداء العام.',
+                    'A comprehensive plan to raise your cumulative GPA and improve overall performance.'),
+                'duration' => $T('4 أشهر', '4 months'),
                 'steps' => [
-                    'الأسبوع 1-2: تقييم نقاط القوة والضعف في جميع المقررات.',
-                    'الأسبوع 3-4: وضع جدول دراسي منظم وتخصيص وقت لكل مادة.',
-                    'الشهر 2: البدء في المراجعة المكثفة للمقررات الأكثر صعوبة.',
-                    'الشهر 3-4: التطبيق العملي وحل التمارين والاختبارات التجريبية.',
+                    $T('الأسبوع 1-2: تقييم نقاط القوة والضعف في جميع المقررات.',
+                       'Weeks 1–2: assess strengths and weaknesses across all courses.'),
+                    $T('الأسبوع 3-4: وضع جدول دراسي منظم وتخصيص وقت لكل مادة.',
+                       'Weeks 3–4: build an organized study schedule with dedicated time per course.'),
+                    $T('الشهر 2: البدء في المراجعة المكثفة للمقررات الأكثر صعوبة.',
+                       'Month 2: start intensive review of the most challenging courses.'),
+                    $T('الشهر 3-4: التطبيق العملي وحل التمارين والاختبارات التجريبية.',
+                       'Months 3–4: practical application — practice exercises and mock exams.'),
                 ],
             ],
             [
-                'title' => 'مسار المهارات والتطوير المهني',
-                'description' => 'بناء مهارات عملية تؤهلك لسوق العمل قبل التخرج.',
-                'duration' => '6 أشهر',
+                'title' => $T('مسار المهارات والتطوير المهني', 'Skills & Professional Development Track'),
+                'description' => $T('بناء مهارات عملية تؤهلك لسوق العمل قبل التخرج.',
+                    'Build practical skills that prepare you for the job market before graduation.'),
+                'duration' => $T('6 أشهر', '6 months'),
                 'steps' => [
-                    'الشهر 1: تحديد المهارات المطلوبة في مجال تخصصك.',
-                    'الشهر 2-3: التسجيل في دورة احترافية معتمدة عبر الإنترنت.',
-                    'الشهر 4-5: تنفيذ مشروع تطبيقي صغير لإثراء ملف الإنجازات.',
-                    'الشهر 6: تجهيز سيرة ذاتية احترافية والبحث عن فرصة تدريب.',
+                    $T('الشهر 1: تحديد المهارات المطلوبة في مجال تخصصك.',
+                       'Month 1: identify the skills in demand in your field of study.'),
+                    $T('الشهر 2-3: التسجيل في دورة احترافية معتمدة عبر الإنترنت.',
+                       'Months 2–3: enroll in an accredited professional online course.'),
+                    $T('الشهر 4-5: تنفيذ مشروع تطبيقي صغير لإثراء ملف الإنجازات.',
+                       'Months 4–5: deliver a small applied project to enrich your portfolio.'),
+                    $T('الشهر 6: تجهيز سيرة ذاتية احترافية والبحث عن فرصة تدريب.',
+                       'Month 6: prepare a professional résumé and look for an internship opportunity.'),
                 ],
             ],
         ];
@@ -2058,23 +2111,41 @@ class StudentDashboardController extends Controller
         for ($week = 1; $week <= 4; $week++) {
             $weeklyPlans[] = [
                 'week' => $week,
-                'focus' => $week == 1 ? 'التقييم والتخطيط' : ($week == 2 ? 'البدء في التنفيذ' : ($week == 3 ? 'التعمق والممارسة' : 'المراجعة والتقييم')),
+                'focus' => $week == 1
+                    ? $T('التقييم والتخطيط', 'Assessment & planning')
+                    : ($week == 2
+                        ? $T('البدء في التنفيذ', 'Start execution')
+                        : ($week == 3
+                            ? $T('التعمق والممارسة', 'Deepen & practice')
+                            : $T('المراجعة والتقييم', 'Review & evaluation'))),
                 'tasks' => $week == 1 ? [
-                    'مراجعة جميع المقررات وتحديد نقاط الضعف.',
-                    'إنشاء جدول دراسي أسبوعي مكتوب.',
-                    'تحديد أهداف واضحة وقابلة للقياس لكل مادة.',
+                    $T('مراجعة جميع المقررات وتحديد نقاط الضعف.',
+                       'Review every course and identify weak spots.'),
+                    $T('إنشاء جدول دراسي أسبوعي مكتوب.',
+                       'Create a written weekly study schedule.'),
+                    $T('تحديد أهداف واضحة وقابلة للقياس لكل مادة.',
+                       'Set clear, measurable goals for each course.'),
                 ] : ($week == 2 ? [
-                    'البدء بمراجعة المقررات الأكثر صعوبة.',
-                    'حضور جميع المحاضرات والتفاعل فيها.',
-                    'حل 50% من التمارين والواجبات المطلوبة.',
+                    $T('البدء بمراجعة المقررات الأكثر صعوبة.',
+                       'Start by reviewing the most challenging courses.'),
+                    $T('حضور جميع المحاضرات والتفاعل فيها.',
+                       'Attend every lecture and participate actively.'),
+                    $T('حل 50% من التمارين والواجبات المطلوبة.',
+                       'Complete 50% of the required exercises and assignments.'),
                 ] : ($week == 3 ? [
-                    'حل تمارين إضافية واختبارات تطبيقية.',
-                    'المشاركة في مجموعة دراسية واحدة على الأقل.',
-                    'مراجعة الملاحظات يومياً قبل النوم.',
+                    $T('حل تمارين إضافية واختبارات تطبيقية.',
+                       'Work through extra exercises and applied quizzes.'),
+                    $T('المشاركة في مجموعة دراسية واحدة على الأقل.',
+                       'Join at least one study group.'),
+                    $T('مراجعة الملاحظات يومياً قبل النوم.',
+                       'Review your notes daily before going to sleep.'),
                 ] : [
-                    'مراجعة شاملة لجميع المقررات.',
-                    'حل اختبارات تجريبية كاملة بمحاكاة وقت الاختبار.',
-                    'تقييم التقدم وتعديل الخطة للشهر القادم.',
+                    $T('مراجعة شاملة لجميع المقررات.',
+                       'Comprehensive review of all courses.'),
+                    $T('حل اختبارات تجريبية كاملة بمحاكاة وقت الاختبار.',
+                       'Take full mock exams under exam-time conditions.'),
+                    $T('تقييم التقدم وتعديل الخطة للشهر القادم.',
+                       'Assess your progress and adjust the plan for next month.'),
                 ])),
                 'expected_hours' => 15 + ($week * 3),
             ];
@@ -2083,52 +2154,56 @@ class StudentDashboardController extends Controller
         // ── SMART goals ───────────────────────────────────────────────────
         $goals = [
             [
-                'type' => 'شهري',
-                'category' => 'أكاديمي',
-                'description' => 'رفع المعدل التراكمي بمقدار 0.3 نقطة على الأقل.',
+                'type' => $T('شهري', 'Monthly'),
+                'category' => $T('أكاديمي', 'Academic'),
+                'description' => $T('رفع المعدل التراكمي بمقدار 0.3 نقطة على الأقل.',
+                    'Raise the cumulative GPA by at least 0.3 points.'),
                 'target_value' => $gpa > 0 ? min(5.0, round($gpa + 0.3, 2)) : 4.5,
-                'timeline' => 'نهاية الفصل الدراسي',
+                'timeline' => $T('نهاية الفصل الدراسي', 'End of semester'),
                 'action_steps' => [
-                    'الدراسة 3 ساعات يومياً على الأقل.',
-                    'حضور جميع المحاضرات دون استثناء.',
-                    'تسليم جميع الواجبات في وقتها أو قبله.',
-                    'إجراء مراجعة أسبوعية شاملة لكل المقررات.',
+                    $T('الدراسة 3 ساعات يومياً على الأقل.', 'Study at least 3 hours daily.'),
+                    $T('حضور جميع المحاضرات دون استثناء.', 'Attend every lecture without exception.'),
+                    $T('تسليم جميع الواجبات في وقتها أو قبله.', 'Submit every assignment on or ahead of time.'),
+                    $T('إجراء مراجعة أسبوعية شاملة لكل المقررات.', 'Run a comprehensive weekly review of all courses.'),
                 ],
             ],
             [
-                'type' => 'أسبوعي',
-                'category' => 'ساعات الدراسة',
-                'description' => 'تخصيص 20 ساعة دراسة فعّالة كل أسبوع.',
-                'target_value' => '20 ساعة',
-                'timeline' => 'كل أسبوع',
+                'type' => $T('أسبوعي', 'Weekly'),
+                'category' => $T('ساعات الدراسة', 'Study hours'),
+                'description' => $T('تخصيص 20 ساعة دراسة فعّالة كل أسبوع.',
+                    'Dedicate 20 hours of effective study every week.'),
+                'target_value' => $T('20 ساعة', '20 hours'),
+                'timeline' => $T('كل أسبوع', 'Every week'),
                 'action_steps' => [
-                    'تخصيص 3 ساعات دراسة يومياً.',
-                    'استخدام تقنية بومودورو للحفاظ على التركيز.',
-                    'تتبع ساعات الدراسة في تطبيق أو دفتر متابعة.',
+                    $T('تخصيص 3 ساعات دراسة يومياً.', 'Set aside 3 study hours every day.'),
+                    $T('استخدام تقنية بومودورو للحفاظ على التركيز.', 'Use the Pomodoro technique to stay focused.'),
+                    $T('تتبع ساعات الدراسة في تطبيق أو دفتر متابعة.', 'Track your study hours in an app or planner.'),
                 ],
             ],
             [
-                'type' => 'شهري',
-                'category' => 'الحضور',
-                'description' => 'رفع نسبة الحضور إلى 95% أو أعلى.',
+                'type' => $T('شهري', 'Monthly'),
+                'category' => $T('الحضور', 'Attendance'),
+                'description' => $T('رفع نسبة الحضور إلى 95% أو أعلى.',
+                    'Raise attendance to 95% or higher.'),
                 'target_value' => '95%',
-                'timeline' => 'نهاية الشهر',
+                'timeline' => $T('نهاية الشهر', 'End of month'),
                 'action_steps' => [
-                    'ضبط تنبيهات لجميع المحاضرات.',
-                    'النوم مبكراً والاستيقاظ قبل المحاضرة بوقت كافٍ.',
-                    'تجهيز الحقيبة والمواد من الليلة السابقة.',
+                    $T('ضبط تنبيهات لجميع المحاضرات.', 'Set reminders for every lecture.'),
+                    $T('النوم مبكراً والاستيقاظ قبل المحاضرة بوقت كافٍ.', 'Sleep early and wake up well before lecture time.'),
+                    $T('تجهيز الحقيبة والمواد من الليلة السابقة.', 'Prepare your bag and materials the night before.'),
                 ],
             ],
             [
-                'type' => 'فصلي',
-                'category' => 'تطوير المهارات',
-                'description' => 'إكمال دورة احترافية معتمدة في مجال التخصص.',
-                'target_value' => 'شهادة واحدة',
-                'timeline' => 'خلال الفصل الدراسي',
+                'type' => $T('فصلي', 'Semester'),
+                'category' => $T('تطوير المهارات', 'Skill development'),
+                'description' => $T('إكمال دورة احترافية معتمدة في مجال التخصص.',
+                    'Complete an accredited professional course in your major.'),
+                'target_value' => $T('شهادة واحدة', 'One certificate'),
+                'timeline' => $T('خلال الفصل الدراسي', 'During the semester'),
                 'action_steps' => [
-                    'اختيار دورة معتمدة مناسبة لمجال التخصص.',
-                    'تخصيص ساعتين أسبوعياً لمتابعة الدورة.',
-                    'تطبيق ما تم تعلمه في مشروع عملي صغير.',
+                    $T('اختيار دورة معتمدة مناسبة لمجال التخصص.', 'Pick an accredited course aligned with your major.'),
+                    $T('تخصيص ساعتين أسبوعياً لمتابعة الدورة.', 'Dedicate two hours a week to the course.'),
+                    $T('تطبيق ما تم تعلمه في مشروع عملي صغير.', 'Apply what you learn in a small hands-on project.'),
                 ],
             ],
         ];
@@ -2137,38 +2212,46 @@ class StudentDashboardController extends Controller
         $recommendedResources = [
             [
                 'type' => 'video',
-                'title' => 'دورة تقنيات الدراسة الفعّالة',
-                'description' => 'تعلّم أفضل الطرق للدراسة والاستيعاب وإدارة وقت المراجعة.',
-                'link' => 'يوتيوب — ابحث عن «تقنيات الدراسة الفعّالة»',
+                'title' => $T('دورة تقنيات الدراسة الفعّالة', 'Effective Study Techniques Course'),
+                'description' => $T('تعلّم أفضل الطرق للدراسة والاستيعاب وإدارة وقت المراجعة.',
+                    'Learn the best ways to study, comprehend, and manage review time.'),
+                'link' => $T('يوتيوب — ابحث عن «تقنيات الدراسة الفعّالة»',
+                    'YouTube — search for "Effective Study Techniques"'),
             ],
             [
                 'type' => 'app',
-                'title' => 'تطبيق Forest للتركيز',
-                'description' => 'تطبيق يساعدك على التركيز وتجنّب المشتتات أثناء الدراسة.',
-                'link' => 'متجر التطبيقات',
+                'title' => $T('تطبيق Forest للتركيز', 'Forest — focus app'),
+                'description' => $T('تطبيق يساعدك على التركيز وتجنّب المشتتات أثناء الدراسة.',
+                    'An app that helps you focus and avoid distractions while studying.'),
+                'link' => $T('متجر التطبيقات', 'App Store'),
             ],
             [
                 'type' => 'book',
-                'title' => 'كتاب: العادات الذرية',
-                'description' => 'دليل عملي لبناء عادات دراسية صغيرة ومستدامة.',
-                'link' => 'متوفر في المكتبة الجامعية',
+                'title' => $T('كتاب: العادات الذرية', 'Book: Atomic Habits'),
+                'description' => $T('دليل عملي لبناء عادات دراسية صغيرة ومستدامة.',
+                    'A practical guide to building small, sustainable study habits.'),
+                'link' => $T('متوفر في المكتبة الجامعية', 'Available at the university library'),
             ],
             [
                 'type' => 'app',
-                'title' => 'تطبيق Notion لتنظيم المهام',
-                'description' => 'لتنظيم الجدول الدراسي والواجبات والملاحظات في مكان واحد.',
+                'title' => $T('تطبيق Notion لتنظيم المهام', 'Notion — task organizer'),
+                'description' => $T('لتنظيم الجدول الدراسي والواجبات والملاحظات في مكان واحد.',
+                    'Organize your schedule, assignments, and notes in one place.'),
                 'link' => 'notion.so',
             ],
             [
                 'type' => 'video',
-                'title' => 'سلسلة شرح المقررات الأساسية',
-                'description' => 'شروحات مبسطة للمفاهيم الصعبة في مقررات التخصص.',
-                'link' => 'منصة كيو سبارك — قسم المكتبة التعليمية',
+                'title' => $T('سلسلة شرح المقررات الأساسية', 'Core Courses Explanation Series'),
+                'description' => $T('شروحات مبسطة للمفاهيم الصعبة في مقررات التخصص.',
+                    'Simplified explanations of difficult concepts in major courses.'),
+                'link' => $T('منصة كيو سبارك — قسم المكتبة التعليمية',
+                    'QSpark platform — Educational Library section'),
             ],
             [
                 'type' => 'link',
-                'title' => 'منصة كورسيرا — دورات مجانية',
-                'description' => 'دورات احترافية معتمدة من جامعات عالمية في مختلف المجالات.',
+                'title' => $T('منصة كورسيرا — دورات مجانية', 'Coursera — free courses'),
+                'description' => $T('دورات احترافية معتمدة من جامعات عالمية في مختلف المجالات.',
+                    'Accredited professional courses from world-class universities in many fields.'),
                 'link' => 'coursera.org',
             ],
         ];
@@ -2176,91 +2259,149 @@ class StudentDashboardController extends Controller
         // ── Study techniques ──────────────────────────────────────────────
         $studyTechniques = [
             [
-                'name' => 'تقنية بومودورو',
-                'description' => '25 دقيقة دراسة مركّزة + 5 دقائق راحة.',
-                'benefits' => 'تحسين التركيز وتقليل الإرهاق الذهني.',
+                'name' => $T('تقنية بومودورو', 'Pomodoro Technique'),
+                'description' => $T('25 دقيقة دراسة مركّزة + 5 دقائق راحة.',
+                    '25 minutes of focused study + 5 minutes of rest.'),
+                'benefits' => $T('تحسين التركيز وتقليل الإرهاق الذهني.',
+                    'Improves focus and reduces mental fatigue.'),
             ],
             [
-                'name' => 'الاسترجاع النشط',
-                'description' => 'محاولة تذكّر المعلومات دون النظر إلى الملاحظات.',
-                'benefits' => 'تثبيت المعلومات في الذاكرة طويلة المدى.',
+                'name' => $T('الاسترجاع النشط', 'Active Recall'),
+                'description' => $T('محاولة تذكّر المعلومات دون النظر إلى الملاحظات.',
+                    'Try to recall information without looking at your notes.'),
+                'benefits' => $T('تثبيت المعلومات في الذاكرة طويلة المدى.',
+                    'Anchors information in long-term memory.'),
             ],
             [
-                'name' => 'الخرائط الذهنية',
-                'description' => 'رسم مخططات بصرية للمفاهيم والعلاقات بينها.',
-                'benefits' => 'فهم أعمق وربط المعلومات ببعضها.',
+                'name' => $T('الخرائط الذهنية', 'Mind Maps'),
+                'description' => $T('رسم مخططات بصرية للمفاهيم والعلاقات بينها.',
+                    'Draw visual diagrams of concepts and the relationships between them.'),
+                'benefits' => $T('فهم أعمق وربط المعلومات ببعضها.',
+                    'Deeper understanding and stronger connections between ideas.'),
             ],
             [
-                'name' => 'المراجعة المتباعدة',
-                'description' => 'إعادة مراجعة المادة على فترات متزايدة.',
-                'benefits' => 'مقاومة النسيان وترسيخ المعلومات على المدى البعيد.',
+                'name' => $T('المراجعة المتباعدة', 'Spaced Repetition'),
+                'description' => $T('إعادة مراجعة المادة على فترات متزايدة.',
+                    'Re-review the material at increasing intervals.'),
+                'benefits' => $T('مقاومة النسيان وترسيخ المعلومات على المدى البعيد.',
+                    'Resists forgetting and locks information in for the long term.'),
             ],
         ];
 
         // Timeline Roadmap
         $timelineRoadmap = [
             'one_week' => [
-                'title' => 'خطة الأسبوع القادم',
+                'title' => $T('خطة الأسبوع القادم', 'Next Week Plan'),
                 'goals' => [
-                    'حضور جميع المحاضرات والتفاعل فيها',
-                    'مراجعة ملاحظات كل محاضرة في نفس اليوم',
-                    'حل 50% من الواجبات المطلوبة',
+                    $T('حضور جميع المحاضرات والتفاعل فيها',
+                       'Attend every lecture and participate actively.'),
+                    $T('مراجعة ملاحظات كل محاضرة في نفس اليوم',
+                       'Review each lecture\'s notes the same day.'),
+                    $T('حل 50% من الواجبات المطلوبة',
+                       'Complete 50% of the required assignments.'),
                 ],
-                'focus_areas' => ['الحضور', 'المراجعة اليومية', 'الواجبات'],
+                'focus_areas' => [
+                    $T('الحضور', 'Attendance'),
+                    $T('المراجعة اليومية', 'Daily review'),
+                    $T('الواجبات', 'Assignments'),
+                ],
             ],
             'one_month' => [
-                'title' => 'خطة الشهر القادم',
+                'title' => $T('خطة الشهر القادم', 'Next Month Plan'),
                 'goals' => [
-                    'رفع المعدل التراكمي بمقدار 0.2 نقطة',
-                    'إكمال جميع الواجبات في وقتها',
-                    'تحسين نسبة الحضور إلى 95%',
-                    'لعب 10 ألعاب تعليمية على الأقل',
+                    $T('رفع المعدل التراكمي بمقدار 0.2 نقطة',
+                       'Raise the cumulative GPA by 0.2 points.'),
+                    $T('إكمال جميع الواجبات في وقتها',
+                       'Complete every assignment on time.'),
+                    $T('تحسين نسبة الحضور إلى 95%',
+                       'Improve attendance rate to 95%.'),
+                    $T('لعب 10 ألعاب تعليمية على الأقل',
+                       'Play at least 10 educational games.'),
                 ],
-                'focus_areas' => ['تحسين المعدل', 'الالتزام', 'التفاعل مع المنصة'],
+                'focus_areas' => [
+                    $T('تحسين المعدل', 'Improving GPA'),
+                    $T('الالتزام', 'Commitment'),
+                    $T('التفاعل مع المنصة', 'Platform engagement'),
+                ],
             ],
             'six_months' => [
-                'title' => 'خطة الستة أشهر القادمة',
+                'title' => $T('خطة الستة أشهر القادمة', 'Next Six Months Plan'),
                 'goals' => [
-                    'رفع المعدل التراكمي إلى 4.5 أو أعلى',
-                    'إتقان جميع المواد الأساسية في التخصص',
-                    'المشاركة في مشروع بحثي أو تطوعي',
-                    'بناء شبكة علاقات مع الأساتذة والزملاء',
+                    $T('رفع المعدل التراكمي إلى 4.5 أو أعلى',
+                       'Raise the cumulative GPA to 4.5 or higher.'),
+                    $T('إتقان جميع المواد الأساسية في التخصص',
+                       'Master every core course in your major.'),
+                    $T('المشاركة في مشروع بحثي أو تطوعي',
+                       'Take part in a research or volunteering project.'),
+                    $T('بناء شبكة علاقات مع الأساتذة والزملاء',
+                       'Build a network with faculty and peers.'),
                 ],
-                'focus_areas' => ['التميز الأكاديمي', 'المشاريع', 'التواصل'],
+                'focus_areas' => [
+                    $T('التميز الأكاديمي', 'Academic excellence'),
+                    $T('المشاريع', 'Projects'),
+                    $T('التواصل', 'Networking'),
+                ],
             ],
             'one_year' => [
-                'title' => 'خطة السنة القادمة',
+                'title' => $T('خطة السنة القادمة', 'Next Year Plan'),
                 'goals' => [
-                    'الحفاظ على معدل تراكمي ممتاز (4.5+)',
-                    'إكمال 75% من ساعات التخصص',
-                    'الحصول على تدريب صيفي في مجال التخصص',
-                    'تطوير مهارات إضافية (لغة، برمجة، إلخ)',
+                    $T('الحفاظ على معدل تراكمي ممتاز (4.5+)',
+                       'Maintain an excellent cumulative GPA (4.5+).'),
+                    $T('إكمال 75% من ساعات التخصص',
+                       'Complete 75% of the major\'s credit hours.'),
+                    $T('الحصول على تدريب صيفي في مجال التخصص',
+                       'Land a summer internship in your field.'),
+                    $T('تطوير مهارات إضافية (لغة، برمجة، إلخ)',
+                       'Develop additional skills (language, programming, etc.).'),
                 ],
-                'focus_areas' => ['الاستمرارية', 'التدريب العملي', 'تطوير المهارات'],
+                'focus_areas' => [
+                    $T('الاستمرارية', 'Consistency'),
+                    $T('التدريب العملي', 'Hands-on training'),
+                    $T('تطوير المهارات', 'Skill development'),
+                ],
             ],
             'pre_graduation' => [
-                'title' => 'خطة ما قبل التخرج',
+                'title' => $T('خطة ما قبل التخرج', 'Pre-Graduation Plan'),
                 'goals' => [
-                    'إكمال جميع متطلبات التخرج بنجاح',
-                    'تحقيق معدل تراكمي نهائي 4.5 أو أعلى',
-                    'إعداد مشروع التخرج بجودة عالية',
-                    'البحث عن فرص عمل أو دراسات عليا',
-                    'بناء سيرة ذاتية قوية وملف إنجازات',
+                    $T('إكمال جميع متطلبات التخرج بنجاح',
+                       'Successfully complete every graduation requirement.'),
+                    $T('تحقيق معدل تراكمي نهائي 4.5 أو أعلى',
+                       'Achieve a final cumulative GPA of 4.5 or higher.'),
+                    $T('إعداد مشروع التخرج بجودة عالية',
+                       'Deliver a high-quality graduation project.'),
+                    $T('البحث عن فرص عمل أو دراسات عليا',
+                       'Search for employment or graduate-study opportunities.'),
+                    $T('بناء سيرة ذاتية قوية وملف إنجازات',
+                       'Build a strong résumé and achievements portfolio.'),
                 ],
-                'focus_areas' => ['التخرج بتميز', 'التخطيط المهني', 'الإنجازات'],
+                'focus_areas' => [
+                    $T('التخرج بتميز', 'Graduating with distinction'),
+                    $T('التخطيط المهني', 'Career planning'),
+                    $T('الإنجازات', 'Achievements'),
+                ],
                 'recommended_certifications' => [
-                    'شهادة إدارة المشاريع الاحترافية (PMP) - معهد إدارة المشاريع',
-                    'شهادات مايكروسوفت المعتمدة (Microsoft Certifications) - مايكروسوفت',
-                    'شهادة المحلل المالي المعتمد (CFA) - معهد المحللين الماليين المعتمدين',
-                    'شهادات جوجل الاحترافية (Google Professional Certificates) - جوجل',
-                    'شهادة محترف الموارد البشرية (PHR/SPHR) - معهد الموارد البشرية',
+                    $T('شهادة إدارة المشاريع الاحترافية (PMP) - معهد إدارة المشاريع',
+                       'Project Management Professional (PMP) — Project Management Institute'),
+                    $T('شهادات مايكروسوفت المعتمدة (Microsoft Certifications) - مايكروسوفت',
+                       'Microsoft Certifications — Microsoft'),
+                    $T('شهادة المحلل المالي المعتمد (CFA) - معهد المحللين الماليين المعتمدين',
+                       'Chartered Financial Analyst (CFA) — CFA Institute'),
+                    $T('شهادات جوجل الاحترافية (Google Professional Certificates) - جوجل',
+                       'Google Professional Certificates — Google'),
+                    $T('شهادة محترف الموارد البشرية (PHR/SPHR) - معهد الموارد البشرية',
+                       'HR Professional certification (PHR/SPHR) — HR Certification Institute'),
                 ],
                 'internship_opportunities' => [
-                    'فرص تدريب في شركات الطاقة السعودية (أرامكو السعودية، سابك) - 3-6 أشهر',
-                    'برامج تدريب في المؤسسات المالية (البنك الأهلي، الراجحي، ساما) - صيفي',
-                    'تدريب في شركات التقنية والاتصالات (STC، موبايلي، زين) - فصلي',
-                    'فرص تدريب في المؤسسات الحكومية (الوزارات والهيئات الحكومية) - سنوي',
-                    'برامج تدريب في الشركات الاستشارية (ديلويت، PwC، KPMG، EY) - صيفي',
+                    $T('فرص تدريب في شركات الطاقة السعودية (أرامكو السعودية، سابك) - 3-6 أشهر',
+                       'Internships at Saudi energy companies (Saudi Aramco, SABIC) — 3–6 months.'),
+                    $T('برامج تدريب في المؤسسات المالية (البنك الأهلي، الراجحي، ساما) - صيفي',
+                       'Internship programs at financial institutions (SNB, Al Rajhi, SAMA) — summer.'),
+                    $T('تدريب في شركات التقنية والاتصالات (STC، موبايلي، زين) - فصلي',
+                       'Internships at tech & telecom companies (STC, Mobily, Zain) — semester-long.'),
+                    $T('فرص تدريب في المؤسسات الحكومية (الوزارات والهيئات الحكومية) - سنوي',
+                       'Government-sector internships (ministries and authorities) — annual.'),
+                    $T('برامج تدريب في الشركات الاستشارية (ديلويت، PwC، KPMG، EY) - صيفي',
+                       'Internships at consulting firms (Deloitte, PwC, KPMG, EY) — summer.'),
                 ],
             ],
         ];
@@ -2301,16 +2442,13 @@ class StudentDashboardController extends Controller
      */
     private function allowedChatPrompts(): array
     {
-        return [
-            'improve_gpa' => 'كيف أحسن معدلي التراكمي؟',
-            'study_tips' => 'أعطني نصائح للدراسة الفعالة.',
-            'time_management' => 'كيف أنظم وقتي بين الدراسة والراحة؟',
-            'exam_prep' => 'ما هي أفضل طرق المذاكرة للاختبارات؟',
-            'handle_pressure' => 'كيف أتعامل مع ضغط الدراسة والقلق؟',
-            'skill_dev' => 'ما هي أهم المهارات لتطويرها كطالب جامعي؟',
-            'final_exams' => 'كيف أستعد للامتحانات النهائية بشكل فعال؟',
-            'focus' => 'كيف أحافظ على التركيز أثناء المذاكرة؟',
-        ];
+        $ids = ['improve_gpa', 'study_tips', 'time_management', 'exam_prep',
+            'handle_pressure', 'skill_dev', 'final_exams', 'focus'];
+        $out = [];
+        foreach ($ids as $id) {
+            $out[$id] = __('messages.chat_prompt_' . $id);
+        }
+        return $out;
     }
 
     /**
@@ -2378,7 +2516,15 @@ class StudentDashboardController extends Controller
     public function chatPage()
     {
         $profile = $this->getStudentProfile();
-        $studentName = $profile['data']['profile']['name'] ?? 'الطالب';
+        $arName = $profile['data']['profile']['name'] ?? '';
+        $enName = $profile['data']['profile']['name_en'] ?? '';
+        $arName = trim((string) $arName);
+        $enName = trim((string) $enName);
+        if (app()->getLocale() === 'en') {
+            $studentName = $enName !== '' ? $enName : ($arName !== '' ? $arName : 'Student');
+        } else {
+            $studentName = $arName !== '' ? $arName : ($enName !== '' ? $enName : 'الطالب');
+        }
 
         return view('qspark::student-chat', [
             'studentName' => $studentName,

@@ -9,7 +9,15 @@
     $useDummyFiles = empty($files);
     $demoQuizUrl   = url('/qspark/react-game-test');
     if ($useDummyFiles) {
-        $files = [
+        $__isEn = app()->getLocale() === 'en';
+        $files = $__isEn ? [
+            ['contentTitle' => 'Course introduction',           'fileName' => 'lecture-01-intro.pdf',        'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'Lecture 1 — Concepts',          'fileName' => 'lecture-02-concepts.pdf',     'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'Lecture 2 — Applications',      'fileName' => 'lecture-03-applications.pdf', 'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'Chapter 1 exercises',           'fileName' => 'exercises-ch1.pdf',           'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'Case study',                    'fileName' => 'case-study.pdf',              'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+            ['contentTitle' => 'Midterm exam review',           'fileName' => 'midterm-review.pdf',          'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
+        ] : [
             ['contentTitle' => 'مقدمة المقرر',                  'fileName' => 'lecture-01-intro.pdf',        'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
             ['contentTitle' => 'المحاضرة الأولى — المفاهيم',    'fileName' => 'lecture-02-concepts.pdf',     'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
             ['contentTitle' => 'المحاضرة الثانية — التطبيقات',  'fileName' => 'lecture-03-applications.pdf', 'demoQuizUrl' => $demoQuizUrl, 'downloadUrl' => '#'],
@@ -118,7 +126,7 @@
               <a href="{{ $file['demoQuizUrl'] }}" target="_top"
                  class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3,3V21H21V3M19,19H5V5H19M17,7H7V9H17M17,11H7V13H17M13,15H7V17H13"/></svg>
-                <span>{{ __('messages.take_quiz') ?? 'ابدأ الاختبار' }}</span>
+                <span>{{ __('messages.take_quiz') }}</span>
               </a>
             @elseif(isset($file['generateQuizUrl']))
               <button

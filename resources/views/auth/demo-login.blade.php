@@ -1,10 +1,11 @@
+@php($__locale = app()->getLocale())
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $__locale }}" dir="{{ $__locale === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>تسجيل الدخول — QUAI | جامعة القصيم</title>
+    <title>{{ __('messages.login_page_title') }}</title>
 
     {{-- Link-preview / social cards. quailab.dev redirects unauthenticated
          visitors here, so this is the page crawlers (WhatsApp, etc.) see. --}}
@@ -27,6 +28,11 @@
 <body class="min-h-screen flex bg-gray-50">
     @include('layouts.partials.page-loader')
 
+    {{-- Language switcher pinned to the corner so unauthenticated visitors can choose the UI locale. --}}
+    <div class="fixed top-4 z-50" style="{{ $__locale === 'ar' ? 'left: 1rem;' : 'right: 1rem;' }}">
+        @include('layouts.partials.language-switcher')
+    </div>
+
     {{-- Brand hero (right side in RTL) --}}
     <section class="hidden md:flex flex-col justify-center w-1/2 p-12 relative overflow-hidden"
              style="background: linear-gradient(135deg, #25935F 0%, #14573A 100%); color: white;">
@@ -38,12 +44,11 @@
                 <span class="text-5xl font-black tracking-tighter">Q</span>
             </div>
             <h1 class="text-5xl font-black mb-2 leading-tight">QUAI</h1>
-            <p class="text-xl font-medium mb-2 opacity-95">منصة الذكاء الاصطناعي</p>
-            <p class="text-base opacity-80 mb-10">جامعة القصيم · Qassim University</p>
+            <p class="text-xl font-medium mb-2 opacity-95">{{ __('messages.login_ai_platform') }}</p>
+            <p class="text-base opacity-80 mb-10">{{ __('messages.login_university_line') }}</p>
 
             <p class="text-lg opacity-90 leading-relaxed mb-8">
-                تسجيل دخول موحّد عبر <strong class="text-white">MyQU</strong>.
-                ادخل ببياناتك الجامعية واصل لجميع التطبيقات الذكية في منظومة واحدة.
+                {!! __('messages.login_unified_intro_html') !!}
             </p>
 
             <div class="space-y-3">
@@ -51,19 +56,19 @@
                     <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
                     </span>
-                    <span class="opacity-90">حماية كاملة عبر بروتوكول SAML SSO</span>
+                    <span class="opacity-90">{{ __('messages.login_feature_saml') }}</span>
                 </div>
                 <div class="flex items-center gap-3 text-sm">
                     <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                     </span>
-                    <span class="opacity-90">QSpark · QMentor · QUBI · QU Agent · سجلك الرقمي</span>
+                    <span class="opacity-90">{{ __('messages.login_feature_apps') }}</span>
                 </div>
                 <div class="flex items-center gap-3 text-sm">
                     <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
                     </span>
-                    <span class="opacity-90">واجهة موحدة لجميع منسوبي الجامعة</span>
+                    <span class="opacity-90">{{ __('messages.login_feature_unified') }}</span>
                 </div>
             </div>
         </div>
@@ -83,10 +88,10 @@
             <div class="text-center mb-6">
                 <div class="inline-flex items-center gap-2 text-xs text-dga-sa-700 bg-dga-sa-50 px-3 py-1 rounded-full mb-3">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                    <span>الدخول عبر MyQU SSO</span>
+                    <span>{{ __('messages.login_sso_badge') }}</span>
                 </div>
-                <h2 class="text-2xl font-extrabold text-gray-900 mb-1">تسجيل الدخول</h2>
-                <p class="text-sm text-gray-500">أدخل بيانات حسابك الجامعي للمتابعة</p>
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-1">{{ __('messages.login_heading') }}</h2>
+                <p class="text-sm text-gray-500">{{ __('messages.login_subheading') }}</p>
             </div>
 
             @if ($errors->any())
@@ -96,7 +101,7 @@
             @endif
 
             <div class="mb-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">اسم المستخدم</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('messages.login_username_label') }}</label>
                 <div class="relative">
                     <input type="text" id="login" name="login" required autofocus dir="ltr"
                            value="{{ old('login') }}"
@@ -109,7 +114,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">كلمة المرور</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('messages.login_password_label') }}</label>
                 <div class="relative">
                     <input type="password" id="password" name="password" required dir="ltr" placeholder="••••••••"
                            class="w-full px-4 py-3 pr-11 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-dga-sa-500 focus:ring-2 focus:ring-dga-sa-100 transition">
@@ -121,23 +126,23 @@
 
             <div class="flex justify-between items-center text-sm mb-5">
                 <label class="flex items-center gap-2 text-gray-600 cursor-pointer">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded text-dga-sa-500 focus:ring-dga-sa-500"> تذكرني
+                    <input type="checkbox" name="remember" class="w-4 h-4 rounded text-dga-sa-500 focus:ring-dga-sa-500"> {{ __('messages.login_remember_me') }}
                 </label>
                 <a href="#" class="text-dga-sa-600 hover:text-dga-sa-700 font-medium"
-                   onclick="event.preventDefault();alert('عرض تجريبي');">نسيت كلمة المرور؟</a>
+                   onclick="event.preventDefault();alert('{{ __('messages.login_forgot_password_demo_alert') }}');">{{ __('messages.login_forgot_password') }}</a>
             </div>
 
             <button type="submit"
                     class="w-full py-3.5 rounded-xl text-white font-bold text-sm hover:opacity-95 transition shadow-lg flex items-center justify-center gap-2"
                     style="background: linear-gradient(135deg, #25935F 0%, #166A45 100%);">
-                تسجيل الدخول
+                {{ __('messages.login_submit') }}
                 <svg class="w-4 h-4 -mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
             </button>
 
             <div class="mt-6 p-4 bg-dga-sa-50 border border-dga-sa-200 border-dashed rounded-xl">
                 <div class="flex justify-between items-center mb-2">
-                    <strong class="text-xs font-bold text-dga-sa-700">🧪 حسابات تجريبية</strong>
-                    <span class="text-[10px] text-gray-500">انقر لتسجيل دخول مباشر</span>
+                    <strong class="text-xs font-bold text-dga-sa-700">{{ __('messages.login_demo_accounts') }}</strong>
+                    <span class="text-[10px] text-gray-500">{{ __('messages.login_click_quick_login') }}</span>
                 </div>
                 <div class="space-y-1.5">
                     @foreach ($accounts as $acc)
@@ -153,7 +158,7 @@
             </div>
 
             <p class="text-[11px] text-gray-400 mt-5 text-center leading-relaxed">
-                هذه نسخة عرض ببيانات وهمية بالكامل. لا تمثل أشخاصًا أو حالات حقيقية.
+                {{ __('messages.login_demo_disclaimer') }}
             </p>
         </form>
 

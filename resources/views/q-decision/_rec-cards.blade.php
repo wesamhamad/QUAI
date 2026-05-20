@@ -1,6 +1,6 @@
 {{-- Renders a grid of AI recommendation cards. Expects: $recommendations, $priorityMeta --}}
 @if (count($recommendations) === 0)
-    <div class="ai-empty">لا توجد توصيات قابلة للتنفيذ في هذه اللوحة حالياً — البيانات ضمن المعدّل المتوقع.</div>
+    <div class="ai-empty">{{ __('messages.q_decision_no_recommendations') }}</div>
 @else
     <div class="ai-recs">
         @foreach ($recommendations as $rec)
@@ -10,7 +10,7 @@
                     @if (! empty($rec['quote']))
                         <span class="voice-tag">
                             <span class="pulse"></span>
-                            مرشح بواسطة الذكاء الاصطناعي · صوت طالب
+                            {{ __('messages.q_decision_ai_filtered_voice') }}
                         </span>
                     @else
                         <span class="ai-rec-tag" style="background: {{ $pm['bg'] }}; color: {{ $pm['color'] }};">
@@ -31,7 +31,7 @@
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                بانتظار التنفيذ
+                                {{ __('messages.q_decision_pending_action') }}
                             </span>
                         </div>
                         <div class="qc-body">{{ $rec['quote']['body'] }}</div>
@@ -50,9 +50,9 @@
                     </div>
                 @endif
 
-                <div class="field"><strong>الملاحظة</strong> {{ $rec['observation'] }}</div>
-                <div class="field"><strong>التوصية</strong> {{ $rec['action'] }}</div>
-                <div class="field"><strong>الأثر المتوقع</strong> {{ $rec['impact'] }}</div>
+                <div class="field"><strong>{{ __('messages.q_decision_observation') }}</strong> {{ $rec['observation'] }}</div>
+                <div class="field"><strong>{{ __('messages.q_decision_recommendation') }}</strong> {{ $rec['action'] }}</div>
+                <div class="field"><strong>{{ __('messages.q_decision_expected_impact') }}</strong> {{ $rec['impact'] }}</div>
             </article>
         @endforeach
     </div>

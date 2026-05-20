@@ -3,7 +3,7 @@
 
     {{-- Quarter selector --}}
     <div class="ai-quarters">
-        <span class="lbl">عرض بيانات الربع:</span>
+        <span class="lbl">{{ __('messages.view_quarter_data') }}</span>
         @foreach ($quarters as $key => $q)
             <button type="button" wire:click="setQuarter('{{ $key }}')"
                     class="ai-quarter-tab {{ $activeQuarter === $key ? 'active' : '' }}">
@@ -11,12 +11,12 @@
                 <span class="qr">{{ $q['range'] }}</span>
             </button>
         @endforeach
-                 <span class="demo-flag">بيانات تجريبية </span>
+                 <span class="demo-flag">{{ __('messages.demo_data_flag') }} </span>
 
     </div>
 
     <p style="font-size:.88rem;color:#6b7280;margin:-.5rem 0 0;">
-        توصيات قابلة للتنفيذ مشتقة من لوحات المؤشرات الست — مصنّفة إلى ثلاث طبقات أولوية.
+        {{ __('messages.actionable_recommendations_intro') }}
     </p>
 
     {{-- Priority legend --}}
@@ -37,7 +37,7 @@
             <div class="fi-section-head">
                 <span class="dot" style="background: {{ $section['accent'] }};"></span>
                 <h2>{{ $section['dashboard'] }}</h2>
-                <span class="count">{{ count($section['recommendations']) }} توصية</span>
+                <span class="count">{{ count($section['recommendations']) }} {{ __('messages.recommendation_count_suffix') }}</span>
             </div>
             @include('q-decision._rec-cards', ['recommendations' => $section['recommendations']])
         </div>

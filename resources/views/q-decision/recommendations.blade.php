@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'توصيات الذكاء الاصطناعي - QUAI')
-@section('page-title', 'توصيات الذكاء الاصطناعي')
+@section('title', __('messages.q_decision_recommendations_title') . ' - QUAI')
+@section('page-title', __('messages.q_decision_recommendations_title'))
 @section('content-class', 'q-content fi-bg')
 
 @push('styles')
@@ -11,8 +11,8 @@
 @section('content')
 <div class="ai-page">
     <div class="fi-header">
-        <h1>توصيات الذكاء الاصطناعي</h1>
-        <p>توصيات قابلة للتنفيذ مشتقة من لوحات المؤشرات الست — مصنّفة إلى ثلاث طبقات أولوية.</p>
+        <h1>{{ __('messages.q_decision_recommendations_title') }}</h1>
+        <p>{{ __('messages.q_decision_recommendations_subtitle') }}</p>
     </div>
 
     @include('q-decision._quarter-selector')
@@ -35,7 +35,7 @@
             <div class="fi-section-head">
                 <span class="dot" style="background: {{ $section['accent'] }};"></span>
                 <h2>{{ $section['dashboard'] }}</h2>
-                <span class="count">{{ count($section['recommendations']) }} توصية</span>
+                <span class="count">{{ count($section['recommendations']) }} {{ __('messages.q_decision_recommendation_count') }}</span>
             </div>
             @include('q-decision._rec-cards', ['recommendations' => $section['recommendations']])
         </div>

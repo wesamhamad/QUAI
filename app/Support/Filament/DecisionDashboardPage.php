@@ -15,8 +15,6 @@ use Livewire\Attributes\Url;
  */
 abstract class DecisionDashboardPage extends Page
 {
-    protected static ?string $navigationGroup = 'Dashboards';
-
     protected static string $view = 'filament.pages.decision-dashboard';
 
     /** Active quarter — bound to the URL so it survives refresh / sharing. */
@@ -25,6 +23,11 @@ abstract class DecisionDashboardPage extends Page
 
     /** Concrete pages return their DecisionDashboards / sections() slug. */
     abstract protected function dashboardSlug(): string;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('messages.nav_group_dashboards');
+    }
 
     /** Demo pages are always visible (bypass Shield permission gating). */
     public static function canAccess(): bool
@@ -46,6 +49,7 @@ abstract class DecisionDashboardPage extends Page
     {
         $slug = $this->dashboardSlug();
         $meta = QDecisionController::DASHBOARDS[$slug];
+        $meta['title'] = __($meta['title_key']);
         $section = collect(QDecisionController::recommendationSections())->firstWhere('id', $slug);
 
         return [

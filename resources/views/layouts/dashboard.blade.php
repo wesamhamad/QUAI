@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+@php($__locale = app()->getLocale())
+<html lang="{{ $__locale }}" dir="{{ $__locale === 'ar' ? 'rtl' : 'ltr' }}" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'QUAI - منصة الذكاء الاصطناعي')</title>
+    <title>@yield('title', __('messages.app_title_default'))</title>
 
     {{-- Link-preview / social cards. Pages can set a custom card title via
          @section('og-title', '...'); otherwise the platform default is used. --}}

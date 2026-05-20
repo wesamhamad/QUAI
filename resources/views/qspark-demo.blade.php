@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Q SPARK — منصة التعلم والتجربة الأكاديمية')
+@section('title', __('messages.qspark_platform_title'))
 @section('page-title', 'Q SPARK')
-@section('og-title', 'Q SPARK — منصة التعلم والتجربة الأكاديمية | جامعة القصيم')
+@section('og-title', __('messages.qspark_platform_og_title'))
 
 {{-- Use a full-bleed content area so the iframe can fill the available space
      below QUAI's topbar without the default q-content padding. --}}
@@ -20,21 +20,21 @@
         <div class="qspark-embed__title">
             <span class="qspark-embed__badge">Q SPARK</span>
             <span class="qspark-embed__role">
-                {{ __('الجلسة الحالية:') }} <strong>{{ $qsparkRole }}</strong>
+                {{ __('messages.current_session') }} <strong>{{ $qsparkRole }}</strong>
             </span>
         </div>
         <div class="qspark-embed__actions">
-            <button type="button" class="qspark-embed__btn" id="qsparkReload" title="إعادة تحميل" aria-label="إعادة تحميل">
+            <button type="button" class="qspark-embed__btn" id="qsparkReload" title="{{ __('messages.reload') }}" aria-label="{{ __('messages.reload') }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>
                 </svg>
-                <span class="qspark-embed__btn-label">إعادة تحميل</span>
+                <span class="qspark-embed__btn-label">{{ __('messages.reload') }}</span>
             </button>
-            <a href="{{ $qsparkUrl }}" target="_blank" rel="noopener" class="qspark-embed__btn qspark-embed__btn--ghost" title="فتح في نافذة جديدة" aria-label="فتح في نافذة جديدة">
+            <a href="{{ $qsparkUrl }}" target="_blank" rel="noopener" class="qspark-embed__btn qspark-embed__btn--ghost" title="{{ __('messages.open_in_new_tab') }}" aria-label="{{ __('messages.open_in_new_tab') }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/>
                 </svg>
-                <span class="qspark-embed__btn-label">فتح في نافذة جديدة</span>
+                <span class="qspark-embed__btn-label">{{ __('messages.open_in_new_tab') }}</span>
             </a>
         </div>
     </header>
@@ -56,7 +56,7 @@
     <div class="qspark-embed__viewport">
         <div id="qsparkLoader" class="qspark-embed__loader" role="status" aria-live="polite">
             <div class="qspark-embed__spinner" aria-hidden="true"></div>
-            <span class="qspark-embed__loader-text">{{ __('جاري التحميل...') }}</span>
+            <span class="qspark-embed__loader-text">{{ __('messages.loading') }}…</span>
         </div>
         <iframe
             id="qsparkFrame"

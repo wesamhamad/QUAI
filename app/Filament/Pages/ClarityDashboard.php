@@ -8,10 +8,6 @@ class ClarityDashboard extends DecisionDashboardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationLabel = 'لوحة Microsoft Clarity';
-
-    protected static ?string $title = 'لوحة Microsoft Clarity';
-
     protected static ?int $navigationSort = 5;
 
     protected static ?string $slug = 'dashboards/clarity';
@@ -19,5 +15,15 @@ class ClarityDashboard extends DecisionDashboardPage
     protected function dashboardSlug(): string
     {
         return 'clarity';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('messages.dashboard_clarity');
+    }
+
+    public function getTitle(): string
+    {
+        return __('messages.dashboard_clarity');
     }
 }

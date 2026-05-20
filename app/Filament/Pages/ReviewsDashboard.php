@@ -8,10 +8,6 @@ class ReviewsDashboard extends DecisionDashboardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-star';
 
-    protected static ?string $navigationLabel = 'لوحة التقييمات الخارجية';
-
-    protected static ?string $title = 'لوحة التقييمات الخارجية';
-
     protected static ?int $navigationSort = 4;
 
     protected static ?string $slug = 'dashboards/reviews';
@@ -19,5 +15,15 @@ class ReviewsDashboard extends DecisionDashboardPage
     protected function dashboardSlug(): string
     {
         return 'reviews';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('messages.dashboard_reviews');
+    }
+
+    public function getTitle(): string
+    {
+        return __('messages.dashboard_reviews');
     }
 }

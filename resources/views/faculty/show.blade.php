@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', $student['name'] . ' — عرض هيئة التدريس')
-@section('page-title', 'عرض الطالب: ' . $student['name'])
+@section('title', $student['name'] . ' — ' . __('messages.nav_students'))
+@section('page-title', __('messages.faculty_view_student') . ': ' . $student['name'])
 
 @push('styles')
 <style>
@@ -28,21 +28,21 @@
 <div style="max-width: var(--q-content-max); margin: 0 auto;">
 
     <a href="{{ route('faculty.students') }}" style="display:inline-flex; align-items:center; gap:6px; color: var(--q-text-secondary); text-decoration:none; margin-bottom: var(--q-space-3); font-size: var(--q-font-sm);">
-        ← العودة لقائمة الطلاب
+        {{ app()->getLocale() === 'ar' ? '←' : '←' }} {{ __('messages.faculty_back_to_students_list') }}
     </a>
 
     <div class="fac-hero">
         <h1>{{ $student['name'] }}</h1>
         <div class="fac-hero-meta">
-            <span dir="ltr">رقم الطالب: <strong>{{ $student['student_id'] }}</strong></span>
-            <span>الكلية: <strong>{{ $student['faculty'] }}</strong></span>
-            <span>التخصص: <strong>{{ $student['major'] }}</strong></span>
-            <span>المعدل: <strong>{{ number_format($student['gpa'], 2) }}</strong></span>
-            <span>المستوى: <strong>{{ $student['level'] }}</strong></span>
+            <span dir="ltr">{{ __('messages.student_id') }}: <strong>{{ $student['student_id'] }}</strong></span>
+            <span>{{ __('messages.college') }}: <strong>{{ $student['faculty'] }}</strong></span>
+            <span>{{ __('messages.major_col') }}: <strong>{{ $student['major'] }}</strong></span>
+            <span>{{ __('messages.gpa') }}: <strong>{{ number_format($student['gpa'], 2) }}</strong></span>
+            <span>{{ __('messages.faculty_level_col') }}: <strong>{{ $student['level'] }}</strong></span>
         </div>
     </div>
 
-    <nav class="fac-tabs" aria-label="بيانات الطالب">
+    <nav class="fac-tabs" aria-label="{{ __('messages.faculty_student_data') }}">
         @foreach($tabs as $key => $info)
             <a href="{{ route('faculty.students.show', ['studentId' => $student['student_id'], 'tab' => $key]) }}"
                class="fac-tab {{ $tab === $key ? 'active' : '' }}">
@@ -60,7 +60,7 @@
     </div>
 
     <a href="{{ $tabs[$tab]['url'] }}" target="_blank" rel="noopener" class="fac-open-newtab">
-        فتح في تبويب جديد ↗
+        {{ __('messages.faculty_open_in_new_tab') }} ↗
     </a>
 </div>
 @endsection

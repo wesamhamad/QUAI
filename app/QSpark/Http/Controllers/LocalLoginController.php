@@ -5,6 +5,7 @@ namespace App\QSpark\Http\Controllers;
 use App\QSpark\Models\DailyVisit;
 use App\QSpark\Models\User;
 use App\QSpark\Support\DemoStudents;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -89,8 +90,13 @@ class LocalLoginController extends Controller
 
         Log::info('Demo quick-login', ['username' => $user->username, 'role' => $role, 'next' => $next ?: null]);
 
+        // Use a relative Location header so the browser keeps the iframe on
+        // whatever origin loaded the demo (e.g. ai.qu.sa) instead of being
+        // redirected to the host Laravel's URL generator computes from
+        // APP_URL/forwarded headers (which on shared deployments resolves to
+        // quailab.dev and is then blocked cross-origin by the iframe).
         if ($next !== '') {
-            return redirect($next);
+            return new RedirectResponse($next);
         }
 
         return $this->redirectForRole($role);
@@ -168,7 +174,7 @@ class LocalLoginController extends Controller
             Log::info('Demo: switched student persona', ['student_id' => $id]);
         }
 
-        return redirect()->route('qspark.dashboard.student');
+        return new RedirectResponse(route('qspark.dashboard.student', [], false));
     }
 
     private function isDemoOrLocal(): bool
@@ -176,13 +182,20 @@ class LocalLoginController extends Controller
         return config('app.demo_mode') === true || config('app.env') === 'local';
     }
 
-    private function redirectForRole(string $role)
+    private function redirectForRole(string $role): RedirectResponse
     {
-        return match ($role) {
-            'admin'   => redirect()->route('qspark.admin.dashboard'),
-            'faculty' => redirect()->route('qspark.faculty.dashboard'),
-            default   => redirect()->route('qspark.dashboard.student'),
+        // `route(name, [], false)` returns a root-relative path (e.g.
+        // "/qspark/admin/dashboard"). Wrapping it directly in a
+        // RedirectResponse keeps the Location header relative so the iframe
+        // follows the 302 on its current origin instead of being pinned to
+        // the URL generator's computed host.
+        $path = match ($role) {
+            'admin'   => route('qspark.admin.dashboard', [], false),
+            'faculty' => route('qspark.faculty.dashboard', [], false),
+            default   => route('qspark.dashboard.student', [], false),
         };
+
+        return new RedirectResponse($path);
     }
 
     private function seedDataFor(string $role, string $username): array

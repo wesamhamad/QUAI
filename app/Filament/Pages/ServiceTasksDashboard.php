@@ -8,10 +8,6 @@ class ServiceTasksDashboard extends DecisionDashboardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-    protected static ?string $navigationLabel = 'لوحة مهام تقنية المعلومات (نظام ساعد)';
-
-    protected static ?string $title = 'لوحة مهام تقنية المعلومات (نظام ساعد)';
-
     protected static ?int $navigationSort = 1;
 
     protected static ?string $slug = 'dashboards/service-tasks';
@@ -19,5 +15,15 @@ class ServiceTasksDashboard extends DecisionDashboardPage
     protected function dashboardSlug(): string
     {
         return 'service-tasks';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('messages.dashboard_service_tasks');
+    }
+
+    public function getTitle(): string
+    {
+        return __('messages.dashboard_service_tasks');
     }
 }

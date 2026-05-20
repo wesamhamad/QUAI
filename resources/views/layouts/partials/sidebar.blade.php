@@ -10,7 +10,7 @@
         </a>
         <div class="q-sidebar-brand">
             <div class="q-sidebar-brand-name">QUAI</div>
-            <div class="q-sidebar-brand-sub">منصة الذكاء الاصطناعي</div>
+            <div class="q-sidebar-brand-sub">{{ __('messages.quai_brand_sub') }}</div>
         </div>
     </div>
 
@@ -21,7 +21,7 @@
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
-            <span class="q-nav-label">الرئيسية</span>
+            <span class="q-nav-label">{{ __('messages.nav_home') }}</span>
         </a>
 
         @php($u = auth()->user())
@@ -50,7 +50,7 @@
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="q-nav-label">سجلك الرقمي</span>
+            <span class="q-nav-label">{{ __('messages.nav_digital_record') }}</span>
         </a>
 
         @if($isFaculty)
@@ -60,7 +60,7 @@
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span class="q-nav-label">الطلاب</span>
+            <span class="q-nav-label">{{ __('messages.nav_students') }}</span>
         </a>
         @endif
 
@@ -71,14 +71,14 @@
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 14l4-4 4 4 5-5"/>
             </svg>
-            <span class="q-nav-label">لوحات القرار</span>
+            <span class="q-nav-label">{{ __('messages.nav_decision_dashboards') }}</span>
         </a>
         <a href="{{ route('q-decision.digital-advisor') }}"
            class="q-nav-item {{ request()->routeIs('q-decision.digital-advisor') ? 'active' : '' }}">
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
             </svg>
-            <span class="q-nav-label">المستشار الرقمي</span>
+            <span class="q-nav-label">{{ __('messages.nav_digital_advisor') }}</span>
         </a>
         @endif
 
@@ -88,18 +88,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            <span class="q-nav-label">لوحة التحكم</span>
+            <span class="q-nav-label">{{ __('messages.admin_panel') }}</span>
         </a>
         @endcan
     </nav>
 
     {{-- Sidebar Footer --}}
     <div class="q-sidebar-footer">
-        <button class="q-sidebar-collapse-btn" id="sidebarCollapseBtn" title="طي القائمة">
+        <button class="q-sidebar-collapse-btn" id="sidebarCollapseBtn" title="{{ __('messages.collapse_menu') }}">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
             </svg>
-            <span class="q-sidebar-collapse-label">طي القائمة</span>
+            <span class="q-sidebar-collapse-label">{{ __('messages.collapse_menu') }}</span>
         </button>
     </div>
 </aside>

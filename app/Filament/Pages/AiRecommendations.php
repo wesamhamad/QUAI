@@ -9,13 +9,7 @@ use Livewire\Attributes\Url;
 
 class AiRecommendations extends Page
 {
-    protected static ?string $navigationGroup = 'Dashboards';
-
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
-
-    protected static ?string $navigationLabel = 'توصيات الذكاء الاصطناعي';
-
-    protected static ?string $title = 'توصيات الذكاء الاصطناعي';
 
     protected static ?int $navigationSort = 0;
 
@@ -29,6 +23,21 @@ class AiRecommendations extends Page
     public static function canAccess(): bool
     {
         return true;
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('messages.nav_group_dashboards');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('messages.dashboard_ai_recommendations');
+    }
+
+    public function getTitle(): string
+    {
+        return __('messages.dashboard_ai_recommendations');
     }
 
     public function mount(): void

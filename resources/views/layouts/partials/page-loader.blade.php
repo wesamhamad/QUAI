@@ -39,12 +39,12 @@
     }
 </style>
 
-<div class="q-page-loader" id="qPageLoader" role="status" aria-live="polite" aria-label="جاري التحميل">
+<div class="q-page-loader" id="qPageLoader" role="status" aria-live="polite" aria-label="{{ __('messages.page_loader_label') }}">
     <div class="q-page-loader__card">
         <div class="q-page-loader__spinner" aria-hidden="true"></div>
         <div>
-            <div class="q-page-loader__text">جاري تحميل الصفحة…</div>
-            <div class="q-page-loader__hint">يرجى الانتظار قليلاً</div>
+            <div class="q-page-loader__text">{{ __('messages.page_loader_text') }}</div>
+            <div class="q-page-loader__hint">{{ __('messages.page_loader_hint') }}</div>
         </div>
     </div>
 </div>

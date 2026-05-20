@@ -37,11 +37,19 @@
         </select>
       </div>
     @endif
-    {{-- Language switcher removed — demo is Arabic-only. --}}
+    @include('qspark::components.language-switcher')
     <div class="flex items-center gap-2">
       <img src="{{ asset('vendor/avatars/female-avatar.svg') }}" alt="profile" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border shrink-0">
-      <span class="font-medium hidden sm:inline truncate max-w-[8rem] lg:max-w-none">
-        {{ app()->getLocale() == 'ar' ? ($studentArabicName ?? 'غير متوفر') : ($studentEnglishName ?? 'Not Available') }}
+      @php
+        // Pick the locale-matching name and fall back to the other language so
+        // a profile that only has the Arabic name still renders correctly when
+        // the UI is in English (and vice versa).
+        $headerName = app()->getLocale() == 'ar'
+          ? (($studentArabicName ?? null) ?: ($studentEnglishName ?? __('messages.not_available')))
+          : (($studentEnglishName ?? null) ?: ($studentArabicName ?? __('messages.not_available')));
+      @endphp
+      <span class="font-medium hidden sm:inline truncate max-w-[8rem] lg:max-w-none" dir="auto">
+        {{ $headerName }}
       </span>
       
       <!-- Logout Button -->

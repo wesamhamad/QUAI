@@ -1,5 +1,8 @@
+@php
+    $qmLocale = app()->getLocale() === 'en' ? 'en' : 'ar';
+@endphp
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $qmLocale }}" dir="{{ $qmLocale === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +17,14 @@
 <body class="antialiased">
     @include('layouts.partials.page-loader')
     <div id="qmentor-app"></div>
+
+    <script>
+        // Seed the SPA's language state from the Laravel session locale so a
+        // toggle in the QUAI shell propagates here, and provide the endpoint
+        // the SPA POSTs to when its own switcher is used.
+        window.__qmentor_locale = @json($qmLocale);
+        window.__qmentor_lang_url = @json(url('/lang'));
+    </script>
 
     @auth
     <script>

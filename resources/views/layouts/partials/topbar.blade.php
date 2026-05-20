@@ -1,17 +1,20 @@
 {{-- ===== Top Bar ===== --}}
 <header class="q-topbar">
     <div class="q-topbar-right">
-        <button class="q-hamburger" id="sidebarToggle" title="القائمة">
+        <button class="q-hamburger" id="sidebarToggle" title="{{ __('messages.menu') }}">
             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
         </button>
-        <h1 class="q-topbar-title">@yield('page-title', 'الرئيسية')</h1>
+        <h1 class="q-topbar-title">@yield('page-title', __('messages.nav_home'))</h1>
     </div>
 
     <div class="q-topbar-left">
+        {{-- Language Switcher --}}
+        @include('layouts.partials.language-switcher')
+
         {{-- Theme Toggle --}}
-        <button class="q-theme-toggle" id="themeToggle" title="تبديل الوضع">
+        <button class="q-theme-toggle" id="themeToggle" title="{{ __('messages.toggle_theme') }}">
             <svg class="q-icon-sun" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
@@ -39,7 +42,7 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
-                    لوحة التحكم
+                    {{ __('messages.admin_panel') }}
                 </a>
                 @endcan
                 <div class="q-dropdown-divider"></div>
@@ -49,7 +52,7 @@
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
-                        تسجيل الخروج
+                        {{ __('messages.logout') }}
                     </button>
                 </form>
             </div>

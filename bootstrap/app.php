@@ -58,6 +58,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'qspark.timeout' => \App\QSpark\Http\Middleware\IncreaseExecutionTime::class,
         ]);
 
+        // Apply the locale resolver to every web request so the QUAI shell
+        // (not just QSpark routes) reads the chosen UI locale from the session.
+        $middleware->web(append: [
+            \App\QSpark\Http\Middleware\SetLocale::class,
+        ]);
+
         // UseQSparkGuard switches the default auth guard to `qspark`. It must run
         // before Laravel's `auth` middleware (Authenticate) — which the framework
         // pulls to a fixed priority slot — otherwise `auth` checks QUAI's `web`

@@ -15,6 +15,21 @@ Route::middleware(['web'])->group(function () {
     Route::post('/demo-login/{username}', [DemoAuthController::class, 'quickLogin'])->name('demo.login.quick');
 });
 
+// Global language switch — persists the chosen UI locale in the session.
+// Used by both the QUAI shell language switcher and the QSpark sub-app's JS.
+Route::post('/lang/{locale}', function (string $locale) {
+    if (! \in_array($locale, ['ar', 'en'], true)) {
+        return response()->json(['success' => false, 'message' => 'Invalid locale'], 400);
+    }
+    session(['locale' => $locale]);
+    app()->setLocale($locale);
+    return response()->json([
+        'success' => true,
+        'locale'  => $locale,
+        'dir'     => $locale === 'ar' ? 'rtl' : 'ltr',
+    ]);
+})->middleware(['web', 'throttle:10,1'])->name('lang.switch');
+
 // SDAIA policy view — auto-accepted at login, but keep the route so old links don't 404.
 Route::get('/sdaia-policy', function () {
     if (auth()->user()?->hasAcceptedSdaiaPolicy()) {
@@ -66,23 +81,23 @@ Route::middleware(['auth'])->group(function () {
         // path carries that prefix (it becomes the quick-login ?next= target).
         $sectionsByRole = [
             'admin' => [
-                'dashboard'   => ['label' => 'لوحة الإدارة',  'path' => '/qspark/admin/dashboard'],
-                'users'       => ['label' => 'المستخدمون',    'path' => '/qspark/admin/users'],
-                'roles'       => ['label' => 'الأدوار',        'path' => '/qspark/admin/roles'],
-                'permissions' => ['label' => 'الصلاحيات',     'path' => '/qspark/admin/permissions'],
+                'dashboard'   => ['label' => __('messages.qspark_section_admin_dashboard'), 'path' => '/qspark/admin/dashboard'],
+                'users'       => ['label' => __('messages.qspark_section_users'),           'path' => '/qspark/admin/users'],
+                'roles'       => ['label' => __('messages.qspark_section_roles'),           'path' => '/qspark/admin/roles'],
+                'permissions' => ['label' => __('messages.qspark_section_permissions'),     'path' => '/qspark/admin/permissions'],
             ],
             'faculty' => [
-                'dashboard' => ['label' => 'لوحة هيئة التدريس', 'path' => '/qspark/faculty/dashboard'],
-                'courses'   => ['label' => 'المقررات',          'path' => '/qspark/faculty/courses'],
-                'students'  => ['label' => 'الطلاب',            'path' => '/qspark/faculty/students'],
-                'reports'   => ['label' => 'التقارير',          'path' => '/qspark/faculty/reports'],
+                'dashboard' => ['label' => __('messages.qspark_section_faculty_dashboard'), 'path' => '/qspark/faculty/dashboard'],
+                'courses'   => ['label' => __('messages.qspark_section_courses'),           'path' => '/qspark/faculty/courses'],
+                'students'  => ['label' => __('messages.qspark_section_students'),          'path' => '/qspark/faculty/students'],
+                'reports'   => ['label' => __('messages.qspark_section_reports'),           'path' => '/qspark/faculty/reports'],
             ],
             'student' => [
-                'dashboard'       => ['label' => 'لوحة الطالب',  'path' => '/qspark/dashboard-student'],
-                'grades'          => ['label' => 'الدرجات',       'path' => '/qspark/dashboard-student/grades'],
-                'courses'         => ['label' => 'المقررات',      'path' => '/qspark/dashboard-student/courses'],
-                'recommendations' => ['label' => 'التوصيات',     'path' => '/qspark/dashboard-student/recommendations'],
-                'chat'            => ['label' => 'المساعد الذكي', 'path' => '/qspark/dashboard-student/chat'],
+                'dashboard'       => ['label' => __('messages.qspark_section_student_dashboard'), 'path' => '/qspark/dashboard-student'],
+                'grades'          => ['label' => __('messages.qspark_section_grades'),            'path' => '/qspark/dashboard-student/grades'],
+                'courses'         => ['label' => __('messages.qspark_section_student_courses'),   'path' => '/qspark/dashboard-student/courses'],
+                'recommendations' => ['label' => __('messages.qspark_section_recommendations'),   'path' => '/qspark/dashboard-student/recommendations'],
+                'chat'            => ['label' => __('messages.qspark_section_chat'),              'path' => '/qspark/dashboard-student/chat'],
             ],
         ];
         $sections = $sectionsByRole[$qsparkRole] ?? [];

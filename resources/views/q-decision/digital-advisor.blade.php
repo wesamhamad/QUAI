@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'المستشار الرقمي - QUAI')
+@section('title', __('messages.nav_digital_advisor') . ' - QUAI')
 @section('page-title', 'QU Agent')
 
 @push('styles')
@@ -326,10 +326,10 @@
             </div>
             <div style="flex: 1;">
                 <h2 style="font-size: 1.5rem; font-weight: 800; color: white; margin: 0 0 0.25rem 0;">QU Agent</h2>
-                <p style="font-size: 0.875rem; color: rgba(255,255,255,0.85); margin: 0;">أنشئ وكلاء ذكاء اصطناعي مخصصين بملفات معرفة خاصة وشارك رابطهم مع الآخرين</p>
+                <p style="font-size: 0.875rem; color: rgba(255,255,255,0.85); margin: 0;">{{ __('messages.qu_agent_hero_desc') }}</p>
             </div>
             <div style="font-size: 0.75rem; color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.12); padding: 0.4rem 0.75rem; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.18);">
-                المزود: {{ $providerName }}
+                {{ __('messages.qu_agent_provider_label') }}: {{ $providerName }}
             </div>
         </div>
     </div>
@@ -337,44 +337,44 @@
     <div class="agent-form">
         <div class="form-body">
             <div id="agentSuccessMessage" class="success-message">
-                تم إنشاء الوكيل بنجاح! يمكنك مشاركة الرابط أدناه.
+                {{ __('messages.qu_agent_created_success') }}
             </div>
 
             <form id="agentForm">
                 <div class="form-group">
-                    <label class="form-label">اسم الوكيل</label>
-                    <input type="text" id="agentName" class="form-input" placeholder="مثال: مساعد عضو هيئة التدريس" required>
-                    <p class="form-hint">اختر اسماً واضحاً يصف وظيفة الوكيل</p>
+                    <label class="form-label">{{ __('messages.qu_agent_name_label') }}</label>
+                    <input type="text" id="agentName" class="form-input" placeholder="{{ __('messages.qu_agent_name_placeholder') }}" required>
+                    <p class="form-hint">{{ __('messages.qu_agent_name_hint') }}</p>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">دور الوكيل</label>
-                    <input type="text" id="agentRole" class="form-input" placeholder="مثال: مساعد لوائح، مستشار سياسات، مساعد قبول وتسجيل" required>
-                    <p class="form-hint">يتحكم الدور في أسلوب الاستجابة والأولويات وعمق التحليل</p>
+                    <label class="form-label">{{ __('messages.qu_agent_role_label') }}</label>
+                    <input type="text" id="agentRole" class="form-input" placeholder="{{ __('messages.qu_agent_role_placeholder') }}" required>
+                    <p class="form-hint">{{ __('messages.qu_agent_role_hint') }}</p>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">استراتيجية المعرفة</label>
+                    <label class="form-label">{{ __('messages.qu_agent_strategy_label') }}</label>
                     <div class="strategy-toggle">
                         <label class="toggle-option selected" data-value="rag">
                             <input type="radio" name="strategy" value="rag" checked>
                             <div class="toggle-option-title">RAG</div>
-                            <div class="toggle-option-desc">استرجاع معزز بالتوليد — مثالي للمعرفة الديناميكية والقابلة للتحقق</div>
-                            <span class="toggle-option-badge badge-green">موصى به</span>
+                            <div class="toggle-option-desc">{{ __('messages.qu_agent_rag_desc') }}</div>
+                            <span class="toggle-option-badge badge-green">{{ __('messages.qu_agent_recommended') }}</span>
                         </label>
                         <label class="toggle-option" data-value="fine_tuning">
                             <input type="radio" name="strategy" value="fine_tuning">
                             <div class="toggle-option-title">Fine-tuning</div>
-                            <div class="toggle-option-desc">ضبط دقيق — مثالي للسلوك المستقر والأنماط الخاصة بالمجال</div>
-                            <span class="toggle-option-badge badge-blue">متقدم</span>
+                            <div class="toggle-option-desc">{{ __('messages.qu_agent_fine_tuning_desc') }}</div>
+                            <span class="toggle-option-badge badge-blue">{{ __('messages.qu_agent_advanced') }}</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group" id="ragFilesGroup">
                     <label class="form-label">
-                        ملفات المعرفة
-                        <span class="form-label-optional">(مصادر بيانات الوكيل)</span>
+                        {{ __('messages.qu_agent_knowledge_files_label') }}
+                        <span class="form-label-optional">({{ __('messages.qu_agent_knowledge_files_sub') }})</span>
                     </label>
                     <div class="rag-files-section" id="ragFilesSection">
                         <div class="file-upload-area" id="agentFileUploadArea">
@@ -382,69 +382,69 @@
                             <svg class="file-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
-                            <p class="file-upload-text"><strong>اضغط لرفع الملفات</strong> أو اسحب وأفلت هنا</p>
-                            <p class="file-upload-hint">TXT, PDF, Word, CSV, JSON, Markdown — بحد أقصى 10MB لكل ملف</p>
+                            <p class="file-upload-text">{!! __('messages.qu_agent_file_upload_text') !!}</p>
+                            <p class="file-upload-hint">{{ __('messages.qu_agent_file_upload_hint') }}</p>
                         </div>
                         <div id="agentUploadedFiles" class="uploaded-files"></div>
-                        <p class="form-hint">ارفع الملفات التي سيعتمد عليها الوكيل كمصدر معرفة للإجابة على الأسئلة</p>
+                        <p class="form-hint">{{ __('messages.qu_agent_file_upload_form_hint') }}</p>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">اللغة والنموذج</label>
+                    <label class="form-label">{{ __('messages.qu_agent_language_label') }}</label>
                     <div class="language-toggle">
                         <label class="toggle-option selected" data-value="ar">
                             <input type="radio" name="language" value="ar" checked>
-                            <div class="toggle-option-title">العربية</div>
-                            <div class="toggle-option-desc">مساعد ذكي باللغة العربية لجامعة القصيم (QU LLM Assistant)، مدرَّب على البيانات العامة للجامعة — السياسات والأخبار والبرامج الأكاديمية واللوائح والخدمات الإدارية.</div>
+                            <div class="toggle-option-title">{{ __('messages.qu_agent_language_arabic') }}</div>
+                            <div class="toggle-option-desc">{{ __('messages.qu_agent_qu_llm_desc_ar') }}</div>
                             <span class="toggle-option-badge badge-green">QU LLM</span>
                         </label>
                         <label class="toggle-option" data-value="en">
                             <input type="radio" name="language" value="en">
                             <div class="toggle-option-title">English</div>
-                            <div class="toggle-option-desc">Arabic-language AI assistant for Qassim University (QU LLM Assistant), trained on the university's own public data — policies, news, academic programs, regulations, and administrative services.</div>
+                            <div class="toggle-option-desc">{{ __('messages.qu_agent_qu_llm_desc_en') }}</div>
                             <span class="toggle-option-badge badge-green">QU LLM</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">أفضل الممارسات</label>
-                    <p class="form-hint" style="margin-bottom: 0.75rem;">تأكد من تفعيل الممارسات التي تناسب حالة الاستخدام</p>
+                    <label class="form-label">{{ __('messages.qu_agent_best_practices') }}</label>
+                    <p class="form-hint" style="margin-bottom: 0.75rem;">{{ __('messages.qu_agent_best_practices_hint') }}</p>
                     <div class="bp-checkboxes">
                         <label class="bp-checkbox">
                             <input type="checkbox" id="bpDataIsolation" checked>
                             <div>
-                                <div class="bp-checkbox-label">عزل البيانات</div>
-                                <div class="bp-checkbox-desc">الوكيل يجيب فقط من مصادر البيانات المحددة</div>
+                                <div class="bp-checkbox-label">{{ __('messages.qu_agent_bp_data_isolation') }}</div>
+                                <div class="bp-checkbox-desc">{{ __('messages.qu_agent_bp_data_isolation_desc') }}</div>
                             </div>
                         </label>
                         <label class="bp-checkbox">
                             <input type="checkbox" id="bpNoHallucination" checked>
                             <div>
-                                <div class="bp-checkbox-label">منع الهلوسة</div>
-                                <div class="bp-checkbox-desc">إذا لم تتوفر المعلومة، يوضح الوكيل ذلك صراحة</div>
+                                <div class="bp-checkbox-label">{{ __('messages.qu_agent_bp_no_hallucination') }}</div>
+                                <div class="bp-checkbox-desc">{{ __('messages.qu_agent_bp_no_hallucination_desc') }}</div>
                             </div>
                         </label>
                         <label class="bp-checkbox">
                             <input type="checkbox" id="bpPromptGovernance" checked>
                             <div>
-                                <div class="bp-checkbox-label">حوكمة التعليمات</div>
-                                <div class="bp-checkbox-desc">التعليمات والأدوار محمية وغير قابلة للكشف</div>
+                                <div class="bp-checkbox-label">{{ __('messages.qu_agent_bp_prompt_governance') }}</div>
+                                <div class="bp-checkbox-desc">{{ __('messages.qu_agent_bp_prompt_governance_desc') }}</div>
                             </div>
                         </label>
                         <label class="bp-checkbox">
                             <input type="checkbox" id="bpSecurity" checked>
                             <div>
-                                <div class="bp-checkbox-label">الأمان</div>
-                                <div class="bp-checkbox-desc">لا وصول لمعرفة خارجية إلا بتمكين صريح</div>
+                                <div class="bp-checkbox-label">{{ __('messages.qu_agent_bp_security') }}</div>
+                                <div class="bp-checkbox-desc">{{ __('messages.qu_agent_bp_security_desc') }}</div>
                             </div>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">البحث في الويب</label>
+                    <label class="form-label">{{ __('messages.qu_agent_web_search_label') }}</label>
                     <div class="web-search-toggle" id="webSearchToggle">
                         <div class="web-search-toggle-info">
                             <div class="web-search-toggle-icon">
@@ -453,8 +453,8 @@
                                 </svg>
                             </div>
                             <div class="web-search-toggle-text">
-                                <div class="web-search-toggle-title">تمكين البحث في الويب</div>
-                                <div class="web-search-toggle-desc">الوكيل سيبحث في الإنترنت (Google, Bing, ...) للإجابة على الأسئلة مع ذكر المصادر والروابط</div>
+                                <div class="web-search-toggle-title">{{ __('messages.qu_agent_web_search_enable') }}</div>
+                                <div class="web-search-toggle-desc">{{ __('messages.qu_agent_web_search_desc') }}</div>
                             </div>
                         </div>
                         <div class="switch-track"><div class="switch-thumb"></div></div>
@@ -466,7 +466,7 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    إنشاء الوكيل
+                    {{ __('messages.qu_agent_create_button') }}
                 </button>
             </form>
         </div>
@@ -474,7 +474,7 @@
 
     <div class="agents-list" id="agentsListSection">
         <div class="agents-list-header">
-            <div class="agents-list-title">الوكلاء المُنشأون</div>
+            <div class="agents-list-title">{{ __('messages.qu_agent_list_title') }}</div>
             <div class="agents-list-count" id="agentsCount"></div>
         </div>
         <div id="agentsList">
@@ -482,7 +482,7 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                <p>لا يوجد وكلاء بعد. قم بإنشاء وكيلك الأول!</p>
+                <p>{{ __('messages.qu_agent_list_empty') }}</p>
             </div>
         </div>
     </div>
@@ -490,8 +490,8 @@
     <div class="loading-overlay" id="agentLoading">
         <div class="loading-card">
             <div class="loading-spinner"></div>
-            <p style="color: var(--q-text-primary, #0f172a); font-weight: 600;">جاري إنشاء الوكيل...</p>
-            <p style="color: var(--q-text-secondary, #64748b); font-size: 0.875rem; margin-top: 0.5rem;">يرجى الانتظار</p>
+            <p style="color: var(--q-text-primary, #0f172a); font-weight: 600;">{{ __('messages.qu_agent_creating') }}</p>
+            <p style="color: var(--q-text-secondary, #64748b); font-size: 0.875rem; margin-top: 0.5rem;">{{ __('messages.qu_agent_please_wait') }}</p>
         </div>
     </div>
 
@@ -505,10 +505,10 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="chat-modal-title" id="chatModalTitle">الوكيل</div>
+                    <div class="chat-modal-title" id="chatModalTitle">{{ __('messages.qu_agent_chat_title') }}</div>
                     <div class="chat-modal-sub" id="chatModalSub"></div>
                 </div>
-                <button type="button" class="chat-modal-close" onclick="closeAgentChat()" title="إغلاق">
+                <button type="button" class="chat-modal-close" onclick="closeAgentChat()" title="{{ __('messages.close') }}">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -517,14 +517,14 @@
             <div class="chat-modal-body" id="chatModalBody"></div>
             <div class="chat-modal-footer">
                 <div class="chat-input-fake">
-                    <span>اكتب رسالتك...</span>
+                    <span>{{ __('messages.qu_agent_chat_placeholder') }}</span>
                     <span class="send-btn">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
                     </span>
                 </div>
-                <div class="chat-demo-note">وضع العرض التجريبي — هذه محادثة سابقة للاطلاع فقط، والإرسال معطّل في هذا الإصدار.</div>
+                <div class="chat-demo-note">{{ __('messages.qu_agent_chat_demo_note') }}</div>
             </div>
         </div>
     </div>
@@ -534,6 +534,23 @@
 (function() {
     // Demo-only: in-memory agent list seeded from the controller. No API calls.
     const seed = @json($demoAgents);
+    // Locale-aware labels for runtime-rendered HTML.
+    const daI18n = {
+        unsupported_type: @json(__('messages.agent_unsupported_file_type')),
+        supported_types:  @json(__('messages.agent_supported_types')),
+        file_too_large:   @json(__('messages.agent_file_too_large')),
+        remove:           @json(__('messages.agent_remove')),
+        count_suffix:     @json(__('messages.agent_count_suffix')),
+        lang_ar:          @json(__('messages.agent_lang_ar')),
+        lang_en:          @json(__('messages.agent_lang_en')),
+        files_suffix:     @json(__('messages.agent_files_suffix')),
+        web_search:       @json(__('messages.agent_web_search')),
+        copy_link:        @json(__('messages.agent_copy_link')),
+        link_copied:      @json(__('messages.agent_link_copied')),
+        open_chat:        @json(__('messages.agent_open_chat')),
+        archive:          @json(__('messages.agent_archive')),
+        confirm_archive:  @json(__('messages.agent_confirm_archive')),
+    };
     let agents = seed.map((a, i) => ({
         id: 'demo-' + (i + 1),
         name: a.name,
@@ -589,10 +606,10 @@
         Array.from(fileList).forEach(file => {
             const ext = file.name.split('.').pop().toLowerCase();
             if (!allowedExtensions.includes(ext)) {
-                alert(`نوع الملف غير مدعوم: .${ext}\nالأنواع المدعومة: ${allowedExtensions.join(', ')}`);
+                alert(`${daI18n.unsupported_type} .${ext}\n${daI18n.supported_types} ${allowedExtensions.join(', ')}`);
                 return;
             }
-            if (file.size > maxFileSize) { alert(`الملف "${file.name}" أكبر من 10MB`); return; }
+            if (file.size > maxFileSize) { alert(daI18n.file_too_large.replace('%s', file.name)); return; }
             if (agentFiles.some(f => f.name === file.name && f.size === file.size)) return;
             agentFiles.push(file);
         });
@@ -616,7 +633,7 @@
                         <div class="uploaded-file-name">${escapeHtml(file.name)}</div>
                         <div class="uploaded-file-size">${sizeLabel}</div>
                     </div>
-                    <button type="button" class="uploaded-file-remove" onclick="removeAgentFile(${index})" title="إزالة">
+                    <button type="button" class="uploaded-file-remove" onclick="removeAgentFile(${index})" title="${daI18n.remove}">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -638,15 +655,15 @@
             countEl.textContent = '';
             return;
         }
-        countEl.textContent = agents.length + ' وكيل';
+        countEl.textContent = agents.length + ' ' + daI18n.count_suffix;
         listEl.innerHTML = agents.map(agent => {
             const langBadgeClass = agent.language === 'ar' ? 'badge-green' : 'badge-blue';
-            const langLabel      = agent.language === 'ar' ? 'عربي' : 'English';
+            const langLabel      = agent.language === 'ar' ? daI18n.lang_ar : daI18n.lang_en;
             const strategyLabel  = agent.knowledge_strategy === 'rag' ? 'RAG' : 'Fine-tuning';
             const filesBadge     = agent.files_count > 0
-                ? `<span class="agent-badge badge-blue">${agent.files_count} ملف</span>` : '';
+                ? `<span class="agent-badge badge-blue">${agent.files_count} ${daI18n.files_suffix}</span>` : '';
             const webSearchBadge = agent.web_search_enabled
-                ? '<span class="agent-badge" style="background:rgba(59,130,246,0.1);color:#3B82F6;">بحث ويب</span>' : '';
+                ? `<span class="agent-badge" style="background:rgba(59,130,246,0.1);color:#3B82F6;">${daI18n.web_search}</span>` : '';
             return `
                 <div class="agent-card" data-agent-id="${agent.id}">
                     <div class="agent-card-header">
@@ -665,14 +682,14 @@
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
-                            نسخ الرابط
+                            ${daI18n.copy_link}
                         </button>
                     </div>
                     <div class="agent-card-actions">
                         <button type="button" class="btn-agent-action" onclick="openAgentChat('${agent.id}')">
-                            فتح المحادثة
+                            ${daI18n.open_chat}
                         </button>
-                        <button type="button" class="btn-agent-action danger" onclick="archiveAgent('${agent.id}')">أرشفة</button>
+                        <button type="button" class="btn-agent-action danger" onclick="archiveAgent('${agent.id}')">${daI18n.archive}</button>
                     </div>
                 </div>`;
         }).join('');
@@ -726,13 +743,13 @@
         navigator.clipboard.writeText(url).then(() => {
             const originalText = btn.innerHTML;
             btn.classList.add('copied');
-            btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> تم النسخ`;
+            btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> ${daI18n.link_copied}`;
             setTimeout(() => { btn.innerHTML = originalText; btn.classList.remove('copied'); }, 2000);
         });
     };
 
     window.archiveAgent = function(agentId) {
-        if (!confirm('هل أنت متأكد من أرشفة هذا الوكيل؟')) return;
+        if (!confirm(daI18n.confirm_archive)) return;
         agents = agents.filter(a => a.id !== agentId);
         renderAgentsList();
     };
@@ -744,32 +761,59 @@
     }
 
     // --- Demo chat history (sample conversation so users understand the experience) ---
-    const chatHistory = {
-        'demo-1': {
-            day: 'الأحد 11 مايو 2026',
-            messages: [
-                { role: 'user', time: '10:12 ص',
-                  text: 'السلام عليكم، كم عدد ساعات العبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك؟' },
-                { role: 'bot', time: '10:12 ص',
-                  text: 'وعليكم السلام. وفقاً للائحة تنظيم شؤون منسوبي الجامعات السعوديين، يبلغ الحد الأدنى للعبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك ١٠ ساعات أسبوعياً.\nويجوز لمجلس القسم تخفيضه إلى ٨ ساعات لمن يكلَّف بأعمال إدارية أو إشرافية معتمدة.',
-                  sources: ['لائحة شؤون المنسوبين — مادة ٤١', 'دليل الأعباء التدريسية ١٤٤٧'] },
-                { role: 'user', time: '10:14 ص',
-                  text: 'وما هي مدة الإجازة العلمية وشروط التقدم لها؟' },
-                { role: 'bot', time: '10:14 ص',
-                  text: 'مدة الإجازة العلمية سنة قابلة للتمديد فصلاً دراسياً واحداً بموافقة مجلس الجامعة.\nأبرز الشروط:\n• أمضى عضو هيئة التدريس ثلاث سنوات على الأقل في الخدمة بعد التعيين أو الترقية.\n• تقديم خطة بحثية معتمدة من مجلس القسم والكلية.\n• ألا يكون قد حصل على إجازة علمية خلال السنوات الثلاث السابقة.',
-                  sources: ['لائحة شؤون المنسوبين — مادة ٦٣', 'دليل الإجازات العلمية'] },
-                { role: 'user', time: '10:17 ص',
-                  text: 'هل يمكنني الجمع بين الإجازة العلمية والتفرغ العلمي في نفس العام؟' },
-                { role: 'bot', time: '10:17 ص',
-                  text: 'لا يمكن الجمع بينهما في نفس الفترة. التفرغ العلمي يُمنح داخل الجامعة لإنجاز بحث محدد دون الإخلال بالحد الأدنى من العبء، بينما الإجازة العلمية تتطلب التفرغ الكامل خارج العمل.\nيمكن التقدم للتفرغ العلمي في عام لاحق بعد انتهاء الإجازة العلمية وعودتك للخدمة الفعلية.',
-                  sources: ['لائحة شؤون المنسوبين — مادة ٦٥'] },
-                { role: 'user', time: '10:19 ص',
-                  text: 'ممتاز، شكراً جزيلاً.' },
-                { role: 'bot', time: '10:19 ص',
-                  text: 'العفو، سعدت بخدمتك. إن احتجت أي توضيح إضافي حول اللوائح أو إجراءات التقديم فأنا متاح.' },
+    // Two parallel scripts; we pick one based on the active UI locale so the modal
+    // makes sense whether the visitor is browsing in Arabic or English.
+    const chatHistory = @json(app()->getLocale() === 'en' ? [
+        'demo-1' => [
+            'day' => 'Sunday, 11 May 2026',
+            'messages' => [
+                ['role' => 'user', 'time' => '10:12 AM',
+                 'text' => 'Hello, what is the teaching load (in hours) for a faculty member at the associate professor rank?'],
+                ['role' => 'bot', 'time' => '10:12 AM',
+                 'text' => "Hello. According to the bylaws governing Saudi university staff, the minimum teaching load for an associate professor is 10 hours per week.\nThe department council may reduce it to 8 hours for those assigned to approved administrative or supervisory duties.",
+                 'sources' => ['Staff Affairs Bylaw — Article 41', 'Teaching Load Guide 1447']],
+                ['role' => 'user', 'time' => '10:14 AM',
+                 'text' => 'What is the duration of a sabbatical leave and the conditions to apply for it?'],
+                ['role' => 'bot', 'time' => '10:14 AM',
+                 'text' => "A sabbatical leave lasts one year, extendable by one additional semester subject to university council approval.\nKey conditions:\n• At least three years of service after appointment or promotion.\n• Submission of a research plan approved by the department and college councils.\n• No sabbatical leave granted in the preceding three years.",
+                 'sources' => ['Staff Affairs Bylaw — Article 63', 'Sabbatical Leave Guide']],
+                ['role' => 'user', 'time' => '10:17 AM',
+                 'text' => 'Can I combine sabbatical leave and scholarly leave in the same year?'],
+                ['role' => 'bot', 'time' => '10:17 AM',
+                 'text' => "No, they cannot be combined in the same period. Scholarly leave is granted inside the university to complete a defined research project without falling below the minimum teaching load, while sabbatical leave requires full release from work.\nYou may apply for scholarly leave in a later year, after returning to active service from sabbatical.",
+                 'sources' => ['Staff Affairs Bylaw — Article 65']],
+                ['role' => 'user', 'time' => '10:19 AM',
+                 'text' => 'Excellent, thank you very much.'],
+                ['role' => 'bot', 'time' => '10:19 AM',
+                 'text' => "You are welcome — happy to help. If you need any further clarification about the regulations or application procedures, I am available."],
             ],
-        },
-    };
+        ],
+    ] : [
+        'demo-1' => [
+            'day' => 'الأحد 11 مايو 2026',
+            'messages' => [
+                ['role' => 'user', 'time' => '10:12 ص',
+                 'text' => 'السلام عليكم، كم عدد ساعات العبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك؟'],
+                ['role' => 'bot', 'time' => '10:12 ص',
+                 'text' => "وعليكم السلام. وفقاً للائحة تنظيم شؤون منسوبي الجامعات السعوديين، يبلغ الحد الأدنى للعبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك ١٠ ساعات أسبوعياً.\nويجوز لمجلس القسم تخفيضه إلى ٨ ساعات لمن يكلَّف بأعمال إدارية أو إشرافية معتمدة.",
+                 'sources' => ['لائحة شؤون المنسوبين — مادة ٤١', 'دليل الأعباء التدريسية ١٤٤٧']],
+                ['role' => 'user', 'time' => '10:14 ص',
+                 'text' => 'وما هي مدة الإجازة العلمية وشروط التقدم لها؟'],
+                ['role' => 'bot', 'time' => '10:14 ص',
+                 'text' => "مدة الإجازة العلمية سنة قابلة للتمديد فصلاً دراسياً واحداً بموافقة مجلس الجامعة.\nأبرز الشروط:\n• أمضى عضو هيئة التدريس ثلاث سنوات على الأقل في الخدمة بعد التعيين أو الترقية.\n• تقديم خطة بحثية معتمدة من مجلس القسم والكلية.\n• ألا يكون قد حصل على إجازة علمية خلال السنوات الثلاث السابقة.",
+                 'sources' => ['لائحة شؤون المنسوبين — مادة ٦٣', 'دليل الإجازات العلمية']],
+                ['role' => 'user', 'time' => '10:17 ص',
+                 'text' => 'هل يمكنني الجمع بين الإجازة العلمية والتفرغ العلمي في نفس العام؟'],
+                ['role' => 'bot', 'time' => '10:17 ص',
+                 'text' => "لا يمكن الجمع بينهما في نفس الفترة. التفرغ العلمي يُمنح داخل الجامعة لإنجاز بحث محدد دون الإخلال بالحد الأدنى من العبء، بينما الإجازة العلمية تتطلب التفرغ الكامل خارج العمل.\nيمكن التقدم للتفرغ العلمي في عام لاحق بعد انتهاء الإجازة العلمية وعودتك للخدمة الفعلية.",
+                 'sources' => ['لائحة شؤون المنسوبين — مادة ٦٥']],
+                ['role' => 'user', 'time' => '10:19 ص',
+                 'text' => 'ممتاز، شكراً جزيلاً.'],
+                ['role' => 'bot', 'time' => '10:19 ص',
+                 'text' => 'العفو، سعدت بخدمتك. إن احتجت أي توضيح إضافي حول اللوائح أو إجراءات التقديم فأنا متاح.'],
+            ],
+        ],
+    ]);
 
     const overlay = document.getElementById('chatModalOverlay');
 
@@ -783,7 +827,7 @@
 
         const body = document.getElementById('chatModalBody');
         if (!history || !history.messages.length) {
-            body.innerHTML = '<div class="chat-empty">لا توجد محادثات سابقة لهذا الوكيل بعد.<br>في النسخة الكاملة يمكنك بدء محادثة جديدة من هنا.</div>';
+            body.innerHTML = `<div class="chat-empty">{!! __('messages.agent_chat_empty') !!}</div>`;
         } else {
             const rows = history.messages.map(m => {
                 const sources = (m.sources && m.sources.length)

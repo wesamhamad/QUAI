@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+@php($__locale = app()->getLocale())
+<html lang="{{ $__locale }}" dir="{{ $__locale === 'ar' ? 'rtl' : 'ltr' }}" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>سياسة استخدام الذكاء الاصطناعي - QUAI</title>
+    <title>{{ __('messages.sdaia_policy_title') }} - QUAI</title>
     <script>(function(){var t=localStorage.getItem('quai-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -471,7 +472,7 @@
         {{-- Logo --}}
         <div class="logo-area">
             <div class="logo-mark">Q</div>
-            <div class="logo-title">QUAI - جامعة القصيم</div>
+            <div class="logo-title">QUAI - {{ __('messages.qassim_university') }}</div>
         </div>
 
         {{-- Card --}}
@@ -484,82 +485,82 @@
                         <path d="M9 12l2 2 4-4"/>
                     </svg>
                 </div>
-                <h1>سياسة استخدام الذكاء الاصطناعي</h1>
+                <h1>{{ __('messages.sdaia_policy_title') }}</h1>
                 <p>AI Usage Policy - SDAIA Ethics Framework</p>
             </div>
 
             {{-- Body --}}
             <div class="policy-body">
                 <p class="policy-intro">
-                    وفقاً لإطار أخلاقيات الذكاء الاصطناعي الصادر عن الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا)، يجب قراءة والموافقة على المبادئ التالية قبل استخدام المنصة:
+                    {{ __('messages.sdaia_policy_intro') }}
                 </p>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">1</span>
-                        <h3>الشفافية والإفصاح</h3>
+                        <h3>{{ __('messages.sdaia_p1_title') }}</h3>
                     </div>
                     <ul>
-                        <li>المحتوى المُنشأ بواسطة الذكاء الاصطناعي قد لا يكون دقيقاً بالكامل</li>
-                        <li>يجب التحقق من المعلومات المهمة من مصادر موثوقة</li>
-                        <li>عدم تقديم مخرجات الذكاء الاصطناعي على أنها عمل بشري أصلي</li>
+                        <li>{{ __('messages.sdaia_p1_a') }}</li>
+                        <li>{{ __('messages.sdaia_p1_b') }}</li>
+                        <li>{{ __('messages.sdaia_p1_c') }}</li>
                     </ul>
                 </div>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">2</span>
-                        <h3>الخصوصية وحماية البيانات</h3>
+                        <h3>{{ __('messages.sdaia_p2_title') }}</h3>
                     </div>
                     <ul>
-                        <li>عدم إدخال بيانات شخصية حساسة (أرقام هوية، سجلات طبية، بيانات مالية)</li>
-                        <li>عدم مشاركة معلومات سرية للجامعة أو الطلاب</li>
-                        <li>الالتزام بنظام حماية البيانات الشخصية السعودي</li>
+                        <li>{{ __('messages.sdaia_p2_a') }}</li>
+                        <li>{{ __('messages.sdaia_p2_b') }}</li>
+                        <li>{{ __('messages.sdaia_p2_c') }}</li>
                     </ul>
                 </div>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">3</span>
-                        <h3>العدالة وعدم التحيز</h3>
+                        <h3>{{ __('messages.sdaia_p3_title') }}</h3>
                     </div>
                     <ul>
-                        <li>عدم استخدام المنصة لإنشاء محتوى تمييزي أو متحيز</li>
-                        <li>الإبلاغ عن أي مخرجات متحيزة تُلاحظ</li>
+                        <li>{{ __('messages.sdaia_p3_a') }}</li>
+                        <li>{{ __('messages.sdaia_p3_b') }}</li>
                     </ul>
                 </div>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">4</span>
-                        <h3>المسؤولية والمساءلة</h3>
+                        <h3>{{ __('messages.sdaia_p4_title') }}</h3>
                     </div>
                     <ul>
-                        <li>المستخدم مسؤول عن كيفية استخدام المخرجات</li>
-                        <li>عدم استخدام المنصة لأغراض ضارة أو غير أخلاقية أو غير قانونية</li>
+                        <li>{{ __('messages.sdaia_p4_a') }}</li>
+                        <li>{{ __('messages.sdaia_p4_b') }}</li>
                     </ul>
                 </div>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">5</span>
-                        <h3>الأمان والسلامة</h3>
+                        <h3>{{ __('messages.sdaia_p5_title') }}</h3>
                     </div>
                     <ul>
-                        <li>عدم محاولة توليد محتوى عنيف أو متطرف أو غير أخلاقي</li>
-                        <li>عدم استخدام المنصة لانتهاك حقوق الملكية الفكرية</li>
-                        <li>الإبلاغ عن أي ثغرات أمنية</li>
+                        <li>{{ __('messages.sdaia_p5_a') }}</li>
+                        <li>{{ __('messages.sdaia_p5_b') }}</li>
+                        <li>{{ __('messages.sdaia_p5_c') }}</li>
                     </ul>
                 </div>
 
                 <div class="principle">
                     <div class="principle-head">
                         <span class="principle-num">6</span>
-                        <h3>الامتثال للأنظمة السعودية</h3>
+                        <h3>{{ __('messages.sdaia_p6_title') }}</h3>
                     </div>
                     <ul>
-                        <li>الالتزام بالأنظمة واللوائح السعودية في استخدام المنصة</li>
-                        <li>احترام القيم والثقافة والهوية الوطنية</li>
+                        <li>{{ __('messages.sdaia_p6_a') }}</li>
+                        <li>{{ __('messages.sdaia_p6_b') }}</li>
                     </ul>
                 </div>
 
@@ -580,23 +581,23 @@
                     <input type="checkbox" id="policyCheck">
                     <span class="custom-check"></span>
                     <span>
-                        لقد قرأت وأوافق على سياسة استخدام الذكاء الاصطناعي
+                        {{ __('messages.sdaia_agree_label') }}
                         <small class="checkbox-en">I have read and agree to the AI usage policy</small>
                     </span>
                 </label>
 
                 <div class="btn-row">
-                    <button id="acceptBtn" class="btn-accept" disabled>قبول والمتابعة</button>
-                    <button id="rejectBtn" class="btn-reject">رفض</button>
+                    <button id="acceptBtn" class="btn-accept" disabled>{{ __('messages.sdaia_accept') }}</button>
+                    <button id="rejectBtn" class="btn-reject">{{ __('messages.sdaia_reject') }}</button>
                 </div>
 
                 {{-- Reject confirmation --}}
                 <div class="reject-warning" id="rejectWarning">
-                    <strong>تنبيه: رفض السياسة يعني عدم إمكانية استخدام المنصة</strong>
-                    سيتم تسجيل خروجك من المنصة. يمكنك تسجيل الدخول مرة أخرى وقبول السياسة لاحقاً.
+                    <strong>{{ __('messages.sdaia_reject_warn_title') }}</strong>
+                    {{ __('messages.sdaia_reject_warn_body') }}
                     <div class="reject-btns">
-                        <button id="rejectConfirmBtn" class="reject-confirm-btn">تأكيد الرفض وتسجيل الخروج</button>
-                        <button id="rejectCancelBtn" class="reject-cancel-btn">إلغاء</button>
+                        <button id="rejectConfirmBtn" class="reject-confirm-btn">{{ __('messages.sdaia_reject_confirm') }}</button>
+                        <button id="rejectCancelBtn" class="reject-cancel-btn">{{ __('messages.cancel') }}</button>
                     </div>
                 </div>
             </div>
@@ -642,8 +643,8 @@
                 }
             } catch (e) {
                 acceptBtn.disabled = false;
-                acceptBtn.textContent = 'قبول والمتابعة';
-                alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+                acceptBtn.textContent = @json(__('messages.sdaia_accept'));
+                alert(@json(__('messages.sdaia_error_retry')));
             }
         });
 

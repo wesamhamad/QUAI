@@ -12,7 +12,7 @@
 <div class="ai-page">
     <div class="fi-header">
         <h1>{{ $meta['title'] }}</h1>
-        <p>{{ $section['subtitle'] ?? 'لوحة مؤشرات تفاعلية — اختر الربع لعرض بياناته.' }}</p>
+        <p>{{ $section['subtitle'] ?? __('messages.q_decision_dashboard_subtitle') }}</p>
     </div>
 
     @include('q-decision._quarter-selector')
@@ -70,8 +70,8 @@
     @if ($section)
         <div class="ai-recs-head">
             <span class="dot"></span>
-            <span class="lbl">توصيات الذكاء الاصطناعي</span>
-            <span class="cnt">{{ count($section['recommendations']) }} توصية</span>
+            <span class="lbl">{{ __('messages.q_decision_ai_recommendations') }}</span>
+            <span class="cnt">{{ count($section['recommendations']) }} {{ __('messages.q_decision_recommendation_unit') }}</span>
         </div>
         @include('q-decision._rec-cards', ['recommendations' => $section['recommendations']])
     @endif

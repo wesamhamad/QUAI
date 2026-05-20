@@ -135,8 +135,8 @@
                 </svg>
             </div>
             <div style="flex:1; min-width:0;">
-                <h2 id="dr-loader-title">QULLMs يحضّر سجلك الرقمي</h2>
-                <p>نقرأ بياناتك الجامعية ونقارنها لحظياً بسوق العمل السعودي…</p>
+                <h2 id="dr-loader-title">{{ __('messages.dr_loader_title') }}</h2>
+                <p>{{ __('messages.dr_loader_subtitle') }}</p>
             </div>
         </div>
 
@@ -146,8 +146,8 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </span>
                 <div>
-                    <div class="dr-loader-step-title">جلب بياناتك من النظام الجامعي</div>
-                    <div class="dr-loader-step-meta">الملف الشخصي، الكلية، التخصص، المعدل التراكمي</div>
+                    <div class="dr-loader-step-title">{{ __('messages.dr_loader_step1_title') }}</div>
+                    <div class="dr-loader-step-meta">{{ __('messages.dr_loader_step1_meta') }}</div>
                 </div>
                 <span class="dr-loader-step-status" aria-hidden="true">
                     <span class="dr-loader-pending"></span>
@@ -160,8 +160,8 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </span>
                 <div>
-                    <div class="dr-loader-step-title">تحليل مهاراتك المعتمدة</div>
-                    <div class="dr-loader-step-meta">قراءة سجل المهارات وتصنيفها حسب الفصل</div>
+                    <div class="dr-loader-step-title">{{ __('messages.dr_loader_step2_title') }}</div>
+                    <div class="dr-loader-step-meta">{{ __('messages.dr_loader_step2_meta') }}</div>
                 </div>
                 <span class="dr-loader-step-status" aria-hidden="true">
                     <span class="dr-loader-pending"></span>
@@ -174,8 +174,8 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </span>
                 <div>
-                    <div class="dr-loader-step-title">مسح متطلبات سوق العمل السعودي</div>
-                    <div class="dr-loader-step-meta">جمع أبرز المهارات المطلوبة من البيانات الحيّة</div>
+                    <div class="dr-loader-step-title">{{ __('messages.dr_loader_step3_title') }}</div>
+                    <div class="dr-loader-step-meta">{{ __('messages.dr_loader_step3_meta') }}</div>
                 </div>
                 <span class="dr-loader-step-status" aria-hidden="true">
                     <span class="dr-loader-pending"></span>
@@ -188,8 +188,8 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </span>
                 <div>
-                    <div class="dr-loader-step-title">مطابقة الوظائف الأنسب لك</div>
-                    <div class="dr-loader-step-meta">حساب التوافق مع تخصصك وأعلى مقرراتك درجةً</div>
+                    <div class="dr-loader-step-title">{{ __('messages.dr_loader_step4_title') }}</div>
+                    <div class="dr-loader-step-meta">{{ __('messages.dr_loader_step4_meta') }}</div>
                 </div>
                 <span class="dr-loader-step-status" aria-hidden="true">
                     <span class="dr-loader-pending"></span>
@@ -202,8 +202,8 @@
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 </span>
                 <div>
-                    <div class="dr-loader-step-title">توليد توصياتك بالذكاء الاصطناعي</div>
-                    <div class="dr-loader-step-meta">دورات ووظائف مرشّحة لسد الفجوات المهارية</div>
+                    <div class="dr-loader-step-title">{{ __('messages.dr_loader_step5_title') }}</div>
+                    <div class="dr-loader-step-meta">{{ __('messages.dr_loader_step5_meta') }}</div>
                 </div>
                 <span class="dr-loader-step-status" aria-hidden="true">
                     <span class="dr-loader-pending"></span>
@@ -220,9 +220,9 @@
         <div class="dr-loader-foot">
             <span class="dr-loader-hint">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                مدعوم بـ QULLMs · تحليل لحظي
+                {{ __('messages.dr_loader_footer') }}
             </span>
-            <button type="button" class="dr-loader-skip" id="dr-loader-skip">تخطي ومشاهدة السجل</button>
+            <button type="button" class="dr-loader-skip" id="dr-loader-skip">{{ __('messages.dr_loader_skip') }}</button>
         </div>
     </div>
 </div>

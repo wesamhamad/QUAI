@@ -11,6 +11,8 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -37,11 +39,15 @@ class AdminPanelProvider extends PanelProvider
             ->homeUrl('/')
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('الرجوع للموقع')
+                    ->label(fn () => __('messages.back_to_site'))
                     ->icon('heroicon-o-arrow-uturn-right')
                     ->url('/')
                     ->openUrlInNewTab(false),
             ])
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn (): string => Blade::render('@include(\'filament.topbar-language-switcher\')'),
+            )
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

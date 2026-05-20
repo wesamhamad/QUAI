@@ -1,6 +1,6 @@
 <footer class="bg-white border-t px-4 sm:px-6 py-4 mt-auto">
-  <div class="text-center text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md py-1.5 px-3 mb-3" dir="rtl">
-    هذه نسخة تجريبية (Demo) وليست النسخة الأصلية
+  <div class="text-center text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md py-1.5 px-3 mb-3" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+    <span data-translate="qspark_demo_disclaimer">{{ __('messages.qspark_demo_disclaimer') }}</span>
   </div>
   <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 text-sm text-gray-600 text-center sm:text-left">
     <div>
