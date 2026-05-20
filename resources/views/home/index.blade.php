@@ -72,7 +72,7 @@
                     </div>
                     <div>
                         <p style="font-size: var(--q-font-sm); color: var(--q-primary); font-weight: 600; margin: 0 0 var(--q-space-1) 0;">{{ __('messages.academic_system') }}</p>
-                        <h2 style="font-size: var(--q-font-xl); font-weight: 800; color: var(--q-text-primary); margin: 0;"> +QSpark</h2>
+                        <h2 style="font-size: var(--q-font-xl); font-weight: 800; color: var(--q-text-primary); margin: 0;">{{ app()->getLocale() === 'ar' ? '+QSpark' : 'QSpark+' }}</h2>
                     </div>
                 </header>
             </a>

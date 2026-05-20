@@ -42,7 +42,7 @@
             <svg class="q-nav-icon" width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
             </svg>
-            <span class="q-nav-label">+QSpark</span>
+            <span class="q-nav-label">{{ app()->getLocale() === 'ar' ? '+QSpark' : 'QSpark+' }}</span>
         </a>
 
         <a href="{{ route('digital-record.index') }}"

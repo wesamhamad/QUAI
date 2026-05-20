@@ -103,7 +103,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
               <span className="text-white font-bold text-sm">Q</span>
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-lg">
-              {isQSparkBrand ? '+QSpark' : t('QMentor', 'QMentor')}
+              {isQSparkBrand ? t('+QSpark', 'QSpark+') : t('QMentor', 'QMentor')}
             </span>
           </a>
         )}

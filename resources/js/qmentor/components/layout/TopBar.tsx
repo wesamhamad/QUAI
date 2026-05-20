@@ -134,7 +134,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
           )}
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">
             {isQSparkBrand
-              ? t('منصة +QSpark', '+QSpark Platform')
+              ? t('منصة +QSpark', 'QSpark+ Platform')
               : t('منصة QMentor', 'QMentor Platform')}
           </h1>
         </div>

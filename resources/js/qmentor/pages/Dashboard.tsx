@@ -969,7 +969,7 @@ export default function Dashboard() {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold tracking-wide opacity-90">{t('المنظومة الأكاديمية', 'Academic System')}</p>
-              <h1 className="text-xl sm:text-2xl font-extrabold leading-tight">+QSpark</h1>
+              <h1 className="text-xl sm:text-2xl font-extrabold leading-tight">{t('+QSpark', 'QSpark+')}</h1>
               <p className="text-sm opacity-90 mt-1">
                 {t('منظومة متكاملة تجمع المرشد الأكاديمي وسجلك الرقمي ومنصة التعلم.', 'Integrated suite combining Academic Advisor, Digital Record, and Learning Platform.')}
               </p>
