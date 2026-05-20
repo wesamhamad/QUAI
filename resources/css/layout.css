@@ -22,10 +22,11 @@ body {
 }
 
 /* === Dashboard Container === */
+/* Direction is inherited from <html dir="…">, which the layout sets per locale
+   (rtl for ar, ltr for en). Hardcoding it here would force RTL on English. */
 .q-dashboard {
     display: flex;
     min-height: 100vh;
-    direction: rtl;
 }
 
 /* === Sidebar === */
@@ -318,18 +319,25 @@ body {
     display: flex;
     align-items: center;
     gap: var(--q-space-4);
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .q-topbar-left {
     display: flex;
     align-items: center;
     gap: var(--q-space-3);
+    flex-shrink: 0;
 }
 
 .q-topbar-title {
     font-size: var(--q-font-lg);
     font-weight: 700;
     color: var(--q-text);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Mobile hamburger */

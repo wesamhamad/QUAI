@@ -21,11 +21,12 @@
     .q-lang-switcher {
         display: inline-flex;
         align-items: center;
-        background: var(--q-bg-sec, #F1F5F2);
-        border: 1px solid var(--q-border-color, #E5E7EB);
+        background: var(--q-bg-secondary, #F1F5F2);
+        border: 1px solid var(--q-border, #E5E7EB);
         border-radius: 999px;
         padding: 2px;
         gap: 2px;
+        flex-shrink: 0;
     }
     .q-lang-btn {
         appearance: none;
@@ -41,12 +42,16 @@
         letter-spacing: 0.04em;
         transition: background var(--q-transition-fast, 0.15s ease), color var(--q-transition-fast, 0.15s ease);
     }
-    .q-lang-btn:hover { color: var(--q-text-primary, #111827); }
+    .q-lang-btn:hover { color: var(--q-text, #111827); }
     .q-lang-btn.active {
         background: var(--q-primary, #25935F);
         color: #fff;
     }
     .q-lang-btn:disabled { opacity: 0.6; cursor: wait; }
+    @media (max-width: 480px) {
+        .q-lang-switcher { padding: 1px; }
+        .q-lang-btn { padding: 5px 8px; font-size: 0.7rem; }
+    }
 </style>
 
 <script>

@@ -125,7 +125,7 @@
     body.dr-loading .dr-wrapper { animation: none; }
 </style>
 
-<div class="dr-loader-overlay" id="dr-loader" role="dialog" aria-modal="true" aria-labelledby="dr-loader-title" dir="rtl" aria-hidden="true">
+<div class="dr-loader-overlay" id="dr-loader" role="dialog" aria-modal="true" aria-labelledby="dr-loader-title" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" aria-hidden="true">
     <div class="dr-loader-card">
         <div class="dr-loader-head">
             <div class="dr-loader-orb" aria-hidden="true">
