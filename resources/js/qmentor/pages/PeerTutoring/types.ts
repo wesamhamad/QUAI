@@ -54,6 +54,7 @@ export interface TutoringSession {
   status: SessionStatus;
   rating?: number;
   notes?: string;
+  notesEn?: string;
 }
 
 export interface LeaderboardEntry {

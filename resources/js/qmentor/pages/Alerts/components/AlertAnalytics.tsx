@@ -60,7 +60,7 @@ export default function AlertAnalytics({ data }: AlertAnalyticsProps) {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.severityOverTime}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+                <XAxis dataKey={isRtl ? 'month' : 'monthEn'} tick={{ fontSize: 11, fill: '#9ca3af' }} />
                 <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }}
@@ -148,7 +148,7 @@ export default function AlertAnalytics({ data }: AlertAnalyticsProps) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.resolutionRates}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} />
+              <XAxis dataKey={isRtl ? 'month' : 'monthEn'} tick={{ fontSize: 11, fill: '#9ca3af' }} />
               <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} />
               <Tooltip
                 contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, color: '#fff', fontSize: 12 }}

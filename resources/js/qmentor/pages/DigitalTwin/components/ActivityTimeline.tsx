@@ -2,49 +2,52 @@ import React, { useState } from 'react';
 import { GraduationCap, BarChart3, Handshake, AlertTriangle, CalendarDays } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TimelineEvent } from '../types';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface Props {
   events: TimelineEvent[];
 }
 
 const typeStyles = {
-  academic: { bg: 'bg-sa-100 dark:bg-sa-900/50', icon: GraduationCap, text: 'text-sa-700 dark:text-sa-300', label: 'أكاديمي', line: 'bg-sa-500' },
-  behavioral: { bg: 'bg-info-100 dark:bg-blue-900/50', icon: BarChart3, text: 'text-info-600 dark:text-blue-300', label: 'سلوكي', line: 'bg-info-500' },
-  intervention: { bg: 'bg-lavender-100 dark:bg-purple-900/50', icon: Handshake, text: 'text-lavender-600 dark:text-purple-300', label: 'تدخل', line: 'bg-lavender-500' },
-  alert: { bg: 'bg-error-100 dark:bg-red-900/50', icon: AlertTriangle, text: 'text-error-500 dark:text-red-300', label: 'تنبيه', line: 'bg-error-500' },
+  academic: { bg: 'bg-sa-100 dark:bg-sa-900/50', icon: GraduationCap, text: 'text-sa-700 dark:text-sa-300', label: 'أكاديمي', labelEn: 'Academic', line: 'bg-sa-500' },
+  behavioral: { bg: 'bg-info-100 dark:bg-blue-900/50', icon: BarChart3, text: 'text-info-600 dark:text-blue-300', label: 'سلوكي', labelEn: 'Behavioral', line: 'bg-info-500' },
+  intervention: { bg: 'bg-lavender-100 dark:bg-purple-900/50', icon: Handshake, text: 'text-lavender-600 dark:text-purple-300', label: 'تدخل', labelEn: 'Intervention', line: 'bg-lavender-500' },
+  alert: { bg: 'bg-error-100 dark:bg-red-900/50', icon: AlertTriangle, text: 'text-error-500 dark:text-red-300', label: 'تنبيه', labelEn: 'Alert', line: 'bg-error-500' },
 };
 
 type FilterType = 'all' | TimelineEvent['type'];
 
-function formatDate(timestamp: string): string {
+function formatDate(timestamp: string, locale: string): string {
   const date = new Date(timestamp);
-  return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function formatTime(timestamp: string): string {
+function formatTime(timestamp: string, locale: string): string {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function ActivityTimeline({ events }: Props) {
+  const { t, lang } = useLanguage();
+  const locale = lang === 'ar' ? 'ar-SA' : 'en-US';
   const [filter, setFilter] = useState<FilterType>('all');
 
   const filtered = filter === 'all' ? events : events.filter(e => e.type === filter);
   const sorted = [...filtered].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  const filters: { key: FilterType; label: string }[] = [
-    { key: 'all', label: 'الكل' },
-    { key: 'academic', label: 'أكاديمي' },
-    { key: 'behavioral', label: 'سلوكي' },
-    { key: 'intervention', label: 'تدخل' },
-    { key: 'alert', label: 'تنبيهات' },
+  const filters: { key: FilterType; label: string; labelEn: string }[] = [
+    { key: 'all', label: 'الكل', labelEn: 'All' },
+    { key: 'academic', label: 'أكاديمي', labelEn: 'Academic' },
+    { key: 'behavioral', label: 'سلوكي', labelEn: 'Behavioral' },
+    { key: 'intervention', label: 'تدخل', labelEn: 'Intervention' },
+    { key: 'alert', label: 'تنبيهات', labelEn: 'Alerts' },
   ];
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-4">
       <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
         <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><CalendarDays className="w-4 h-4" /></span>
-        السجل الزمني
+        {t('السجل الزمني', 'Timeline')}
       </h2>
 
       {/* Filters */}
@@ -59,7 +62,7 @@ export default function ActivityTimeline({ events }: Props) {
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
-            {f.label}
+            {lang === 'ar' ? f.label : f.labelEn}
           </button>
         ))}
       </div>
@@ -81,13 +84,13 @@ export default function ActivityTimeline({ events }: Props) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <style.icon className="w-4 h-4" />
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">{event.title}</h4>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${style.text} font-medium shrink-0`}>{style.label}</span>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">{lang === 'ar' ? event.title : event.titleEn}</h4>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${style.text} font-medium shrink-0`}>{lang === 'ar' ? style.label : style.labelEn}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{event.description}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{lang === 'ar' ? event.description : event.descriptionEn}</p>
                   <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5">
-                    {formatDate(event.timestamp)} • {formatTime(event.timestamp)}
+                    {formatDate(event.timestamp, locale)} • {formatTime(event.timestamp, locale)}
                   </p>
                 </div>
               </div>

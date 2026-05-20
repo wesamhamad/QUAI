@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import type { RiskAssessmentData, RiskIndicator } from '../types';
 import DataSourceBadge from '../../../components/shared/DataSourceBadge';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface Props {
   risk: RiskAssessmentData;
@@ -21,17 +22,18 @@ function riskColor(score: number): string {
   return '#D92D20';
 }
 
-function riskLabel(score: number): string {
-  if (score <= 25) return 'منخفض';
-  if (score <= 50) return 'متوسط';
-  if (score <= 75) return 'مرتفع';
-  return 'حرج';
+function riskLabel(score: number, isAr: boolean): string {
+  if (score <= 25) return isAr ? 'منخفض' : 'Low';
+  if (score <= 50) return isAr ? 'متوسط' : 'Medium';
+  if (score <= 75) return isAr ? 'مرتفع' : 'High';
+  return isAr ? 'حرج' : 'Critical';
 }
 
 const trendIcons = { improving: '↗', stable: '→', declining: '↘' };
 const trendColors = { improving: 'text-sa-600', stable: 'text-gray-500', declining: 'text-error-500' };
 
 function RiskGauge({ score }: { score: number }) {
+  const { lang } = useLanguage();
   const color = riskColor(score);
   const angle = (score / 100) * 180;
   const r = 60;
@@ -73,18 +75,19 @@ function RiskGauge({ score }: { score: number }) {
         </text>
         <text x={cx} y={cy + 8} textAnchor="middle" fontSize="10" fill="#6C737F">/ 100</text>
       </svg>
-      <span className="text-sm font-bold mt-1" style={{ color }}>{riskLabel(score)}</span>
+      <span className="text-sm font-bold mt-1" style={{ color }}>{riskLabel(score, lang === 'ar')}</span>
     </div>
   );
 }
 
 function TopFactors({ indicators }: { indicators: RiskIndicator[] }) {
+  const { t, lang } = useLanguage();
   const top3 = [...indicators].sort((a, b) => b.score - a.score).slice(0, 3);
   const total = top3.reduce((s, i) => s + i.score, 0);
 
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">أهم العوامل المؤثرة</h4>
+      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('أهم العوامل المؤثرة', 'Top Contributing Factors')}</h4>
       {top3.map((ind, i) => {
         const weight = total > 0 ? Math.round((ind.score / total) * 100) : 0;
         const color = riskColor(ind.score);
@@ -101,7 +104,7 @@ function TopFactors({ indicators }: { indicators: RiskIndicator[] }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={ind.tooltip || ind.name}>{ind.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={(lang === 'ar' ? (ind.tooltip || ind.name) : (ind.tooltipEn || ind.nameEn))}>{lang === 'ar' ? ind.name : ind.nameEn}</p>
                 <span className="text-xs font-bold mr-2" style={{ color }}>{weight}%</span>
               </div>
               <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
@@ -122,6 +125,7 @@ function TopFactors({ indicators }: { indicators: RiskIndicator[] }) {
 }
 
 function IndicatorCard({ indicator }: { indicator: RiskIndicator }) {
+  const { lang } = useLanguage();
   const color = riskColor(indicator.score);
   return (
     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 flex items-start gap-3">
@@ -130,18 +134,19 @@ function IndicatorCard({ indicator }: { indicator: RiskIndicator }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={indicator.tooltip || indicator.name}>{indicator.name}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white truncate" title={(lang === 'ar' ? (indicator.tooltip || indicator.name) : (indicator.tooltipEn || indicator.nameEn))}>{lang === 'ar' ? indicator.name : indicator.nameEn}</p>
           <span className={`text-xs ${trendColors[indicator.trend]}`}>{trendIcons[indicator.trend]}</span>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{indicator.description}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{lang === 'ar' ? indicator.description : indicator.descriptionEn}</p>
       </div>
     </div>
   );
 }
 
 export default function RiskAssessment({ risk, source = 'mock' }: Props) {
+  const { t, lang } = useLanguage();
   const radarData = risk.categoryScores.map(cs => ({
-    category: cs.label,
+    category: lang === 'ar' ? cs.label : cs.labelEn,
     score: cs.score,
     fullMark: 100,
   }));
@@ -155,7 +160,7 @@ export default function RiskAssessment({ risk, source = 'mock' }: Props) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-error-100 dark:bg-red-900 flex items-center justify-center text-error-500 dark:text-red-400"><ShieldCheck className="w-4 h-4" /></span>
-          تقييم المخاطر
+          {t('تقييم المخاطر', 'Risk Assessment')}
         </h2>
         <DataSourceBadge source={source} />
       </div>
@@ -165,32 +170,32 @@ export default function RiskAssessment({ risk, source = 'mock' }: Props) {
         <RiskGauge score={risk.overallScore} />
         <TopFactors indicators={risk.indicators} />
         <div>
-          <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">اتجاه المخاطر</h4>
+          <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t('اتجاه المخاطر', 'Risk Trend')}</h4>
           <div className="h-24">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={risk.history} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                 <XAxis dataKey="date" tick={{ fontSize: 9 }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} hide />
-                <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '11px' }} formatter={(v: number) => [`${v}`, 'الخطورة']} />
+                <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '11px' }} formatter={(v: number) => [`${v}`, t('الخطورة', 'Risk')]} />
                 <Line type="monotone" dataKey="score" stroke={riskColor(risk.overallScore)} strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
           <p className={`text-xs flex items-center gap-1 mt-1 ${trendColors[risk.trend]}`}>
-            {trendIcons[risk.trend]} {risk.trend === 'improving' ? 'تحسن مستمر' : risk.trend === 'stable' ? 'مستقر' : 'انخفاض'}
+            {trendIcons[risk.trend]} {risk.trend === 'improving' ? t('تحسن مستمر', 'Steady improvement') : risk.trend === 'stable' ? t('مستقر', 'Stable') : t('انخفاض', 'Declining')}
           </p>
         </div>
       </div>
 
       {/* Radar Chart */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">توزيع المخاطر حسب الفئة</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('توزيع المخاطر حسب الفئة', 'Risk Distribution by Category')}</h3>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
               <PolarGrid className="opacity-30" />
               <PolarAngleAxis dataKey="category" tick={{ fontSize: 9, fill: '#6C737F' }} />
-              <Radar name="الخطورة" dataKey="score" stroke="#F04438" fill="#F04438" fillOpacity={0.15} strokeWidth={2} />
+              <Radar name={t('الخطورة', 'Risk')} dataKey="score" stroke="#F04438" fill="#F04438" fillOpacity={0.15} strokeWidth={2} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
@@ -206,7 +211,7 @@ export default function RiskAssessment({ risk, source = 'mock' }: Props) {
             transition={{ delay: i * 0.03 }}
             className="flex items-center gap-3"
           >
-            <span className="text-xs text-gray-600 dark:text-gray-400 w-28 truncate">{cs.label}</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400 w-28 truncate">{lang === 'ar' ? cs.label : cs.labelEn}</span>
             <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
@@ -223,7 +228,7 @@ export default function RiskAssessment({ risk, source = 'mock' }: Props) {
 
       {/* Risk Indicators */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">مؤشرات المخاطر الرئيسية</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('مؤشرات المخاطر الرئيسية', 'Key Risk Indicators')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {risk.indicators.map(ind => (
             <IndicatorCard key={ind.id} indicator={ind} />

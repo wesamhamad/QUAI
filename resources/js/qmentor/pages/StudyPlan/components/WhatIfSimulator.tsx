@@ -380,7 +380,7 @@ export default function WhatIfSimulator({ profile, courses }: Props) {
                     {(compareData.remaining ?? []).slice(0, 30).map((c, i) => (
                       <li key={i} className="text-[11px] text-gray-700 dark:text-gray-300 flex justify-between gap-2">
                         <span className="truncate"><span className="font-mono text-gray-500">{c.course_code}</span> {c.course_name}</span>
-                        <span className="shrink-0 text-gray-400">{c.crd_hrs ? `${c.crd_hrs}س` : ''}</span>
+                        <span className="shrink-0 text-gray-400">{c.crd_hrs ? `${c.crd_hrs}${t('س', 'cr')}` : ''}</span>
                       </li>
                     ))}
                   </ul>

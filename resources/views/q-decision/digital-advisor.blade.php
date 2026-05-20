@@ -763,57 +763,62 @@
     // --- Demo chat history (sample conversation so users understand the experience) ---
     // Two parallel scripts; we pick one based on the active UI locale so the modal
     // makes sense whether the visitor is browsing in Arabic or English.
-    const chatHistory = @json(app()->getLocale() === 'en' ? [
-        'demo-1' => [
-            'day' => 'Sunday, 11 May 2026',
-            'messages' => [
-                ['role' => 'user', 'time' => '10:12 AM',
-                 'text' => 'Hello, what is the teaching load (in hours) for a faculty member at the associate professor rank?'],
-                ['role' => 'bot', 'time' => '10:12 AM',
-                 'text' => "Hello. According to the bylaws governing Saudi university staff, the minimum teaching load for an associate professor is 10 hours per week.\nThe department council may reduce it to 8 hours for those assigned to approved administrative or supervisory duties.",
-                 'sources' => ['Staff Affairs Bylaw — Article 41', 'Teaching Load Guide 1447']],
-                ['role' => 'user', 'time' => '10:14 AM',
-                 'text' => 'What is the duration of a sabbatical leave and the conditions to apply for it?'],
-                ['role' => 'bot', 'time' => '10:14 AM',
-                 'text' => "A sabbatical leave lasts one year, extendable by one additional semester subject to university council approval.\nKey conditions:\n• At least three years of service after appointment or promotion.\n• Submission of a research plan approved by the department and college councils.\n• No sabbatical leave granted in the preceding three years.",
-                 'sources' => ['Staff Affairs Bylaw — Article 63', 'Sabbatical Leave Guide']],
-                ['role' => 'user', 'time' => '10:17 AM',
-                 'text' => 'Can I combine sabbatical leave and scholarly leave in the same year?'],
-                ['role' => 'bot', 'time' => '10:17 AM',
-                 'text' => "No, they cannot be combined in the same period. Scholarly leave is granted inside the university to complete a defined research project without falling below the minimum teaching load, while sabbatical leave requires full release from work.\nYou may apply for scholarly leave in a later year, after returning to active service from sabbatical.",
-                 'sources' => ['Staff Affairs Bylaw — Article 65']],
-                ['role' => 'user', 'time' => '10:19 AM',
-                 'text' => 'Excellent, thank you very much.'],
-                ['role' => 'bot', 'time' => '10:19 AM',
-                 'text' => "You are welcome — happy to help. If you need any further clarification about the regulations or application procedures, I am available."],
+    @php
+        $chatHistoryEn = [
+            'demo-1' => [
+                'day' => 'Sunday, 11 May 2026',
+                'messages' => [
+                    ['role' => 'user', 'time' => '10:12 AM',
+                     'text' => 'Hello, what is the teaching load (in hours) for a faculty member at the associate professor rank?'],
+                    ['role' => 'bot', 'time' => '10:12 AM',
+                     'text' => "Hello. According to the bylaws governing Saudi university staff, the minimum teaching load for an associate professor is 10 hours per week.\nThe department council may reduce it to 8 hours for those assigned to approved administrative or supervisory duties.",
+                     'sources' => ['Staff Affairs Bylaw — Article 41', 'Teaching Load Guide 1447']],
+                    ['role' => 'user', 'time' => '10:14 AM',
+                     'text' => 'What is the duration of a sabbatical leave and the conditions to apply for it?'],
+                    ['role' => 'bot', 'time' => '10:14 AM',
+                     'text' => "A sabbatical leave lasts one year, extendable by one additional semester subject to university council approval.\nKey conditions:\n• At least three years of service after appointment or promotion.\n• Submission of a research plan approved by the department and college councils.\n• No sabbatical leave granted in the preceding three years.",
+                     'sources' => ['Staff Affairs Bylaw — Article 63', 'Sabbatical Leave Guide']],
+                    ['role' => 'user', 'time' => '10:17 AM',
+                     'text' => 'Can I combine sabbatical leave and scholarly leave in the same year?'],
+                    ['role' => 'bot', 'time' => '10:17 AM',
+                     'text' => "No, they cannot be combined in the same period. Scholarly leave is granted inside the university to complete a defined research project without falling below the minimum teaching load, while sabbatical leave requires full release from work.\nYou may apply for scholarly leave in a later year, after returning to active service from sabbatical.",
+                     'sources' => ['Staff Affairs Bylaw — Article 65']],
+                    ['role' => 'user', 'time' => '10:19 AM',
+                     'text' => 'Excellent, thank you very much.'],
+                    ['role' => 'bot', 'time' => '10:19 AM',
+                     'text' => "You are welcome — happy to help. If you need any further clarification about the regulations or application procedures, I am available."],
+                ],
             ],
-        ],
-    ] : [
-        'demo-1' => [
-            'day' => 'الأحد 11 مايو 2026',
-            'messages' => [
-                ['role' => 'user', 'time' => '10:12 ص',
-                 'text' => 'السلام عليكم، كم عدد ساعات العبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك؟'],
-                ['role' => 'bot', 'time' => '10:12 ص',
-                 'text' => "وعليكم السلام. وفقاً للائحة تنظيم شؤون منسوبي الجامعات السعوديين، يبلغ الحد الأدنى للعبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك ١٠ ساعات أسبوعياً.\nويجوز لمجلس القسم تخفيضه إلى ٨ ساعات لمن يكلَّف بأعمال إدارية أو إشرافية معتمدة.",
-                 'sources' => ['لائحة شؤون المنسوبين — مادة ٤١', 'دليل الأعباء التدريسية ١٤٤٧']],
-                ['role' => 'user', 'time' => '10:14 ص',
-                 'text' => 'وما هي مدة الإجازة العلمية وشروط التقدم لها؟'],
-                ['role' => 'bot', 'time' => '10:14 ص',
-                 'text' => "مدة الإجازة العلمية سنة قابلة للتمديد فصلاً دراسياً واحداً بموافقة مجلس الجامعة.\nأبرز الشروط:\n• أمضى عضو هيئة التدريس ثلاث سنوات على الأقل في الخدمة بعد التعيين أو الترقية.\n• تقديم خطة بحثية معتمدة من مجلس القسم والكلية.\n• ألا يكون قد حصل على إجازة علمية خلال السنوات الثلاث السابقة.",
-                 'sources' => ['لائحة شؤون المنسوبين — مادة ٦٣', 'دليل الإجازات العلمية']],
-                ['role' => 'user', 'time' => '10:17 ص',
-                 'text' => 'هل يمكنني الجمع بين الإجازة العلمية والتفرغ العلمي في نفس العام؟'],
-                ['role' => 'bot', 'time' => '10:17 ص',
-                 'text' => "لا يمكن الجمع بينهما في نفس الفترة. التفرغ العلمي يُمنح داخل الجامعة لإنجاز بحث محدد دون الإخلال بالحد الأدنى من العبء، بينما الإجازة العلمية تتطلب التفرغ الكامل خارج العمل.\nيمكن التقدم للتفرغ العلمي في عام لاحق بعد انتهاء الإجازة العلمية وعودتك للخدمة الفعلية.",
-                 'sources' => ['لائحة شؤون المنسوبين — مادة ٦٥']],
-                ['role' => 'user', 'time' => '10:19 ص',
-                 'text' => 'ممتاز، شكراً جزيلاً.'],
-                ['role' => 'bot', 'time' => '10:19 ص',
-                 'text' => 'العفو، سعدت بخدمتك. إن احتجت أي توضيح إضافي حول اللوائح أو إجراءات التقديم فأنا متاح.'],
+        ];
+        $chatHistoryAr = [
+            'demo-1' => [
+                'day' => 'الأحد 11 مايو 2026',
+                'messages' => [
+                    ['role' => 'user', 'time' => '10:12 ص',
+                     'text' => 'السلام عليكم، كم عدد ساعات العبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك؟'],
+                    ['role' => 'bot', 'time' => '10:12 ص',
+                     'text' => "وعليكم السلام. وفقاً للائحة تنظيم شؤون منسوبي الجامعات السعوديين، يبلغ الحد الأدنى للعبء التدريسي لعضو هيئة التدريس برتبة أستاذ مشارك ١٠ ساعات أسبوعياً.\nويجوز لمجلس القسم تخفيضه إلى ٨ ساعات لمن يكلَّف بأعمال إدارية أو إشرافية معتمدة.",
+                     'sources' => ['لائحة شؤون المنسوبين — مادة ٤١', 'دليل الأعباء التدريسية ١٤٤٧']],
+                    ['role' => 'user', 'time' => '10:14 ص',
+                     'text' => 'وما هي مدة الإجازة العلمية وشروط التقدم لها؟'],
+                    ['role' => 'bot', 'time' => '10:14 ص',
+                     'text' => "مدة الإجازة العلمية سنة قابلة للتمديد فصلاً دراسياً واحداً بموافقة مجلس الجامعة.\nأبرز الشروط:\n• أمضى عضو هيئة التدريس ثلاث سنوات على الأقل في الخدمة بعد التعيين أو الترقية.\n• تقديم خطة بحثية معتمدة من مجلس القسم والكلية.\n• ألا يكون قد حصل على إجازة علمية خلال السنوات الثلاث السابقة.",
+                     'sources' => ['لائحة شؤون المنسوبين — مادة ٦٣', 'دليل الإجازات العلمية']],
+                    ['role' => 'user', 'time' => '10:17 ص',
+                     'text' => 'هل يمكنني الجمع بين الإجازة العلمية والتفرغ العلمي في نفس العام؟'],
+                    ['role' => 'bot', 'time' => '10:17 ص',
+                     'text' => "لا يمكن الجمع بينهما في نفس الفترة. التفرغ العلمي يُمنح داخل الجامعة لإنجاز بحث محدد دون الإخلال بالحد الأدنى من العبء، بينما الإجازة العلمية تتطلب التفرغ الكامل خارج العمل.\nيمكن التقدم للتفرغ العلمي في عام لاحق بعد انتهاء الإجازة العلمية وعودتك للخدمة الفعلية.",
+                     'sources' => ['لائحة شؤون المنسوبين — مادة ٦٥']],
+                    ['role' => 'user', 'time' => '10:19 ص',
+                     'text' => 'ممتاز، شكراً جزيلاً.'],
+                    ['role' => 'bot', 'time' => '10:19 ص',
+                     'text' => 'العفو، سعدت بخدمتك. إن احتجت أي توضيح إضافي حول اللوائح أو إجراءات التقديم فأنا متاح.'],
+                ],
             ],
-        ],
-    ]);
+        ];
+        $chatHistoryData = app()->getLocale() === 'en' ? $chatHistoryEn : $chatHistoryAr;
+    @endphp
+    const chatHistory = @json($chatHistoryData);
 
     const overlay = document.getElementById('chatModalOverlay');
 

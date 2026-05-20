@@ -48,6 +48,9 @@
         @include('digital-record._loader')
     @endauth
 
+    {{-- Floating accessibility & contact widget (user can dismiss; choice persists in localStorage). --}}
+    @include('layouts.partials.accessibility-widget')
+
     {{-- Theme & Dropdown JS --}}
     <script>
         // Theme toggle

@@ -66,7 +66,7 @@ export interface BehavioralMetrics {
   attendanceRate: number; // percentage
   libraryVisits: number; // per month
   lmsHoursPerWeek: number;
-  attendanceByMonth: { month: string; rate: number }[];
+  attendanceByMonth: { month: string; monthEn?: string; rate: number }[];
   studyPatterns: { hour: number; activity: number }[];
   courseEngagement: { course: string; hours: number; submissions: number }[];
   attendanceHeatmap?: AttendanceHeatmapEntry[];

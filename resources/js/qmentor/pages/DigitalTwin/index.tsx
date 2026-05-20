@@ -16,18 +16,19 @@ import DataSourceBadge from '../../components/shared/DataSourceBadge';
 import { mockStudent } from './data/mockStudent';
 import type { StudentListItem } from './data/mockStudentList';
 import { useStudentProfile, useCurrentCourses, useAcademicTransactions, useAbsences } from '../../hooks/useStudentData';
+import { useLanguage } from '../../contexts/LanguageContext';
 import type { StudentProfile, SemesterGPA, Course } from './types';
 
 type TabKey = 'academic' | 'courses' | 'studyplan' | 'behavioral' | 'risk' | 'recommendations' | 'timeline';
 
-const tabs: { key: TabKey; label: string; icon: LucideIcon }[] = [
-  { key: 'academic', label: 'الأداء الأكاديمي', icon: BarChart3 },
-  { key: 'courses', label: 'المقررات', icon: BookOpen },
-  { key: 'studyplan', label: 'الخطة الدراسية', icon: ClipboardList },
-  { key: 'behavioral', label: 'التحليلات السلوكية', icon: TrendingUp },
-  { key: 'risk', label: 'تقييم المخاطر', icon: ShieldCheck },
-  { key: 'recommendations', label: 'التوصيات', icon: Bot },
-  { key: 'timeline', label: 'السجل الزمني', icon: CalendarDays },
+const tabs: { key: TabKey; label: string; labelEn: string; icon: LucideIcon }[] = [
+  { key: 'academic', label: 'الأداء الأكاديمي', labelEn: 'Academic Performance', icon: BarChart3 },
+  { key: 'courses', label: 'المقررات', labelEn: 'Courses', icon: BookOpen },
+  { key: 'studyplan', label: 'الخطة الدراسية', labelEn: 'Study Plan', icon: ClipboardList },
+  { key: 'behavioral', label: 'التحليلات السلوكية', labelEn: 'Behavioral Analytics', icon: TrendingUp },
+  { key: 'risk', label: 'تقييم المخاطر', labelEn: 'Risk Assessment', icon: ShieldCheck },
+  { key: 'recommendations', label: 'التوصيات', labelEn: 'Recommendations', icon: Bot },
+  { key: 'timeline', label: 'السجل الزمني', labelEn: 'Timeline', icon: CalendarDays },
 ];
 
 // API profile response: { profile: { id, name, name_en, student_id, academic: { cumulative_gpa, last_recorded_gpa, total_plan_hours, total_earned_hours, current_registered_hours, remaining_hours_to_graduate, academic_status }, major: { name, name_en }, faculty: { name, name_en } } }
@@ -119,6 +120,7 @@ function mapApiCourses(apiData: unknown): Course[] {
 }
 
 export default function DigitalTwinPage() {
+  const { t, dir } = useLanguage();
   const [selectedStudent, setSelectedStudent] = useState<StudentListItem | null>(null);
   const [showListOnMobile, setShowListOnMobile] = useState(true);
 
@@ -133,7 +135,7 @@ export default function DigitalTwinPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white" dir="rtl">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white" dir={dir}>
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Page Title */}
         <div className="flex items-center justify-between mb-6 print:mb-4">
@@ -142,8 +144,8 @@ export default function DigitalTwinPage() {
               <User className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">التوأم الرقمي للطالب</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 print:hidden">عرض شامل لملف الطالب الأكاديمي والسلوكي</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('التوأم الرقمي للطالب', 'Student Digital Twin')}</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 print:hidden">{t('عرض شامل لملف الطالب الأكاديمي والسلوكي', 'A comprehensive view of the student academic and behavioral profile')}</p>
             </div>
           </div>
           {selectedStudent && (
@@ -152,7 +154,7 @@ export default function DigitalTwinPage() {
               className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors print:hidden"
             >
               <Printer className="w-3.5 h-3.5" />
-              طباعة
+              {t('طباعة', 'Print')}
             </button>
           )}
         </div>
@@ -179,7 +181,7 @@ export default function DigitalTwinPage() {
                   className="lg:hidden flex items-center gap-2 text-sm text-sa-600 dark:text-sa-400 font-medium mb-4 hover:text-sa-700 dark:hover:text-sa-300 transition-colors print:hidden"
                 >
                   <ArrowRight className="w-4 h-4" />
-                  العودة لقائمة الطلاب
+                  {t('العودة لقائمة الطلاب', 'Back to student list')}
                 </button>
                 {selectedStudent.isLive ? (
                   <LiveDigitalTwin key={selectedStudent.profile.studentId} student={selectedStudent} />
@@ -191,7 +193,7 @@ export default function DigitalTwinPage() {
               <div className="hidden lg:flex items-center justify-center h-96 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="text-center">
                   <User className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 dark:text-gray-500 text-sm">اختر طالباً من القائمة لعرض التوأم الرقمي</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">{t('اختر طالباً من القائمة لعرض التوأم الرقمي', 'Select a student from the list to view the digital twin')}</p>
                 </div>
               </div>
             )}
@@ -320,6 +322,7 @@ function TwinContent({
   currentSemesterHasGrades: boolean;
   lastGradedSemester: { semester: string; courses: Course[] } | null;
 }) {
+  const { lang } = useLanguage();
   return (
     <div className="space-y-6">
       {/* Data source badge */}
@@ -348,7 +351,7 @@ function TwinContent({
               className="tab-underline flex items-center gap-1.5 text-sm whitespace-nowrap pb-3"
             >
               <tab.icon className="w-4 h-4" strokeWidth={activeTab === tab.key ? 2 : 1.5} />
-              {tab.label}
+              {lang === 'ar' ? tab.label : tab.labelEn}
             </button>
           ))}
         </div>

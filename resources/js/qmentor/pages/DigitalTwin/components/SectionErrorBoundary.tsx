@@ -19,6 +19,7 @@ export default class SectionErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const isAr = typeof document !== 'undefined' ? document.documentElement.lang !== 'en' : true;
       return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -26,15 +27,15 @@ export default class SectionErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-6 h-6 text-error-500" />
             </div>
             <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-              تعذر تحميل {this.props.sectionName}
+              {isAr ? `تعذر تحميل ${this.props.sectionName}` : `Failed to load ${this.props.sectionName}`}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">حدث خطأ غير متوقع</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{isAr ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred'}</p>
             <button
               onClick={() => this.setState({ hasError: false })}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sa-600 dark:text-sa-400 bg-sa-50 dark:bg-sa-900/30 rounded-lg hover:bg-sa-100 dark:hover:bg-sa-900/50 transition-colors"
             >
               <RefreshCw className="w-3 h-3" />
-              إعادة المحاولة
+              {isAr ? 'إعادة المحاولة' : 'Retry'}
             </button>
           </div>
         </div>

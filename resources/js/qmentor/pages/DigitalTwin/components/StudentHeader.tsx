@@ -1,5 +1,6 @@
 import React from 'react';
 import type { StudentProfile } from '../types';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 const riskColors = {
   low: { bg: 'bg-sa-100 dark:bg-sa-900', text: 'text-sa-700 dark:text-sa-300', label: 'منخفض', labelEn: 'Low' },
@@ -29,9 +30,12 @@ interface Props {
 }
 
 export default function StudentHeader({ profile }: Props) {
+  const { t, lang } = useLanguage();
+  const isAr = lang === 'ar';
   const risk = riskColors[profile.riskLevel];
   const standing = standingLabels[profile.academicStanding];
   const status = statusLabels[profile.enrollmentStatus];
+  const displayName = isAr ? profile.name : profile.nameEn;
   const creditPercent = Math.round((profile.creditHoursCompleted / profile.creditHoursRequired) * 100);
 
   return (
@@ -40,7 +44,7 @@ export default function StudentHeader({ profile }: Props) {
         {/* Avatar */}
         <div className="relative shrink-0">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sa-500 to-sa-700 flex items-center justify-center text-white text-2xl font-bold">
-            {profile.name.charAt(0)}
+            {displayName.charAt(0)}
           </div>
           <span className={`absolute -bottom-1 -left-1 w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 ${status.color}`} />
         </div>
@@ -48,24 +52,24 @@ export default function StudentHeader({ profile }: Props) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-3 mb-1">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">{profile.name}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">{displayName}</h1>
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${risk.bg} ${risk.text}`}>
-              {risk.label}
+              {isAr ? risk.label : risk.labelEn}
             </span>
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color} text-white`}>
-              {status.ar}
+              {isAr ? status.ar : status.en}
             </span>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            {profile.studentId} • {profile.college} • {profile.department} • المستوى {profile.level}
+            {profile.studentId} • {isAr ? profile.college : profile.collegeEn} • {isAr ? profile.department : profile.departmentEn} • {t('المستوى', 'Level')} {profile.level}
           </p>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatCard label="المعدل التراكمي" value={`${profile.gpa}`} sub={`/ ${profile.gpaScale}`} accent />
-            <StatCard label="الساعات المكتملة" value={`${profile.creditHoursCompleted}`} sub={`/ ${profile.creditHoursRequired} (${creditPercent}%)`} />
-            <StatCard label="التخرج المتوقع" value={profile.expectedGraduation} />
-            <StatCard label="التقدير" value={standing?.ar ?? ''} />
+            <StatCard label={t('المعدل التراكمي', 'Cumulative GPA')} value={`${profile.gpa}`} sub={`/ ${profile.gpaScale}`} accent />
+            <StatCard label={t('الساعات المكتملة', 'Completed Hours')} value={`${profile.creditHoursCompleted}`} sub={`/ ${profile.creditHoursRequired} (${creditPercent}%)`} />
+            <StatCard label={t('التخرج المتوقع', 'Expected Graduation')} value={profile.expectedGraduation} />
+            <StatCard label={t('التقدير', 'Standing')} value={(isAr ? standing?.ar : standing?.en) ?? ''} />
           </div>
         </div>
       </div>

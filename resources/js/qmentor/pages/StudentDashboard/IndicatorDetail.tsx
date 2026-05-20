@@ -626,7 +626,7 @@ function overrideWarningsIndicator(
   const events: ContextualEvent[] = [];
 
   for (const w of warnings?.warnings ?? []) {
-    const date = String(w.entry_date ?? '').slice(0, 10) || (w.semester ? `الفصل ${w.semester}` : '—');
+    const date = String(w.entry_date ?? '').slice(0, 10) || (w.semester ? String(w.semester) : '—');
     events.push({
       date,
       descriptionAr: `إنذار أكاديمي${w.semester ? ` (الفصل ${w.semester})` : ''}: ${w.reason_ar ?? ''}`,

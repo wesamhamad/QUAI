@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Users, Filter, ChevronDown, X } from 'lucide-react';
 import { useRole } from '../../../contexts/RoleContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { mockStudentList, advisorStudentIds } from '../data/mockStudentList';
 import type { StudentListItem } from '../data/mockStudentList';
 import StudentCard from './StudentCard';
@@ -21,6 +22,14 @@ const riskLabels: Record<RiskFilter, string> = {
   critical: 'حرج',
 };
 
+const riskLabelsEn: Record<RiskFilter, string> = {
+  all: 'All',
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+};
+
 const gpaLabels: Record<GPAFilter, string> = {
   all: 'الكل',
   high: '4.0+',
@@ -28,15 +37,24 @@ const gpaLabels: Record<GPAFilter, string> = {
   low: 'أقل من 2.75',
 };
 
+const gpaLabelsEn: Record<GPAFilter, string> = {
+  all: 'All',
+  high: '4.0+',
+  mid: '2.75 – 3.99',
+  low: 'Below 2.75',
+};
+
 export default function StudentSelector({ selectedStudentId, onSelectStudent }: Props) {
   const { role } = useRole();
+  const { t, lang } = useLanguage();
+  const isAr = lang === 'ar';
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [collegeFilter, setCollegeFilter] = useState('all');
   const [gpaFilter, setGPAFilter] = useState<GPAFilter>('all');
 
-  const roleLabel = role === 'advisor' ? 'طلابي' : 'جميع الطلاب';
+  const roleLabel = role === 'advisor' ? t('طلابي', 'My Students') : t('جميع الطلاب', 'All Students');
 
   const filteredByRole = useMemo(() => {
     if (role === 'advisor') {
@@ -46,8 +64,11 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
   }, [role]);
 
   const colleges = useMemo(() => {
-    const set = new Set(filteredByRole.map(s => s.profile.college));
-    return Array.from(set);
+    const map = new Map<string, string>();
+    filteredByRole.forEach(s => {
+      if (!map.has(s.profile.college)) map.set(s.profile.college, s.profile.collegeEn);
+    });
+    return Array.from(map, ([ar, en]) => ({ ar, en }));
   }, [filteredByRole]);
 
   const filteredStudents = useMemo(() => {
@@ -112,7 +133,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
             }`}
           >
             <Filter className="w-3 h-3" />
-            تصفية
+            {t('تصفية', 'Filter')}
             <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </button>
         </div>
@@ -124,7 +145,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="بحث بالاسم أو الرقم الجامعي..."
+            placeholder={t('بحث بالاسم أو الرقم الجامعي...', 'Search by name or student ID...')}
             className="w-full pr-9 pl-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-sa-500 focus:outline-none"
           />
         </div>
@@ -134,7 +155,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
           <div className="mt-3 space-y-2.5 pt-3 border-t border-gray-100 dark:border-gray-700">
             {/* Risk Level */}
             <div>
-              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">مستوى الخطورة</label>
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">{t('مستوى الخطورة', 'Risk Level')}</label>
               <div className="flex flex-wrap gap-1">
                 {(Object.keys(riskLabels) as RiskFilter[]).map(key => (
                   <button
@@ -146,7 +167,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}
                   >
-                    {riskLabels[key]}
+                    {isAr ? riskLabels[key] : riskLabelsEn[key]}
                   </button>
                 ))}
               </div>
@@ -154,22 +175,22 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
 
             {/* College */}
             <div>
-              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">الكلية</label>
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">{t('الكلية', 'College')}</label>
               <select
                 value={collegeFilter}
                 onChange={e => setCollegeFilter(e.target.value)}
                 className="w-full text-xs bg-gray-100 dark:bg-gray-700 border-0 rounded-lg py-1.5 px-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-sa-500 focus:outline-none"
               >
-                <option value="all">جميع الكليات</option>
+                <option value="all">{t('جميع الكليات', 'All Colleges')}</option>
                 {colleges.map(c => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c.ar} value={c.ar}>{isAr ? c.ar : c.en}</option>
                 ))}
               </select>
             </div>
 
             {/* GPA Range */}
             <div>
-              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">نطاق المعدل</label>
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 block">{t('نطاق المعدل', 'GPA Range')}</label>
               <div className="flex flex-wrap gap-1">
                 {(Object.keys(gpaLabels) as GPAFilter[]).map(key => (
                   <button
@@ -181,7 +202,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}
                   >
-                    {gpaLabels[key]}
+                    {isAr ? gpaLabels[key] : gpaLabelsEn[key]}
                   </button>
                 ))}
               </div>
@@ -193,7 +214,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
                 className="flex items-center gap-1 text-[10px] text-error-500 hover:text-error-600 font-medium"
               >
                 <X className="w-3 h-3" />
-                مسح الفلاتر
+                {t('مسح الفلاتر', 'Clear filters')}
               </button>
             )}
           </div>
@@ -204,7 +225,7 @@ export default function StudentSelector({ selectedStudentId, onSelectStudent }: 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {filteredStudents.length === 0 ? (
           <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
-            لا توجد نتائج
+            {t('لا توجد نتائج', 'No results')}
           </div>
         ) : (
           filteredStudents.map(student => (

@@ -49,8 +49,8 @@ export interface AlertPreference {
 
 export interface AlertAnalyticsData {
   byType: { type: string; typeEn: string; count: number }[];
-  severityOverTime: { month: string; info: number; warning: number; urgent: number; critical: number }[];
+  severityOverTime: { month: string; monthEn: string; info: number; warning: number; urgent: number; critical: number }[];
   responseTime: { range: string; rangeEn: string; count: number }[];
   topIndicators: { indicator: string; indicatorEn: string; count: number }[];
-  resolutionRates: { month: string; resolved: number; pending: number; escalated: number }[];
+  resolutionRates: { month: string; monthEn: string; resolved: number; pending: number; escalated: number }[];
 }

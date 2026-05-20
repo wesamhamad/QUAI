@@ -33,11 +33,11 @@ export const mockStudent: DigitalTwinData = {
   ],
 
   currentCourses: [
-    { code: 'CS401', name: 'هندسة البرمجيات', nameEn: 'Software Engineering', creditHours: 3, grade: 'A', gradePoints: 5.0, bbGrade: '95/100', status: 'in-progress', instructor: 'د. خالد عتيب', instructorEn: 'Dr. Khalid Otaib', instructorEmail: 'k.otaibi@qu.edu.sa', contentPreview: 'نماذج التصميم، UML، اختبار البرمجيات' },
-    { code: 'CS421', name: 'الذكاء الاصطناعي', nameEn: 'Artificial Intelligence', creditHours: 3, grade: 'A-', gradePoints: 4.75, bbGrade: '91/100', status: 'in-progress', instructor: 'د. سارة سعد', instructorEn: 'Dr. Sara Saad', instructorEmail: 's.mutairi@qu.edu.sa', contentPreview: 'خوارزميات البحث، التعلم الآلي، الشبكات العصبية' },
-    { code: 'CS433', name: 'شبكات الحاسب', nameEn: 'Computer Networks', creditHours: 3, grade: 'B+', gradePoints: 4.5, bbGrade: '87/100', status: 'in-progress', instructor: 'د. فهد ناصر', instructorEn: 'Dr. Fahd Nasser', instructorEmail: 'f.harbi@qu.edu.sa', contentPreview: 'TCP/IP، بروتوكولات الشبكة، أمن الشبكات' },
-    { code: 'CS450', name: 'مشروع التخرج ١', nameEn: 'Senior Project 1', creditHours: 3, grade: 'A', gradePoints: 5.0, bbGrade: '97/100', status: 'in-progress', instructor: 'د. عبدالله شاهر', instructorEn: 'Dr. Abdullah Shaher', instructorEmail: 'a.shehri@qu.edu.sa', contentPreview: 'منهجية البحث، تصميم المشروع، التنفيذ' },
-    { code: 'ARAB301', name: 'الكتابة والتعبير', nameEn: 'Arabic Writing', creditHours: 2, grade: 'B', gradePoints: 4.0, bbGrade: '82/100', status: 'in-progress', instructor: 'أ. محمد قحطان', instructorEn: 'Mr. Mohammed Qahtan', instructorEmail: 'm.qahtani@qu.edu.sa', contentPreview: 'فنون الكتابة، التحرير، البلاغة' },
+    { code: 'CS401', name: 'هندسة البرمجيات', nameEn: 'Software Engineering', creditHours: 3, grade: 'A', gradePoints: 5.0, bbGrade: '95/100', status: 'in-progress', instructor: 'د. خالد عتيب', instructorEn: 'Dr. Khalid Otaib', instructorEmail: 'k.otaibi@qu.edu.sa', contentPreview: 'نماذج التصميم، UML، اختبار البرمجيات', contentPreviewEn: 'Design patterns, UML, software testing' },
+    { code: 'CS421', name: 'الذكاء الاصطناعي', nameEn: 'Artificial Intelligence', creditHours: 3, grade: 'A-', gradePoints: 4.75, bbGrade: '91/100', status: 'in-progress', instructor: 'د. سارة سعد', instructorEn: 'Dr. Sara Saad', instructorEmail: 's.mutairi@qu.edu.sa', contentPreview: 'خوارزميات البحث، التعلم الآلي، الشبكات العصبية', contentPreviewEn: 'Search algorithms, machine learning, neural networks' },
+    { code: 'CS433', name: 'شبكات الحاسب', nameEn: 'Computer Networks', creditHours: 3, grade: 'B+', gradePoints: 4.5, bbGrade: '87/100', status: 'in-progress', instructor: 'د. فهد ناصر', instructorEn: 'Dr. Fahd Nasser', instructorEmail: 'f.harbi@qu.edu.sa', contentPreview: 'TCP/IP، بروتوكولات الشبكة، أمن الشبكات', contentPreviewEn: 'TCP/IP, network protocols, network security' },
+    { code: 'CS450', name: 'مشروع التخرج ١', nameEn: 'Senior Project 1', creditHours: 3, grade: 'A', gradePoints: 5.0, bbGrade: '97/100', status: 'in-progress', instructor: 'د. عبدالله شاهر', instructorEn: 'Dr. Abdullah Shaher', instructorEmail: 'a.shehri@qu.edu.sa', contentPreview: 'منهجية البحث، تصميم المشروع، التنفيذ', contentPreviewEn: 'Research methodology, project design, implementation' },
+    { code: 'ARAB301', name: 'الكتابة والتعبير', nameEn: 'Arabic Writing', creditHours: 2, grade: 'B', gradePoints: 4.0, bbGrade: '82/100', status: 'in-progress', instructor: 'أ. محمد قحطان', instructorEn: 'Mr. Mohammed Qahtan', instructorEmail: 'm.qahtani@qu.edu.sa', contentPreview: 'فنون الكتابة، التحرير، البلاغة', contentPreviewEn: 'Writing arts, editing, rhetoric' },
   ],
 
   allCourses: [
@@ -78,13 +78,13 @@ export const mockStudent: DigitalTwinData = {
     libraryVisits: 12,
     lmsHoursPerWeek: 14.5,
     attendanceByMonth: [
-      { month: 'سبتمبر', rate: 95 },
-      { month: 'أكتوبر', rate: 90 },
-      { month: 'نوفمبر', rate: 85 },
-      { month: 'ديسمبر', rate: 82 },
-      { month: 'يناير', rate: 88 },
-      { month: 'فبراير', rate: 92 },
-      { month: 'مارس', rate: 87 },
+      { month: 'سبتمبر', monthEn: 'Sep', rate: 95 },
+      { month: 'أكتوبر', monthEn: 'Oct', rate: 90 },
+      { month: 'نوفمبر', monthEn: 'Nov', rate: 85 },
+      { month: 'ديسمبر', monthEn: 'Dec', rate: 82 },
+      { month: 'يناير', monthEn: 'Jan', rate: 88 },
+      { month: 'فبراير', monthEn: 'Feb', rate: 92 },
+      { month: 'مارس', monthEn: 'Mar', rate: 87 },
     ],
     studyPatterns: [
       { hour: 6, activity: 5 }, { hour: 7, activity: 10 }, { hour: 8, activity: 35 },

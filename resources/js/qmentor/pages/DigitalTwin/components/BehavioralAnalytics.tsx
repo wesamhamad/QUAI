@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import type { BehavioralMetrics, AttendanceHeatmapEntry } from '../types';
 import DataSourceBadge from '../../../components/shared/DataSourceBadge';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AbsenceBreakdown {
   course: string;
@@ -43,6 +44,7 @@ function GaugeRing({ value, label, color }: { value: number; label: string; colo
 }
 
 const dayLabels = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس'];
+const dayLabelsEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
 const heatmapColors: Record<AttendanceHeatmapEntry['status'], string> = {
   present: '#25935F',
   'absent-excused': '#F5BD02',
@@ -51,11 +53,13 @@ const heatmapColors: Record<AttendanceHeatmapEntry['status'], string> = {
 };
 
 function AttendanceHeatmap({ data }: { data: AttendanceHeatmapEntry[] }) {
+  const { t, lang } = useLanguage();
+  const dayNames = lang === 'ar' ? dayLabels : dayLabelsEn;
   const weeks = Array.from(new Set(data.map(d => d.week))).sort((a, b) => a - b);
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">خريطة الحضور الحرارية</h3>
+      <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('خريطة الحضور الحرارية', 'Attendance Heatmap')}</h3>
       <div className="overflow-x-auto">
         <div className="inline-block">
           {/* Week labels on top */}
@@ -67,7 +71,7 @@ function AttendanceHeatmap({ data }: { data: AttendanceHeatmapEntry[] }) {
           {/* Grid: days as rows, weeks as columns */}
           {[0, 1, 2, 3, 4].map(day => (
             <div key={day} className="flex items-center gap-0.5 mb-0.5">
-              <span className="text-[9px] text-gray-400 dark:text-gray-500 w-10 shrink-0 text-left">{dayLabels[day]}</span>
+              <span className="text-[9px] text-gray-400 dark:text-gray-500 w-10 shrink-0 text-left">{dayNames[day]}</span>
               {weeks.map(week => {
                 const cell = data.find(d => d.week === week && d.day === day);
                 const status = cell?.status ?? 'no-class';
@@ -76,10 +80,10 @@ function AttendanceHeatmap({ data }: { data: AttendanceHeatmapEntry[] }) {
                     key={`${week}-${day}`}
                     className="w-5 h-5 rounded-sm transition-transform hover:scale-125"
                     style={{ backgroundColor: heatmapColors[status] }}
-                    title={`أسبوع ${week} - ${dayLabels[day]}: ${
-                      status === 'present' ? 'حاضر' :
-                      status === 'absent-excused' ? 'غياب بعذر' :
-                      status === 'absent-unexcused' ? 'غياب بدون عذر' : 'لا محاضرة'
+                    title={`${t('أسبوع', 'Week')} ${week} - ${dayNames[day]}: ${
+                      status === 'present' ? t('حاضر', 'Present') :
+                      status === 'absent-excused' ? t('غياب بعذر', 'Excused absence') :
+                      status === 'absent-unexcused' ? t('غياب بدون عذر', 'Unexcused absence') : t('لا محاضرة', 'No class')
                     }`}
                   />
                 );
@@ -89,14 +93,14 @@ function AttendanceHeatmap({ data }: { data: AttendanceHeatmapEntry[] }) {
           {/* Legend */}
           <div className="flex items-center gap-3 mt-2 mr-12">
             {[
-              { status: 'present' as const, label: 'حاضر' },
-              { status: 'absent-excused' as const, label: 'بعذر' },
-              { status: 'absent-unexcused' as const, label: 'بدون عذر' },
-              { status: 'no-class' as const, label: 'لا محاضرة' },
+              { status: 'present' as const, label: 'حاضر', labelEn: 'Present' },
+              { status: 'absent-excused' as const, label: 'بعذر', labelEn: 'Excused' },
+              { status: 'absent-unexcused' as const, label: 'بدون عذر', labelEn: 'Unexcused' },
+              { status: 'no-class' as const, label: 'لا محاضرة', labelEn: 'No class' },
             ].map(item => (
               <div key={item.status} className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: heatmapColors[item.status] }} />
-                <span className="text-[9px] text-gray-500 dark:text-gray-400">{item.label}</span>
+                <span className="text-[9px] text-gray-500 dark:text-gray-400">{lang === 'ar' ? item.label : item.labelEn}</span>
               </div>
             ))}
           </div>
@@ -107,16 +111,17 @@ function AttendanceHeatmap({ data }: { data: AttendanceHeatmapEntry[] }) {
 }
 
 function ExcusedVsUnexcused({ excused, unexcused, total }: { excused: number; unexcused: number; total: number }) {
+  const { t, lang } = useLanguage();
   const present = total - excused - unexcused;
   const data = [
-    { name: 'حاضر', value: present, color: '#25935F' },
-    { name: 'بعذر', value: excused, color: '#F5BD02' },
-    { name: 'بدون عذر', value: unexcused, color: '#F04438' },
+    { name: 'حاضر', nameEn: 'Present', value: present, color: '#25935F' },
+    { name: 'بعذر', nameEn: 'Excused', value: excused, color: '#F5BD02' },
+    { name: 'بدون عذر', nameEn: 'Unexcused', value: unexcused, color: '#F04438' },
   ];
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">تفصيل الحضور والغياب</h3>
+      <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('تفصيل الحضور والغياب', 'Attendance Breakdown')}</h3>
       <div className="flex items-center gap-4">
         <div className="w-28 h-28">
           <ResponsiveContainer width="100%" height="100%">
@@ -140,7 +145,7 @@ function ExcusedVsUnexcused({ excused, unexcused, total }: { excused: number; un
             <div key={d.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: d.color }} />
-                <span className="text-xs text-gray-600 dark:text-gray-400">{d.name}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">{lang === 'ar' ? d.name : d.nameEn}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-gray-900 dark:text-white">{d.value}</span>
@@ -155,9 +160,14 @@ function ExcusedVsUnexcused({ excused, unexcused, total }: { excused: number; un
 }
 
 export default function BehavioralAnalytics({ behavioral, absenceBreakdown, source = 'mock' }: Props) {
+  const { t, lang } = useLanguage();
   const breakdownData = absenceBreakdown ?? behavioral.courseEngagement.map(ce => ({
     course: ce.course,
     absencePercent: Math.round(Math.random() * 20 + 5),
+  }));
+  const attendanceChartData = behavioral.attendanceByMonth.map(m => ({
+    ...m,
+    month: lang === 'ar' ? m.month : (m.monthEn ?? m.month),
   }));
 
   return (
@@ -169,27 +179,27 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-info-100 dark:bg-blue-900 flex items-center justify-center text-info-500 dark:text-blue-400"><TrendingUp className="w-4 h-4" /></span>
-          التحليلات السلوكية
+          {t('التحليلات السلوكية', 'Behavioral Analytics')}
         </h2>
         <DataSourceBadge source={source} />
       </div>
 
       {/* Gauge Rings */}
       <div className="grid grid-cols-3 gap-4">
-        <GaugeRing value={behavioral.attendanceRate} label="نسبة الحضور" color="#25935F" />
-        <GaugeRing value={behavioral.assignmentSubmissionRate} label="تسليم الواجبات" color="#F5BD02" />
-        <GaugeRing value={Math.min(100, Math.round(behavioral.lmsLoginFrequency / 7 * 100))} label="دخول المنصة" color="#2E90FA" />
+        <GaugeRing value={behavioral.attendanceRate} label={t('نسبة الحضور', 'Attendance Rate')} color="#25935F" />
+        <GaugeRing value={behavioral.assignmentSubmissionRate} label={t('تسليم الواجبات', 'Assignment Submission')} color="#F5BD02" />
+        <GaugeRing value={Math.min(100, Math.round(behavioral.lmsLoginFrequency / 7 * 100))} label={t('دخول المنصة', 'LMS Logins')} color="#2E90FA" />
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{behavioral.lmsHoursPerWeek}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">ساعة / أسبوع في المنصة</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('ساعة / أسبوع في المنصة', 'hours / week on LMS')}</p>
         </div>
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">{behavioral.libraryVisits}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">زيارة للمكتبة / شهر</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t('زيارة للمكتبة / شهر', 'library visits / month')}</p>
         </div>
       </div>
 
@@ -209,14 +219,14 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
 
       {/* Attendance Trend */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">اتجاه الحضور</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('اتجاه الحضور', 'Attendance Trend')}</h3>
         <div className="h-40">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={behavioral.attendanceByMonth} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <AreaChart data={attendanceChartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="month" tick={{ fontSize: 10 }} />
               <YAxis domain={[60, 100]} tick={{ fontSize: 10 }} />
-              <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '12px' }} formatter={(v: number) => [`${v}%`, 'الحضور']} />
+              <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '12px' }} formatter={(v: number) => [`${v}%`, t('الحضور', 'Attendance')]} />
               <Area type="monotone" dataKey="rate" stroke="#25935F" fill="#25935F" fillOpacity={0.15} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -225,7 +235,7 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
 
       {/* Per-Course Absence Breakdown */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">الغياب حسب المقرر</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('الغياب حسب المقرر', 'Absences by Course')}</h3>
         <div className="space-y-2">
           {breakdownData.map((item, i) => {
             const color = item.absencePercent > 15 ? '#F04438' : item.absencePercent > 10 ? '#F5BD02' : '#25935F';
@@ -256,14 +266,14 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
 
       {/* Study Patterns */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">نمط الدراسة (حسب الساعة)</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('نمط الدراسة (حسب الساعة)', 'Study Pattern (by hour)')}</h3>
         <div className="h-36">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={behavioral.studyPatterns} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={(h: number) => `${h}:00`} />
               <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '12px' }} formatter={(v: number) => [`${v}`, 'النشاط']} />
+              <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '12px' }} formatter={(v: number) => [`${v}`, t('النشاط', 'Activity')]} />
               <Area type="monotone" dataKey="activity" stroke="#80519F" fill="#80519F" fillOpacity={0.2} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -272,7 +282,7 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
 
       {/* Course Engagement */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">التفاعل مع المقررات</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('التفاعل مع المقررات', 'Course Engagement')}</h3>
         <div className="space-y-2">
           {behavioral.courseEngagement.map((ce, i) => (
             <motion.div
@@ -291,7 +301,7 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
                   className="h-full bg-info-500 rounded-full"
                 />
               </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 w-20 text-left">{ce.hours} ساعة</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 w-20 text-left">{ce.hours} {t('ساعة', 'hrs')}</span>
             </motion.div>
           ))}
         </div>

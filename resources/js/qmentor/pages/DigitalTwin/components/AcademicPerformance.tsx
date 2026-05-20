@@ -8,6 +8,7 @@ import {
 import type { SemesterGPA, Course } from '../types';
 import DataSourceBadge from '../../../components/shared/DataSourceBadge';
 import EmptyState from './EmptyState';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface Props {
   semesterGPAs: SemesterGPA[];
@@ -28,22 +29,23 @@ const gradeColors: Record<string, string> = {
 };
 
 function GPAComparisonGauge({ studentGPA, collegeAvg, universityAvg }: { studentGPA: number; collegeAvg: number; universityAvg: number }) {
+  const { t, lang } = useLanguage();
   const maxGPA = 5.0;
   const gaugeWidth = 100;
 
   const markers = [
-    { value: universityAvg, label: 'الجامعة', color: '#6C737F' },
-    { value: collegeAvg, label: 'الكلية', color: '#80519F' },
-    { value: studentGPA, label: 'الطالب', color: '#25935F' },
+    { value: universityAvg, label: 'الجامعة', labelEn: 'University', color: '#6C737F' },
+    { value: collegeAvg, label: 'الكلية', labelEn: 'College', color: '#80519F' },
+    { value: studentGPA, label: 'الطالب', labelEn: 'Student', color: '#25935F' },
   ];
 
   return (
     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">مقارنة المعدل</h4>
+      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">{t('مقارنة المعدل', 'GPA Comparison')}</h4>
       <div className="space-y-3">
         {markers.map(m => (
           <div key={m.label} className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 dark:text-gray-400 w-14 shrink-0">{m.label}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 w-14 shrink-0">{lang === 'ar' ? m.label : m.labelEn}</span>
             <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden relative">
               <motion.div
                 initial={{ width: 0 }}
@@ -66,6 +68,7 @@ export default function AcademicPerformance({
   academicStanding, currentSemesterHasGrades = true,
   lastGradedSemesterCourses, lastGradedSemesterName, source = 'mock', gpa = 0,
 }: Props) {
+  const { t, lang } = useLanguage();
   const creditPercent = Math.round((creditHoursCompleted / creditHoursRequired) * 100);
 
   const showGradesFallback = !currentSemesterHasGrades && lastGradedSemesterCourses && lastGradedSemesterCourses.length > 0;
@@ -88,11 +91,11 @@ export default function AcademicPerformance({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-sa-100 dark:bg-sa-900 flex items-center justify-center text-sa-600 dark:text-sa-400"><BarChart3 className="w-4 h-4" /></span>
-            الأداء الأكاديمي
+            {t('الأداء الأكاديمي', 'Academic Performance')}
           </h2>
           <DataSourceBadge source={source} />
         </div>
-        <EmptyState title="لا توجد بيانات أكاديمية" description="لم يتم العثور على سجل أكاديمي للطالب" icon="chart" />
+        <EmptyState title={t('لا توجد بيانات أكاديمية', 'No academic data')} description={t('لم يتم العثور على سجل أكاديمي للطالب', 'No academic record was found for this student')} icon="chart" />
       </div>
     );
   }
@@ -113,10 +116,10 @@ export default function AcademicPerformance({
 
       {/* Grades not available banner */}
       {showGradesFallback && (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gold-100 dark:bg-gold-900/30 border border-gold-200 dark:border-gold-800" dir="rtl">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-gold-100 dark:bg-gold-900/30 border border-gold-200 dark:border-gold-800">
           <Clock className="w-5 h-5 text-gold-700 dark:text-gold-400 shrink-0" />
           <p className="text-sm text-gold-700 dark:text-gold-400">
-            درجات الفصل الحالي غير متاحة بعد — يتم عرض درجات آخر فصل متاح
+            {t('درجات الفصل الحالي غير متاحة بعد — يتم عرض درجات آخر فصل متاح', 'Current semester grades are not available yet — showing the most recent available semester')}
             {lastGradedSemesterName && <span className="font-bold"> ({lastGradedSemesterName})</span>}
           </p>
         </div>
@@ -127,7 +130,7 @@ export default function AcademicPerformance({
 
       {/* GPA Trend Chart */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">اتجاه المعدل التراكمي</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('اتجاه المعدل التراكمي', 'Cumulative GPA Trend')}</h3>
         <div className="h-52">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={semesterGPAs} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -136,7 +139,7 @@ export default function AcademicPerformance({
               <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} />
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '12px' }}
-                formatter={(value: number) => [`${value.toFixed(2)}`, 'المعدل']}
+                formatter={(value: number) => [`${value.toFixed(2)}`, t('المعدل', 'GPA')]}
               />
               <Line type="monotone" dataKey="gpa" stroke="#25935F" strokeWidth={2.5} dot={{ fill: '#25935F', r: 4 }} activeDot={{ r: 6 }} />
             </LineChart>
@@ -146,7 +149,7 @@ export default function AcademicPerformance({
 
       {/* Semester Bar Chart */}
       <div>
-        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">المعدل الفصلي</h3>
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{t('المعدل الفصلي', 'Semester GPA')}</h3>
         <div className="h-44">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={semesterGPAs} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -155,7 +158,7 @@ export default function AcademicPerformance({
               <YAxis domain={[0, 5]} tick={{ fontSize: 10 }} />
               <Tooltip
                 contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
-                formatter={(value: number) => [`${value.toFixed(2)}`, 'المعدل']}
+                formatter={(value: number) => [`${value.toFixed(2)}`, t('المعدل', 'GPA')]}
               />
               <Bar dataKey="gpa" radius={[6, 6, 0, 0]}>
                 {semesterGPAs.map((entry, idx) => (
@@ -170,16 +173,18 @@ export default function AcademicPerformance({
       {/* Course Grades Table */}
       <div>
         <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
-          {showGradesFallback ? `درجات الفصل ${lastGradedSemesterName ?? 'السابق'}` : 'درجات المقررات'}
+          {showGradesFallback
+            ? t(`درجات الفصل ${lastGradedSemesterName ?? 'السابق'}`, `${lastGradedSemesterName ?? 'Previous'} Semester Grades`)
+            : t('درجات المقررات', 'Course Grades')}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-right py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">الرمز</th>
-                <th className="text-right py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">المقرر</th>
-                <th className="text-center py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">الساعات</th>
-                <th className="text-center py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">التقدير</th>
+                <th className="text-right py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">{t('الرمز', 'Code')}</th>
+                <th className="text-right py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">{t('المقرر', 'Course')}</th>
+                <th className="text-center py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">{t('الساعات', 'Hours')}</th>
+                <th className="text-center py-2 px-3 text-gray-500 dark:text-gray-400 font-medium">{t('التقدير', 'Grade')}</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +197,7 @@ export default function AcademicPerformance({
                   className="border-b border-gray-100 dark:border-gray-700/50"
                 >
                   <td className="py-2 px-3 font-mono text-gray-700 dark:text-gray-300">{course.code}</td>
-                  <td className="py-2 px-3 text-gray-900 dark:text-white">{course.name}</td>
+                  <td className="py-2 px-3 text-gray-900 dark:text-white">{lang === 'ar' ? course.name : course.nameEn}</td>
                   <td className="py-2 px-3 text-center text-gray-600 dark:text-gray-400">{course.creditHours}</td>
                   <td className="py-2 px-3 text-center">
                     {course.grade ? (
@@ -204,7 +209,7 @@ export default function AcademicPerformance({
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gold-100 text-gold-600 dark:bg-gold-900/30 dark:text-gold-400">
-                        غير متاح بعد
+                        {t('غير متاح بعد', 'Not available yet')}
                       </span>
                     )}
                   </td>
@@ -218,7 +223,7 @@ export default function AcademicPerformance({
       {/* Credit Hours Progress */}
       <div>
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-gray-600 dark:text-gray-400">الساعات المعتمدة</span>
+          <span className="text-gray-600 dark:text-gray-400">{t('الساعات المعتمدة', 'Credit Hours')}</span>
           <span className="font-bold text-gray-900 dark:text-white">{creditHoursCompleted} / {creditHoursRequired}</span>
         </div>
         <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -229,7 +234,7 @@ export default function AcademicPerformance({
             className="h-full bg-gradient-to-l from-sa-500 to-sa-600 rounded-full"
           />
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{creditPercent}% مكتمل</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{creditPercent}% {t('مكتمل', 'completed')}</p>
       </div>
     </motion.div>
   );
