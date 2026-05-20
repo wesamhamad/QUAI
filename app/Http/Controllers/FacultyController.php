@@ -21,10 +21,14 @@ class FacultyController extends Controller
 
         if ($needle !== '') {
             $needleLower = mb_strtolower($needle);
+            // Search across both Arabic and English variants so the box works
+            // regardless of the active UI locale.
             $students = array_values(array_filter($students, fn ($s) =>
                 mb_strpos(mb_strtolower($s['name']), $needleLower) !== false
+                || mb_strpos(mb_strtolower($s['name_en'] ?? ''), $needleLower) !== false
                 || mb_strpos((string) $s['student_id'], $needle) !== false
-                || mb_strpos(mb_strtolower($s['major']), $needleLower) !== false));
+                || mb_strpos(mb_strtolower($s['major']), $needleLower) !== false
+                || mb_strpos(mb_strtolower($s['major_en'] ?? ''), $needleLower) !== false));
         }
 
         return view('faculty.index', [
@@ -56,7 +60,7 @@ class FacultyController extends Controller
                     'url'   => '/qspark-plus?as=' . urlencode($studentId),
                 ],
                 'record'  => [
-                    'label' => 'سجلك الرقمي',
+                    'label' => __('messages.nav_digital_record'),
                     'url'   => route('digital-record.index', ['student_id' => $studentId]),
                 ],
             ],
