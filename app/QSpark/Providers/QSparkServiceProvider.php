@@ -177,6 +177,27 @@ class QSparkServiceProvider extends ServiceProvider
             return $value;
         });
 
+        // Instructor-name view helper. Returns an English transliteration for
+        // demo-fixture instructors when the UI locale is English; otherwise
+        // returns the original Arabic name unchanged. Whitespace is normalised
+        // (multiple spaces collapsed) so minor data variations still resolve.
+        $instructorEnMap = [
+            'محمد ماهر عبدالحميد'    => 'Dr. Mohammed Maher Abdulhamid',
+            'بلال نجيب منصور'        => 'Dr. Bilal Najib Mansour',
+            'جهان عبد الوهاب احمد'   => 'Dr. Jihan Abdulwahab Ahmad',
+            'جهان عبدالوهاب احمد'    => 'Dr. Jihan Abdulwahab Ahmad',
+            'حسين محمد'              => 'Dr. Hussein Mohammed',
+            'بشرى سعد محمد'          => 'Dr. Bushra Saad Mohammed',
+        ];
+        View::share('instructorLabel', static function (?string $arabicName) use ($instructorEnMap): string {
+            $name = trim((string) $arabicName);
+            if ($name === '' || app()->getLocale() !== 'en') {
+                return $name;
+            }
+            $key = preg_replace('/\s+/u', ' ', $name) ?? $name;
+            return $instructorEnMap[$key] ?? $name;
+        });
+
         // Share user names with QSPARK views only (scoped to qspark::* so QUAI
         // views are never touched) so the QSPARK header renders consistently.
         View::composer('qspark::*', function ($view) {

@@ -2457,56 +2457,123 @@ class StudentDashboardController extends Controller
      */
     private function dummyChatAnswers(): array
     {
+        $T = fn (string $ar, string $en) => app()->getLocale() === 'en' ? $en : $ar;
+
         return [
-            'improve_gpa' => "لرفع معدلك التراكمي، ركّز على الخطوات التالية:\n\n"
+            'improve_gpa' => $T(
+                "لرفع معدلك التراكمي، ركّز على الخطوات التالية:\n\n"
                 . "✅ ضع خطة أسبوعية واضحة لكل مادة وحدّد ساعات مذاكرة ثابتة.\n"
                 . "✅ ابدأ بالمواد ذات الساعات المعتمدة الأعلى لأن أثرها أكبر على المعدل.\n"
                 . "✅ راجع نقاط ضعفك مع أعضاء هيئة التدريس في الساعات المكتبية.\n"
                 . "✅ حلّ نماذج الاختبارات السابقة وراجع أخطاءك بانتظام.\n"
                 . "✅ لا تهمل الواجبات والمشاركة فهي تدعم درجاتك التراكمية.",
-            'study_tips' => "نصائح عملية لدراسة فعّالة:\n\n"
+                "To raise your cumulative GPA, focus on these steps:\n\n"
+                . "✅ Set a clear weekly plan for each course and fix dedicated study hours.\n"
+                . "✅ Start with the higher-credit courses — they move the GPA needle the most.\n"
+                . "✅ Address your weak spots with faculty during office hours.\n"
+                . "✅ Solve past exams and review your mistakes regularly.\n"
+                . "✅ Don't skip assignments and participation — they support your overall grade."
+            ),
+            'study_tips' => $T(
+                "نصائح عملية لدراسة فعّالة:\n\n"
                 . "• اعتمد تقنية بومودورو: ٢٥ دقيقة تركيز ثم ٥ دقائق راحة.\n"
                 . "• لخّص كل محاضرة بخريطة ذهنية أو نقاط مختصرة.\n"
                 . "• ذاكر بصوت مرتفع أو اشرح المادة لزميلك لتثبيت المعلومة.\n"
                 . "• ابتعد عن الهاتف أثناء الجلسة وضعه في وضع الطيران.\n"
                 . "• راجع المادة خلال ٢٤ ساعة من المحاضرة لتقليل النسيان.",
-            'time_management' => "لتنظيم وقتك بين الدراسة والراحة:\n\n"
+                "Practical tips for effective studying:\n\n"
+                . "• Use the Pomodoro technique: 25 minutes of focus, then a 5-minute break.\n"
+                . "• Summarize every lecture as a mind map or short bullet points.\n"
+                . "• Study out loud or explain the material to a classmate to lock it in.\n"
+                . "• Keep your phone away during sessions — use airplane mode.\n"
+                . "• Review the material within 24 hours of the lecture to reduce forgetting."
+            ),
+            'time_management' => $T(
+                "لتنظيم وقتك بين الدراسة والراحة:\n\n"
                 . "✅ ابدأ يومك بقائمة مهام مرتّبة حسب الأولوية.\n"
                 . "✅ خصّص بلوكات زمنية ثابتة للدراسة (٩٠ دقيقة) وأخرى للراحة (٣٠ دقيقة).\n"
                 . "✅ احرص على نوم ٧–٨ ساعات يومياً فهو يضاعف كفاءة المذاكرة.\n"
                 . "✅ اجعل يوماً في الأسبوع للراحة الكاملة والأنشطة الاجتماعية.\n"
                 . "✅ راجع خطتك الأسبوعية كل خميس وعدّلها حسب احتياجاتك.",
-            'exam_prep' => "أفضل طرق المذاكرة للاختبارات:\n\n"
+                "To balance your time between studying and rest:\n\n"
+                . "✅ Start each day with a task list ordered by priority.\n"
+                . "✅ Use fixed time blocks for study (90 minutes) and rest (30 minutes).\n"
+                . "✅ Aim for 7–8 hours of sleep daily — it doubles study efficiency.\n"
+                . "✅ Keep one day a week for full rest and social activities.\n"
+                . "✅ Review your weekly plan every Thursday and adjust as needed."
+            ),
+            'exam_prep' => $T(
+                "أفضل طرق المذاكرة للاختبارات:\n\n"
                 . "• ابدأ المراجعة قبل الاختبار بأسبوعين على الأقل.\n"
                 . "• قسّم المنهج إلى وحدات صغيرة وحدّد هدفاً يومياً واضحاً.\n"
                 . "• استخدم البطاقات التعليمية (Flashcards) للمفاهيم والتعاريف.\n"
                 . "• حلّ نماذج اختبارات سابقة تحت ضغط الوقت.\n"
                 . "• اجمع ملاحظاتك في ورقة واحدة قبل ليلة الاختبار للمراجعة السريعة.",
-            'handle_pressure' => "للتعامل مع ضغط الدراسة والقلق:\n\n"
+                "Best study methods for exams:\n\n"
+                . "• Start reviewing at least two weeks before the exam.\n"
+                . "• Break the syllabus into small units with a clear daily target.\n"
+                . "• Use flashcards for concepts and definitions.\n"
+                . "• Solve past exam papers under timed conditions.\n"
+                . "• Condense your notes onto a single sheet for a quick last-night review."
+            ),
+            'handle_pressure' => $T(
+                "للتعامل مع ضغط الدراسة والقلق:\n\n"
                 . "✅ تنفّس بعمق ٤-٤-٦ (شهيق ٤ ثوانٍ، حبس ٤، زفير ٦) عند التوتر.\n"
                 . "✅ قسّم المهام الكبيرة إلى خطوات صغيرة قابلة للتنفيذ.\n"
                 . "✅ مارس رياضة خفيفة ٢٠ دقيقة يومياً لتفريغ التوتر.\n"
                 . "✅ تحدّث مع مرشدك الأكاديمي أو وحدة الإرشاد الطلابي عند الحاجة.\n"
                 . "✅ تذكّر أن الراحة ليست تكاسلاً بل جزء من خطة النجاح.",
-            'skill_dev' => "أهم المهارات لطالب جامعي ناجح:\n\n"
+                "To handle study pressure and anxiety:\n\n"
+                . "✅ Use 4-4-6 breathing (inhale 4s, hold 4s, exhale 6s) when stressed.\n"
+                . "✅ Break large tasks into small, actionable steps.\n"
+                . "✅ Do 20 minutes of light exercise daily to release tension.\n"
+                . "✅ Talk to your academic advisor or student counseling unit when needed.\n"
+                . "✅ Remember: rest isn't laziness — it's part of the success plan."
+            ),
+            'skill_dev' => $T(
+                "أهم المهارات لطالب جامعي ناجح:\n\n"
                 . "• التفكير النقدي وحلّ المشكلات.\n"
                 . "• التواصل الفعّال والعرض والإلقاء.\n"
                 . "• إدارة الوقت وتحديد الأولويات.\n"
                 . "• العمل الجماعي والتعاون مع فرق متعددة التخصصات.\n"
                 . "• المهارات الرقمية الأساسية (Excel، أدوات التعاون، أساسيات البرمجة).\n"
                 . "• تعلّم لغة ثانية وتطوير المهارات البحثية.",
-            'final_exams' => "للاستعداد للامتحانات النهائية بفاعلية:\n\n"
+                "Key skills for a successful university student:\n\n"
+                . "• Critical thinking and problem solving.\n"
+                . "• Effective communication, presentation, and public speaking.\n"
+                . "• Time management and setting priorities.\n"
+                . "• Teamwork and collaboration across multidisciplinary teams.\n"
+                . "• Core digital skills (Excel, collaboration tools, programming basics).\n"
+                . "• Learning a second language and developing research skills."
+            ),
+            'final_exams' => $T(
+                "للاستعداد للامتحانات النهائية بفاعلية:\n\n"
                 . "✅ ضع خطة مراجعة لكل مادة قبل الاختبارات بثلاثة أسابيع.\n"
                 . "✅ ابدأ بأصعب المواد أولاً عندما يكون تركيزك في أعلى مستوى.\n"
                 . "✅ شكّل مجموعة دراسة صغيرة لتبادل الملخصات والأسئلة.\n"
                 . "✅ احرص على نوم منتظم وتغذية متوازنة طوال فترة الاختبارات.\n"
                 . "✅ لا تذاكر مادة جديدة في ليلة الاختبار، اكتفِ بالمراجعة السريعة.",
-            'focus' => "للحفاظ على التركيز أثناء المذاكرة:\n\n"
+                "To prepare effectively for final exams:\n\n"
+                . "✅ Build a review plan for each course three weeks before exams start.\n"
+                . "✅ Tackle the hardest subjects first, when your focus is at its peak.\n"
+                . "✅ Form a small study group to exchange summaries and questions.\n"
+                . "✅ Keep regular sleep and balanced nutrition throughout the exam period.\n"
+                . "✅ Don't study new material the night before — stick to quick review."
+            ),
+            'focus' => $T(
+                "للحفاظ على التركيز أثناء المذاكرة:\n\n"
                 . "• اختر مكاناً هادئاً ومرتباً وبإضاءة جيدة.\n"
                 . "• اضبط الهاتف على وضع \"عدم الإزعاج\" أو ضعه في غرفة أخرى.\n"
                 . "• ضع هدفاً واضحاً لكل جلسة (مثلاً: إنهاء فصلين خلال ساعة).\n"
                 . "• خذ راحة قصيرة كل ٢٥–٣٠ دقيقة لتفادي الإرهاق الذهني.\n"
                 . "• اشرب الماء بانتظام وتجنّب الوجبات الثقيلة قبل المذاكرة.",
+                "To maintain focus while studying:\n\n"
+                . "• Pick a quiet, tidy spot with good lighting.\n"
+                . "• Set your phone to \"Do Not Disturb\" or leave it in another room.\n"
+                . "• Set a clear goal for each session (e.g., finish two chapters in an hour).\n"
+                . "• Take a short break every 25–30 minutes to avoid mental fatigue.\n"
+                . "• Drink water regularly and avoid heavy meals before studying."
+            ),
         ];
     }
 
@@ -2564,7 +2631,9 @@ class StudentDashboardController extends Controller
             ]);
         }
 
-        $systemPrompt = 'أنت مساعد ذكي لطلاب جامعة القصيم. أجب بالعربية في 4-6 جمل قصيرة، نقاط واضحة وعملية، بدون مقدمات. استخدم ✅ أو • للقوائم.';
+        $systemPrompt = app()->getLocale() === 'en'
+            ? 'You are a smart assistant for Qassim University students. Reply in English in 4-6 short sentences, clear and practical bullet points, without introductions. Use ✅ or • for lists.'
+            : 'أنت مساعد ذكي لطلاب جامعة القصيم. أجب بالعربية في 4-6 جمل قصيرة، نقاط واضحة وعملية، بدون مقدمات. استخدم ✅ أو • للقوائم.';
 
         try {
             $response = Http::timeout(30)

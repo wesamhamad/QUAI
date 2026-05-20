@@ -120,7 +120,7 @@
             <svg class="w-5 h-5 text-dga-primary-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.2c-3.1 0-9.3 1.6-9.3 4.9v2.7h18.6v-2.7c0-3.3-6.2-4.9-9.3-4.9z"/>
             </svg>
-            <span>{{ $course['instructor_name'] }}</span>
+            <span dir="auto">{{ $instructorLabel($course['instructor_name']) }}</span>
           </div>
         @else
           <p class="text-gray-400 italic text-sm mt-3" data-translate="instructor_not_available">
@@ -131,7 +131,7 @@
         <!-- Footer -->
         <div class="flex justify-between items-center mt-6">
           <span class="bg-green-100 text-green-600 text-xs py-1 px-4 rounded-full font-medium">
-            {{ $course['activity_desc'] ?? __('messages.not_available') }}
+            {{ ($course['activity_desc'] ?? null) ? $sisLabel($course['activity_desc']) : __('messages.not_available') }}
           </span>
           <a href="{{ route('qspark.courses.show', ['id' => $course['numeric_id'] ?? ($loop->index + 1)]) }}"
              class="bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow hover:from-dga-primary-600 hover:to-dga-primary-700 hover:shadow-lg transition">

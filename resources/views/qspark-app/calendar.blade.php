@@ -99,7 +99,7 @@
                           @endif
                           
                           @if(!empty($lecture['activity_desc']))
-                            <div class="leading-tight text-center opacity-90">{{ $lecture['activity_desc'] }}</div>
+                            <div class="leading-tight text-center opacity-90" dir="auto">{{ $sisLabel($lecture['activity_desc']) }}</div>
                           @endif
                         </div>
                         
