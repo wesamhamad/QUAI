@@ -272,6 +272,7 @@
     top: calc(100% + 4px);
     left: 0;
     min-width: 200px;
+    max-width: min(280px, calc(100vw - var(--q-space-6)));
     background: var(--q-card-bg);
     border: 1px solid var(--q-border);
     border-radius: var(--q-radius-xl);
@@ -285,6 +286,14 @@
 }
 
 [dir="rtl"] .q-dropdown {
+    left: auto;
+    right: 0;
+}
+
+/* The user menu sits on the inline-end edge of the topbar, so its dropdown
+   must always be anchored to that same edge — otherwise it spills off the
+   page (left-anchored in LTR, right-anchored in RTL). */
+.q-user-menu .q-dropdown {
     left: auto;
     right: 0;
 }
@@ -348,6 +357,13 @@
 .q-dropdown-header {
     padding: var(--q-space-3) var(--q-space-4);
     border-bottom: 1px solid var(--q-border);
+    overflow: hidden;
+}
+
+.q-dropdown-header > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* === Messages (Chat) === */

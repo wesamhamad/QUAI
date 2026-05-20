@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\DemoData;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -96,10 +97,16 @@ class User extends Authenticatable implements FilamentUser
      * dropped. The QU demo addresses faculty/students by their given name(s)
      * only, never the tribe/family name. Falls back to the full name when
      * there is just a single token.
+     *
+     * When the active UI locale is English the method picks the English
+     * variant: for students it resolves the matching DemoData row by
+     * student_id; for the demo admin/faculty accounts it uses a small
+     * username map. The Arabic name is used as a fallback whenever an
+     * English variant is unavailable.
      */
     public function displayName(): string
     {
-        $name = trim($this->name ?? '');
+        $name = $this->localizedName();
 
         if ($name === '') {
             return '';
@@ -110,5 +117,34 @@ class User extends Authenticatable implements FilamentUser
         return \count($parts) > 1
             ? implode(' ', \array_slice($parts, 0, -1))
             : $name;
+    }
+
+    private function localizedName(): string
+    {
+        $arabic = trim($this->name ?? '');
+
+        if (app()->getLocale() !== 'en') {
+            return $arabic;
+        }
+
+        if (! empty($this->student_id)) {
+            foreach (DemoData::students() as $s) {
+                if ((string) ($s['student_id'] ?? '') === (string) $this->student_id
+                    && ! empty($s['name_en'])) {
+                    return (string) $s['name_en'];
+                }
+            }
+        }
+
+        $staffEn = [
+            'admin'   => 'Huda Mohammed Al-Abdulaziz',
+            'faculty' => 'Dr. Abdulaziz Mohammed',
+        ];
+
+        if (! empty($this->username) && isset($staffEn[$this->username])) {
+            return $staffEn[$this->username];
+        }
+
+        return $arabic;
     }
 }
