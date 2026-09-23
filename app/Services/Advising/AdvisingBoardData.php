@@ -101,7 +101,7 @@ class AdvisingBoardData
             }
             if ($s['failed_courses'] >= 2 && $s['cumulative_gpa'] < 2.6) {
                 $c = $s['courses'][1];
-                $fired['T2'] = ['courses' => [['course_code' => $c['course_code'], 'course_name' => $c['course_name'], 'failures' => 2, 'attempts' => [['semester' => '463', 'final_grade' => 41, 'letter_grade' => 'F'], ['semester' => DemoCohort::GRADED_SEMESTER, 'final_grade' => 48, 'letter_grade' => 'F']]]]];
+                $fired['T2'] = ['courses' => [['course_code' => $c['course_code'], 'course_name' => $c['course_name'], 'failures' => 2, 'attempts' => [['semester' => '471', 'final_grade' => 41, 'letter_grade' => 'F'], ['semester' => DemoCohort::GRADED_SEMESTER, 'final_grade' => 48, 'letter_grade' => 'F']]]]];
             }
             if ($lastGpa < 2.0) {
                 $fired['T3'] = ['semester_gpa' => $lastGpa, 'cumulative_gpa' => $s['cumulative_gpa'], 'semester' => DemoCohort::GRADED_SEMESTER, 'passed_hours' => max(0, 15 - $s['failed_courses'] * 3), 'attempted_hours' => 15, 'threshold' => 2.0];
@@ -110,7 +110,7 @@ class AdvisingBoardData
                 $fired['T4'] = ['previous_gpa' => $prevGpa, 'semester_gpa' => $lastGpa, 'previous_semester' => $s['terms'][count($s['terms']) - 2]['semester'], 'semester' => DemoCohort::GRADED_SEMESTER, 'drop' => round($prevGpa - $lastGpa, 2), 'threshold' => 0.5];
             }
             if ($seed('t6'.$id) % 37 === 0) {
-                $fired['T6'] = ['semester' => $current, 'missed_semesters' => 1, 'absent' => ['465'], 'last_seen' => '464'];
+                $fired['T6'] = ['semester' => $current, 'missed_semesters' => 1, 'absent' => ['472'], 'last_seen' => '471'];
             }
             if ($s['passed_hours'] < ($s['student_level'] - 1) * 15 - 6 && $s['student_level'] > 2) {
                 $fired['T7'] = ['off_plan' => [$s['courses'][3]['course_code']], 'delayed_prerequisites' => [['course' => $s['courses'][0]['course_code'], 'prerequisite' => 'MATH101']], 'passed_courses' => (int) ($s['passed_hours'] / 3), 'plan_courses' => 45];
@@ -122,7 +122,7 @@ class AdvisingBoardData
                 $fired['T9'] = ['probability' => round(0.62 + $s['risk']['score'] / 400, 2), 'course' => $worstCourse['course_code'], 'model' => 'QU-LLM v8', 'threshold' => 0.7];
             }
             if ($s['warnings'] > 0) {
-                $items = [['kind_label' => 'إنذار أكاديمي', 'label' => 'المعدل التراكمي دون 2.00', 'semester' => '465', 'issued_at' => '2026-02-12']];
+                $items = [['kind_label' => 'إنذار أكاديمي', 'label' => 'المعدل التراكمي دون 2.00', 'semester' => '471', 'issued_at' => '2026-02-12']];
                 if ($s['warnings'] > 1) {
                     $items[] = ['kind_label' => 'إنذار أكاديمي ثانٍ', 'label' => 'استمرار المعدل دون 2.00', 'semester' => DemoCohort::GRADED_SEMESTER, 'issued_at' => '2026-06-30'];
                 }
@@ -147,7 +147,7 @@ class AdvisingBoardData
                         continue;
                     }
                     $day = $seed('d'.$term.$code.$id) % max(7, min(7 * $weeks, 63));
-                    $detected = $isCurrent ? $termStart->addDays($day)->setTime(2, 10 + $seed('m'.$id) % 40) : CarbonImmutable::parse('2026-0'.(2 + $ti).'-10')->addDays($day % 40);
+                    $detected = $isCurrent ? $termStart->addDays($day)->setTime(2, 10 + $seed('m'.$id) % 40) : CarbonImmutable::parse($ti === 1 ? '2026-04-10' : '2025-11-10')->addDays($day % 40);
                     $resolved = ! $isCurrent ? ($seed('r'.$term.$id) % 100 < 45) : ($seed('r'.$term.$id) % 100 < 12);
                     $signals[] = [
                         'id' => ++$sid, 'student_id' => $id, 'semester' => $term, 'trigger_code' => $code,

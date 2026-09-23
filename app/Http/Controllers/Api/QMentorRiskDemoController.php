@@ -191,7 +191,7 @@ class QMentorRiskDemoController extends Controller
         ];
 
         return response()->json(['source' => 'api', 'data' => [
-            'generated_on' => '2026-09-13', 'as_of' => '464', 'outcome_semester' => '465',
+            'generated_on' => '2026-09-13', 'as_of' => '471', 'outcome_semester' => '472',
             'students' => $n, 'tp' => $tp, 'fp' => $fp, 'tn' => $tn, 'fn' => $fn,
             'precision' => round($precision * 100, 1), 'recall' => round($recall * 100, 1),
             'f1' => round(2 * $precision * $recall / ($precision + $recall) * 100, 1),

@@ -403,7 +403,7 @@ class QMentorOpsDemoController extends Controller
             $heatmap[] = ['course_code' => $c['code'], 'faculty_no' => $c['faculty_no'], 'dept_id' => $c['dept_id'], 'dept_name' => $c['dept_name'], 'graded' => $c['graded'], 'pass_rate' => $pass, 'avg_grade' => $avg];
         }
         $trends = [];
-        foreach (['461', '462', '463', '464', '465'] as $k => $sem) {
+        foreach (['452', '461', '462', '471', '472'] as $k => $sem) {
             $trends[] = ['semester' => $sem, 'students' => count($all) - (4 - $k) * 9, 'avg_gpa' => round(3.28 + $k * 0.03, 2), 'dfw_rate' => round(14.8 - $k * 0.6, 1), 'at_risk' => (int) round(count($all) * (0.24 - $k * 0.012))];
         }
 
@@ -560,7 +560,7 @@ class QMentorOpsDemoController extends Controller
 
         return response()->json(['source' => 'api', 'data' => [
             'semester' => DemoCohort::SEMESTER,
-            'semesters' => [['code' => '466', 'current' => true, 'label' => 'الفصل الأول 1448'], ['code' => '465', 'current' => false, 'label' => 'الفصل الصيفي 1447'], ['code' => '464', 'current' => false, 'label' => 'الفصل الثاني 1447']],
+            'semesters' => [['code' => '481', 'current' => true, 'label' => 'الفصل الأول 1448'], ['code' => '472', 'current' => false, 'label' => 'الفصل الثاني 1447'], ['code' => '471', 'current' => false, 'label' => 'الفصل الأول 1447']],
             'term' => ['code' => $term['code'], 'starts_on' => $term['starts_on'], 'ends_on' => $term['ends_on'], 'started' => true, 'days_to_start' => null],
             'scope' => $caseload ? 'caseload' : 'university',
             'engine_ready' => true,

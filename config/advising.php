@@ -139,12 +139,12 @@ return [
     */
 
     'semesters' => [
-        'current' => env('ADVISING_SEMESTER', '466'),
+        'current' => env('ADVISING_SEMESTER', '481'),
         // The two most recent completed terms — one academic year of history.
         // Each historical term costs a full mask build plus a per-student grade
         // sweep, so the list is deliberately short; widen it only when the bulk
         // endpoints (v1/advising/*) make a term a single call.
-        'history' => ['465', '464', '463', '462'],
+        'history' => ['472', '471'],
     ],
 
     /*

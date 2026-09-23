@@ -23,8 +23,8 @@ use Illuminate\Support\Carbon;
 final class DemoCohort
 {
     /** The running term and the last fully graded one (demo term codes). */
-    public const SEMESTER = '466';
-    public const GRADED_SEMESTER = '465';
+    public const SEMESTER = '481';
+    public const GRADED_SEMESTER = '472';
     public const TERM_STARTS = '2026-08-23';
     public const TERM_ENDS = '2026-12-17';
     public const MODEL_VERSION = '2026-09-16.1';
@@ -240,7 +240,7 @@ final class DemoCohort
 
         // Term history: one row per completed term, ending at the graded term.
         $terms = [];
-        $codes = ['461', '462', '463', '464', '465'];
+        $codes = ['452', '461', '462', '471', '472'];
         $count = max(1, min(5, $level - 1));
         $history = array_slice($codes, 5 - $count);
         $running = $gpa;
@@ -280,7 +280,7 @@ final class DemoCohort
             'student_level' => $level, 'cumulative_gpa' => $gpa, 'semester_gpa' => $terms[count($terms) - 1]['semester_gpa'] ?? $gpa,
             'attempted_hours' => $passedHours + $failed * 3, 'passed_hours' => $passedHours, 'registered_hours' => $seed['registered_hours'],
             'plan_hours' => $planHours, 'remaining_hours' => max(0, $planHours - $passedHours),
-            'expected_graduation_semester' => (string) (466 + max(0, 8 - $level) * 2),
+            'expected_graduation_semester' => (string) (481 + max(0, 8 - $level) * 5),
             'advisor_id' => $advisor['id'], 'advisor_name' => $advisor['name'], 'advisor_email' => $advisor['email'],
             'warnings' => $warnings, 'failed_courses' => $failed, 'plan_levels' => 8,
             'courses' => $courses, 'terms' => $terms, 'excuse' => $excuse, 'profile' => $profile,
