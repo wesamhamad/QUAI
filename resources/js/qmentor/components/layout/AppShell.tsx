@@ -9,10 +9,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // QSpark+ is a tabbed, single-surface experience — it ships without the
-  // QMentor side menu, so the nav (and its mobile toggle) are dropped here.
-  const isQSparkPlus = typeof window !== 'undefined'
-    && window.location.pathname.startsWith('/qspark-plus');
+  // +QSpark carries the full side menu since the role pages arrived (home,
+  // advisor desk, instructor roster, agent core, system board…); on phones
+  // it opens from the top-bar toggle.
+  const isQSparkPlus = false;
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
