@@ -27,7 +27,7 @@ export default function WhatsAppPreview({ t }: WhatsAppPreviewProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t('معاينة رسائل بوت كيومنتور على واتساب', 'Preview of QMentor bot messages on WhatsApp')}
+        {t('معاينة رسائل بوت كيو سبارك+ على واتساب', 'Preview of QSpark+ bot messages on WhatsApp')}
       </p>
 
       {/* Phone Frame */}
@@ -45,7 +45,7 @@ export default function WhatsAppPreview({ t }: WhatsAppPreviewProps) {
                 QM
               </div>
               <div className="flex-1">
-                <p className="text-white font-semibold text-sm">QMentor Bot</p>
+                <p className="text-white font-semibold text-sm">QSpark+ Bot</p>
                 <p className="text-emerald-200 text-xs">{t('متصل', 'online')}</p>
               </div>
               <div className="flex gap-4 text-white">

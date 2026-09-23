@@ -26,7 +26,7 @@ export default function SMSPreview({ t }: SMSPreviewProps) {
                 <div className="w-10 h-10 mx-auto rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center mb-1">
                   <span className="text-sm font-bold text-gray-600 dark:text-gray-300">QM</span>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">QMentor</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">QSpark+</p>
               </div>
               <div className="w-5" />
             </div>

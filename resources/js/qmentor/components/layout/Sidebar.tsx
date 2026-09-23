@@ -68,10 +68,9 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
   const { role } = useRole();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  // Everything under /qspark-plus is +QSpark now — on every page, not only the home.
   const isQSparkBrand = typeof window !== 'undefined'
-    && window.location.pathname.startsWith('/qspark-plus')
-    && location.pathname === '/'
-    && searchParams.get('solo') !== '1';
+    && window.location.pathname.startsWith('/qspark-plus');
   const isRtl = dir === 'rtl';
   const visibleItems = navItems.filter(item => canAccess(role, item.path) && !isRoadmap(item.path));
   // The "Q" brand mark leaves the SPA and returns to the QUAI platform home.
@@ -110,7 +109,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
               <span className="text-white font-bold text-sm">Q</span>
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-lg">
-              {isQSparkBrand ? t('+QSpark', 'QSpark+') : t('QMentor', 'QMentor')}
+              {isQSparkBrand ? t('+QSpark', 'QSpark+') : t('QSpark+', 'QSpark+')}
             </span>
           </a>
         )}

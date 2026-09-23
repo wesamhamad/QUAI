@@ -86,8 +86,8 @@ const mockInteractions: Interaction[] = [
     id: '3',
     dateEn: 'Mar 28, 2026',
     dateAr: '٢٨ مارس ٢٠٢٦',
-    typeAr: 'محادثة QMentor',
-    typeEn: 'QMentor Chat',
+    typeAr: 'محادثة +QSpark',
+    typeEn: 'QSpark+ Chat',
     summaryAr: 'طلب توصية أكاديمية لبرنامج التدريب الصيفي.',
     summaryEn: 'Requested academic recommendation for summer internship program.',
     icon: 'chat',
@@ -239,12 +239,12 @@ export default function ContactAdvisor() {
             <MessageSquare className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
           </div>
           <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-            {t('محادثة QMentor', 'Chat via QMentor')}
+            {t('محادثة +QSpark', 'Chat via QSpark+')}
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
             {t(
-              'تحدث مع مرشدك عبر المحادثة الذكية في QMentor.',
-              'Chat with your advisor through QMentor intelligent chat.'
+              'تحدث مع مرشدك عبر المحادثة الذكية في +QSpark.',
+              'Chat with your advisor through QSpark+ intelligent chat.'
             )}
           </p>
           <a
@@ -271,7 +271,7 @@ export default function ContactAdvisor() {
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" />
               </svg>
-              {t('تمت الجدولة تلقائياً بواسطة QMentor Agent', 'Auto-scheduled by QMentor Agent')}
+              {t('تمت الجدولة تلقائياً بواسطة +QSpark Agent', 'Auto-scheduled by QSpark+ Agent')}
             </span>
           </div>
 

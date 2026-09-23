@@ -38,10 +38,9 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
   const { role, setRole, canSwitchRole, allowedRoles, viewOnly } = useRole();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  // Everything under /qspark-plus is +QSpark now — on every page, not only the home.
   const isQSparkBrand = typeof window !== 'undefined'
-    && window.location.pathname.startsWith('/qspark-plus')
-    && location.pathname === '/'
-    && searchParams.get('solo') !== '1';
+    && window.location.pathname.startsWith('/qspark-plus');
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [studentMenuOpen, setStudentMenuOpen] = useState(false);
@@ -132,7 +131,7 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white hidden sm:block">
             {isQSparkBrand
               ? t('منصة +QSpark', 'QSpark+ Platform')
-              : t('منصة QMentor', 'QMentor Platform')}
+              : t('منصة +QSpark', 'QSpark+ Platform')}
           </h1>
         </div>
 

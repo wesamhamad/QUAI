@@ -31,7 +31,7 @@ export default function AIRecommendations({ recommendations }: Props) {
           {t('توصيات الذكاء الاصطناعي', 'AI Recommendations')}
         </h2>
         <span className="text-[10px] bg-sa-100 dark:bg-sa-900/50 text-sa-700 dark:text-sa-300 px-2 py-1 rounded-full font-medium">
-          {t('مدعوم من QMentor AI', 'Powered by QMentor AI')}
+          {t('مدعوم من +QSpark AI', 'Powered by QSpark+ AI')}
         </span>
       </div>
 

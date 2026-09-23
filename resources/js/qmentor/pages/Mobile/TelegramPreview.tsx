@@ -16,7 +16,7 @@ function TelegramBubble({ msg, t }: { msg: ChatMessage; t: (ar: string, en: stri
             : 'bg-[#EFFDDE] dark:bg-[#2B5278] text-gray-900 dark:text-white rounded-tr-none'
         }`}>
           {isBot && (
-            <p className="text-xs font-semibold text-blue-500 mb-1">QMentor Bot</p>
+            <p className="text-xs font-semibold text-blue-500 mb-1">QSpark+ Bot</p>
           )}
           <p className="text-sm whitespace-pre-line">{t(msg.textAr, msg.textEn)}</p>
           <p className="text-[10px] text-gray-400 mt-1 text-end">{msg.time}</p>
@@ -44,7 +44,7 @@ export default function TelegramPreview({ t }: TelegramPreviewProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        {t('معاينة بوت كيومنتور على تيليجرام مع أزرار التفاعل', 'Preview of QMentor Telegram bot with inline keyboard buttons')}
+        {t('معاينة بوت كيو سبارك+ على تيليجرام مع أزرار التفاعل', 'Preview of QSpark+ Telegram bot with inline keyboard buttons')}
       </p>
 
       {/* Phone Frame */}
@@ -62,7 +62,7 @@ export default function TelegramPreview({ t }: TelegramPreviewProps) {
                 QM
               </div>
               <div className="flex-1">
-                <p className="text-white font-semibold text-sm">QMentor Bot</p>
+                <p className="text-white font-semibold text-sm">QSpark+ Bot</p>
                 <p className="text-blue-300 text-xs">{t('بوت', 'bot')}</p>
               </div>
               <div className="flex gap-4 text-white">
