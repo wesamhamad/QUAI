@@ -22,7 +22,7 @@ const faqItems: FAQItem[] = [
 ];
 
 const videoTutorials = [
-  { id: '1', titleAr: 'مقدمة عن منصة QMentor', titleEn: 'Introduction to QMentor', durationAr: '٥ دقائق', durationEn: '5 min' },
+  { id: '1', titleAr: 'مقدمة عن +QSpark', titleEn: 'Introduction to QSpark+', durationAr: '٥ دقائق', durationEn: '5 min' },
   { id: '2', titleAr: 'استخدام التوأم الرقمي', titleEn: 'Using Digital Twin', durationAr: '٨ دقائق', durationEn: '8 min' },
   { id: '3', titleAr: 'إنشاء خطة دراسية ذكية', titleEn: 'Creating a Smart Study Plan', durationAr: '٦ دقائق', durationEn: '6 min' },
   { id: '4', titleAr: 'فهم تحليل المخاطر', titleEn: 'Understanding Risk Analytics', durationAr: '٧ دقائق', durationEn: '7 min' },

@@ -50,41 +50,14 @@ type TabKey = 'weekly' | 'deadlines';
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
 
-const mockTimetable: TimetableEntry[] = [
-  { courseCode: 'CS101', courseName: 'Intro to CS', courseNameAr: 'مقدمة في الحاسب', day: 0, startHour: 10, endHour: 11, room: '6-201', color: 'bg-blue-500' },
-  { courseCode: 'CS101', courseName: 'Intro to CS', courseNameAr: 'مقدمة في الحاسب', day: 2, startHour: 10, endHour: 11, room: '6-201', color: 'bg-blue-500' },
-  { courseCode: 'MATH201', courseName: 'Linear Algebra', courseNameAr: 'الجبر الخطي', day: 1, startHour: 12, endHour: 13, room: '3-105', color: 'bg-emerald-500' },
-  { courseCode: 'MATH201', courseName: 'Linear Algebra', courseNameAr: 'الجبر الخطي', day: 3, startHour: 12, endHour: 13, room: '3-105', color: 'bg-emerald-500' },
-  { courseCode: 'CS201', courseName: 'Data Structures', courseNameAr: 'هياكل البيانات', day: 0, startHour: 14, endHour: 15, room: '6-310', color: 'bg-violet-500' },
-  { courseCode: 'CS201', courseName: 'Data Structures', courseNameAr: 'هياكل البيانات', day: 2, startHour: 14, endHour: 15, room: '6-310', color: 'bg-violet-500' },
-  { courseCode: 'CS201', courseName: 'Data Structures', courseNameAr: 'هياكل البيانات', day: 4, startHour: 14, endHour: 15, room: '6-310', color: 'bg-violet-500' },
-  { courseCode: 'ENG101', courseName: 'English I', courseNameAr: 'اللغة الإنجليزية ١', day: 1, startHour: 8, endHour: 9, room: '2-110', color: 'bg-amber-500' },
-  { courseCode: 'PHYS101', courseName: 'Physics I', courseNameAr: 'فيزياء ١', day: 3, startHour: 10, endHour: 11, room: '4-220', color: 'bg-rose-500' },
-];
+// Faisal's real 481 timetable, from resources/fixtures/student_layan.json —
+// days/times/rooms as the SIS reports them (day 0 = Sunday, hours floored to
+// the grid slot the live mapper would land them in).
 
 const now = new Date();
 
-function futureDate(daysAhead: number, hour = 9, minute = 0): string {
-  const d = new Date(now);
-  d.setDate(d.getDate() + daysAhead);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
 
-const mockExams: FinalExam[] = [
-  { courseCode: 'CS101', courseName: 'Intro to CS', courseNameAr: 'مقدمة في الحاسب', date: futureDate(2, 9), time: '09:00', room: 'Hall A' },
-  { courseCode: 'MATH201', courseName: 'Linear Algebra', courseNameAr: 'الجبر الخطي', date: futureDate(6, 11), time: '11:00', room: 'Hall B' },
-  { courseCode: 'CS201', courseName: 'Data Structures', courseNameAr: 'هياكل البيانات', date: futureDate(12, 9), time: '09:00', room: 'Hall C' },
-];
 
-const mockDeadlines: Deadline[] = [
-  { id: '1', courseCode: 'CS101', title: 'Lab 5: Loops', titleAr: 'معمل ٥: الحلقات', dueDate: futureDate(1, 23, 59), type: 'assignment' },
-  { id: '2', courseCode: 'MATH201', title: 'Quiz 3: Matrices', titleAr: 'اختبار ٣: المصفوفات', dueDate: futureDate(1, 14, 0), type: 'quiz' },
-  { id: '3', courseCode: 'CS201', title: 'Assignment 4: Linked Lists', titleAr: 'واجب ٤: القوائم المتصلة', dueDate: futureDate(3, 23, 59), type: 'assignment' },
-  { id: '4', courseCode: 'ENG101', title: 'Essay Draft 2', titleAr: 'مسودة المقال ٢', dueDate: futureDate(5, 23, 59), type: 'assignment' },
-  { id: '5', courseCode: 'PHYS101', title: 'Midterm Exam', titleAr: 'اختبار نصفي', dueDate: futureDate(8, 10, 0), type: 'exam' },
-  { id: '6', courseCode: 'CS101', title: 'Project Milestone 2', titleAr: 'مرحلة المشروع ٢', dueDate: futureDate(10, 23, 59), type: 'assignment' },
-];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -97,7 +70,7 @@ function daysUntil(dateStr: string): number {
 }
 
 function formatDate(dateStr: string, lang: 'ar' | 'en'): string {
-  return new Date(dateStr).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+  return new Date(dateStr).toLocaleDateString(lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -105,7 +78,7 @@ function formatDate(dateStr: string, lang: 'ar' | 'en'): string {
 }
 
 function formatTime(dateStr: string, lang: 'ar' | 'en'): string {
-  return new Date(dateStr).toLocaleTimeString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+  return new Date(dateStr).toLocaleTimeString(lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -276,24 +249,24 @@ export default function Schedule() {
   // FinalExam types — `time-table` is wrapped in `{student_id, semester, time-table:[]}`
   // and each entry's `times` are nested objects (`day: {number, name}`, `start`, `end`).
   // Same for finals. We accept either shape and coerce.
-  const { data: rawTimetable, source: timetableSource } = useTimetable<unknown>(mockTimetable);
-  const { data: rawExams, source: examsSource } = useFinalExams<unknown>(mockExams);
+  // No fixture stands in for the student's own record: what SIS has not
+  // answered is shown as empty, never as somebody's sample timetable.
+  const { data: rawTimetable, source: timetableSource } = useTimetable<unknown>(null);
+  const { data: rawExams, source: examsSource, isLoading: examsLoading } = useFinalExams<unknown>(null);
 
-  const timetable: TimetableEntry[] = useMemo(() => {
-    if (timetableSource !== 'api') {
-      return Array.isArray(rawTimetable) ? rawTimetable as TimetableEntry[] : mockTimetable;
-    }
-    return mapApiTimetable(rawTimetable);
-  }, [rawTimetable, timetableSource]);
+  const timetable: TimetableEntry[] = useMemo(
+    () => (timetableSource === 'api' ? mapApiTimetable(rawTimetable) : []),
+    [rawTimetable, timetableSource],
+  );
 
-  const exams: FinalExam[] = useMemo(() => {
-    if (examsSource !== 'api') {
-      return Array.isArray(rawExams) ? rawExams as FinalExam[] : mockExams;
-    }
-    return mapApiFinalExams(rawExams);
-  }, [rawExams, examsSource]);
+  const exams: FinalExam[] = useMemo(
+    () => (examsSource === 'api' ? mapApiFinalExams(rawExams) : []),
+    [rawExams, examsSource],
+  );
 
-  const deadlines = mockDeadlines;
+  // Assignment / quiz deadlines live on Blackboard, which the sync does not
+  // carry for this student yet — the list is empty until that feed answers.
+  const deadlines: Deadline[] = [];
 
   const dayLabels = [
     { en: 'Sun', ar: 'أحد' },
@@ -391,7 +364,7 @@ export default function Schedule() {
     const lines = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//QMentor//Schedule//EN',
+      'PRODID:-//QSpark+//Schedule//EN',
     ];
 
     for (const exam of exams) {
@@ -445,6 +418,13 @@ export default function Schedule() {
         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
           {t('العد التنازلي للاختبارات النهائية', 'Final Exam Countdown')}
         </h2>
+        {exams.length === 0 && (
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            {examsLoading
+              ? '…'
+              : t('لا مواعيد اختبارات نهائية مسجّلة في النظام الأكاديمي بعد.', 'No final exam sittings are on file in SIS yet.')}
+          </p>
+        )}
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           {exams.map((exam) => {
             const days = daysUntil(exam.date);
@@ -635,7 +615,7 @@ export default function Schedule() {
             {grouped.next48.length === 0 && grouped.thisWeek.length === 0 && grouped.nextWeek.length === 0 && (
               <div className="text-center py-16 text-gray-400 dark:text-gray-500">
                 <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">{t('لا توجد مواعيد نهائية قادمة', 'No upcoming deadlines')}</p>
+                <p className="text-sm">{t('لا مواعيد تسليم مسجّلة — تُقرأ من بلاكبورد حين تصل بياناته', 'No deadlines on file — read from Blackboard once its feed answers')}</p>
               </div>
             )}
           </div>

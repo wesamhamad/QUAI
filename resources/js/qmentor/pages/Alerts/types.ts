@@ -1,8 +1,8 @@
 export type AlertSeverity = 'info' | 'warning' | 'urgent' | 'critical';
 export type AlertStatus = 'active' | 'acknowledged' | 'dismissed' | 'escalated' | 'resolved';
 export type AlertType = 'gpa_drop' | 'attendance' | 'deadline' | 'academic_warning' | 'registration' | 'financial' | 'agent_action' | 'system' | 'caseload' | 'intervention';
-export type NotificationChannel = 'in_app' | 'email' | 'sms' | 'push';
-export type AlertRole = 'student' | 'advisor' | 'agent' | 'admin' | 'all';
+export type NotificationChannel = 'in_app' | 'email' | 'sms'; // decision 2026-09-14: email and platform notifications only
+export type AlertRole = 'student' | 'instructor' | 'advisor' | 'admin' | 'agent' | 'all';
 
 export interface Alert {
   id: string;
@@ -41,8 +41,6 @@ export interface AlertPreference {
   channels: {
     in_app: boolean;
     email: boolean;
-    sms: boolean;
-    push: boolean;
   };
   threshold?: number;
 }

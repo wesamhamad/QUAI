@@ -190,6 +190,162 @@ class ApiClient {
   compareMajor(targetMajorNo: string) {
     return this.get<ApiResponse>(`/majors/compare/${encodeURIComponent(targetMajorNo)}`);
   }
+
+  // ── Ported from the live build: risk engine, advisor caseload, cohort, admin ──
+  // Risk engine — 31 indicators (SRS §5.B/§5.C), computed nightly on the server
+  getRiskMe() {
+    return this.get<ApiResponse>('/risk/me');
+  }
+
+  getRiskStudent(studentId: string) {
+    return this.get<ApiResponse>(`/risk/students/${encodeURIComponent(studentId)}`);
+  }
+
+  getRiskCaseload(ids: string[], all = false) {
+    return this.get<ApiResponse>(all ? '/risk/caseload?all=1' : `/risk/caseload?ids=${encodeURIComponent(ids.join(','))}`);
+  }
+
+  getMyInterventions() {
+    return this.get<ApiResponse>('/interventions');
+  }
+
+  logIntervention(body: { student_id: string; type: string; note: string; outcome?: string; follow_up?: string }) {
+    return this.post<ApiResponse>('/interventions', body);
+  }
+
+  getApprovals() {
+    return this.get<ApiResponse>('/approvals');
+  }
+
+  decideApproval(id: number, decision: 'approve' | 'reject', note?: string) {
+    return this.post<ApiResponse>(`/approvals/${id}/decide`, { decision, note });
+  }
+
+  overrideRisk(studentId: string, level: number, reason: string) {
+    return this.post<ApiResponse>(`/risk/students/${encodeURIComponent(studentId)}/override`, { level, reason });
+  }
+
+  getAutonomy() {
+    return this.get<ApiResponse>('/autonomy');
+  }
+
+  getFacultyOverview(faculty?: string) {
+    return this.get<ApiResponse>(`/faculty/overview${faculty ? `?faculty=${encodeURIComponent(faculty)}` : ''}`);
+  }
+
+  getRiskBacktest() {
+    return this.get<ApiResponse>('/risk/backtest');
+  }
+
+  getRiskCohort(faculty?: string) {
+    return this.get<ApiResponse>(`/risk/cohort${faculty ? `?faculty=${encodeURIComponent(faculty)}` : ''}`);
+  }
+
+  /** Own Blackboard from the cohort snapshots: {grades, activity, submissions} — `unavailable` until the sweep stored them. */
+  getMyBlackboard() {
+    return this.get<ApiResponse>('/student/blackboard');
+  }
+
+  // المرشد الذكي — the systems the agent reads, the steps it runs, this term's counts
+  getAgentCore(qsparkStudent?: string | null) {
+    const query = qsparkStudent ? `?qspark_student=${encodeURIComponent(qsparkStudent)}` : '';
+    return this.get<ApiResponse>(`/agent-core${query}`);
+  }
+
+  getAdvisorIdentity() {
+    return this.advisorGet('/me');
+  }
+
+  getAdvisees(semester?: string, all = false, q?: string, atRisk = false, filters: { level?: number; facultyName?: string } = {}) {
+    const params = new URLSearchParams();
+    if (semester) params.set('semester', semester);
+    if (all) params.set('all', '1');
+    if (atRisk) params.set('at_risk', '1');
+    if (q) params.set('q', q);
+    if (filters.level !== undefined) params.set('level', String(filters.level));
+    if (filters.facultyName) params.set('faculty_name', filters.facultyName);
+    const query = params.toString();
+    return this.advisorGet(`/advisees${query ? `?${query}` : ''}`);
+  }
+
+  getAdviseePlan(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/plan`);
+  }
+
+  /** Twin slices of a student who is not the signed-in user, from the pre-loaded cohort tables. */
+  getAdviseeCourses(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/courses`);
+  }
+
+  getAdviseeTransactions(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/transactions`);
+  }
+
+  getAdviseeAbsences(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/absences`);
+  }
+
+  getAdviseeRecommendations(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/recommendations`);
+  }
+
+  getAdviseeTimeline(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/timeline`);
+  }
+
+  /** Final-exam sittings and the weekly timetable, from the cohort snapshots (kinds `finals` / `timetable`). */
+  getAdviseeFinals(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/finals`);
+  }
+
+  getAdviseeTimetable(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/timetable`);
+  }
+
+  /** Blackboard per course — grade columns, LMS activity and submissions; `unavailable` until the sweep stored them. */
+  getAdviseeBlackboard(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/blackboard`);
+  }
+
+  /** Stored AI recommendations / real-event timeline for the signed-in student. */
+  getMyRecommendations() {
+    return this.get<ApiResponse>('/student/recommendations');
+  }
+
+  getMyTimeline() {
+    return this.get<ApiResponse>('/student/timeline');
+  }
+
+  /** لوحة النظام — super admin only. */
+  getAdminUsage(period: string | number = 30) {
+    const q = typeof period === 'number' ? `days=${period}` : `period=${encodeURIComponent(period)}`;
+    return this.get<ApiResponse>(`/admin/usage?${q}`);
+  }
+
+  getAdviseeProfile(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/profile`);
+  }
+
+  getAdviseePredictions(studentId: string) {
+    return this.advisorGet(`/students/${encodeURIComponent(studentId)}/predictions`);
+  }
+
+  private async advisorGet(path: string): Promise<ApiResponse> {
+    const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
+    const res = await fetch(`/api/advisor${path}`, {
+      credentials: 'same-origin',
+      headers: {
+        'Accept': 'application/json',
+        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status}`);
+    }
+
+    return res.json();
+  }
 }
 
 export const apiClient = new ApiClient(BASE_URL);

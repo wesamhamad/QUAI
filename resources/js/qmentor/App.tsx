@@ -1,5 +1,7 @@
 import { Suspense, lazy, useEffect, type ComponentType } from 'react';
-import { Routes, Route, useSearchParams } from 'react-router-dom';
+import { isRoadmap, roadmapPreviewRequested } from './lib/roadmap';
+import RoadmapNotice from './components/shared/RoadmapNotice';
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import AppShell from './components/layout/AppShell';
 import Dashboard from './pages/Dashboard';
 import ErrorBoundary, { SectionErrorBoundary } from './components/shared/ErrorBoundary';
@@ -53,6 +55,10 @@ const ActionPlan = lazyWithRetry(() => import('./pages/StudentDashboard/ActionPl
 const Schedule = lazyWithRetry(() => import('./pages/StudentDashboard/Schedule'));
 const ContactAdvisor = lazyWithRetry(() => import('./pages/StudentDashboard/ContactAdvisor'));
 const Grades = lazyWithRetry(() => import('./pages/Grades/index'));
+const AdviseePlan = lazyWithRetry(() => import('./pages/AdviseePlan/index'));
+const Instructor = lazyWithRetry(() => import('./pages/Instructor/index'));
+const SystemUsage = lazyWithRetry(() => import('./pages/SystemUsage/index'));
+const AgentCore = lazyWithRetry(() => import('./pages/AgentCore/index'));
 
 function RoleGuard({ path, children }: { path: string; children: ReactNode }) {
   const { role } = useRole();
@@ -72,7 +78,7 @@ function RoleGuard({ path, children }: { path: string; children: ReactNode }) {
         <p className="text-gray-500 dark:text-gray-400 mb-6">
           {t('هذه الصفحة غير متاحة لدورك الحالي', 'This page is not available for your current role')}
         </p>
-        <a href="/qmentor/" className="px-4 py-2 rounded-lg bg-sa-500 text-white hover:bg-sa-600 transition-colors text-sm font-medium">
+        <a href="/qspark-plus/" className="px-4 py-2 rounded-lg bg-sa-500 text-white hover:bg-sa-600 transition-colors text-sm font-medium">
           {t('العودة للرئيسية', 'Back to Dashboard')}
         </a>
       </div>
@@ -112,11 +118,13 @@ function ImpersonationPin() {
 
 /** Wraps a lazy-loaded page with error boundary and Suspense fallback */
 function PageRoute({ path, children, fallback }: { path: string; children: ReactNode; fallback: ReactNode }) {
+  // Roadmap screens open on a notice unless a reviewer asks for the model (?preview=1).
+  const roadmap = isRoadmap(path) && !roadmapPreviewRequested();
   return (
     <RoleGuard path={path}>
       <SectionErrorBoundary>
         <Suspense fallback={fallback}>
-          {children}
+          {roadmap ? <RoadmapNotice path={path} /> : children}
         </Suspense>
       </SectionErrorBoundary>
     </RoleGuard>
@@ -132,23 +140,30 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/digital-twin" element={<PageRoute path="/digital-twin" fallback={<DetailPageSkeleton />}><DigitalTwin /></PageRoute>} />
           <Route path="/advisor-dashboard" element={<PageRoute path="/advisor-dashboard" fallback={<DashboardWithTableSkeleton />}><AdvisorDashboard /></PageRoute>} />
+          <Route path="/advisee/:studentId" element={<PageRoute path="/advisee" fallback={<TabbedPageSkeleton />}><AdviseePlan /></PageRoute>} />
           <Route path="/risk-analytics" element={<PageRoute path="/risk-analytics" fallback={<TabbedPageSkeleton />}><RiskAnalytics /></PageRoute>} />
+          {/* «الطلاب المعرضون للخطر» is that page opened on its own tab: one board, two ways in. */}
+          <Route path="/at-risk" element={<Navigate to="/risk-analytics?tab=students&solo=1" replace />} />
           <Route path="/study-plan" element={<PageRoute path="/study-plan" fallback={<TabbedPageSkeleton />}><StudyPlan /></PageRoute>} />
           <Route path="/chatbot" element={<PageRoute path="/chatbot" fallback={<ChatSkeleton />}><Chatbot /></PageRoute>} />
           <Route path="/alerts" element={<PageRoute path="/alerts" fallback={<TabbedPageSkeleton />}><Alerts /></PageRoute>} />
+          <Route path="/instructor" element={<PageRoute path="/instructor" fallback={<DashboardWithTableSkeleton />}><Instructor /></PageRoute>} />
           <Route path="/faculty" element={<PageRoute path="/faculty" fallback={<TabbedPageSkeleton />}><Faculty /></PageRoute>} />
-          <Route path="/peer-tutoring" element={<PageRoute path="/peer-tutoring" fallback={<TabbedPageSkeleton />}><PeerTutoring /></PageRoute>} />
-          <Route path="/recovery" element={<PageRoute path="/recovery" fallback={<TabbedPageSkeleton />}><Recovery /></PageRoute>} />
-          <Route path="/benchmarking" element={<PageRoute path="/benchmarking" fallback={<TabbedPageSkeleton />}><Benchmarking /></PageRoute>} />
+          <Route path="/system-usage" element={<PageRoute path="/system-usage" fallback={<TabbedPageSkeleton />}><SystemUsage /></PageRoute>} />
           <Route path="/settings" element={<PageRoute path="/settings" fallback={<TabbedPageSkeleton cards={2} />}><Settings /></PageRoute>} />
-          <Route path="/mobile" element={<PageRoute path="/mobile" fallback={<TabbedPageSkeleton />}><Mobile /></PageRoute>} />
           <Route path="/agent-activity" element={<PageRoute path="/agent-activity" fallback={<DashboardWithTableSkeleton />}><AgentActivity /></PageRoute>} />
           <Route path="/student-dashboard" element={<PageRoute path="/student-dashboard" fallback={<DashboardWithTableSkeleton />}><StudentDashboard /></PageRoute>} />
           <Route path="/indicator-detail" element={<PageRoute path="/indicator-detail" fallback={<DetailPageSkeleton />}><IndicatorDetail /></PageRoute>} />
           <Route path="/action-plan" element={<PageRoute path="/action-plan" fallback={<DetailPageSkeleton />}><ActionPlan /></PageRoute>} />
           <Route path="/schedule" element={<PageRoute path="/schedule" fallback={<TabbedPageSkeleton />}><Schedule /></PageRoute>} />
           <Route path="/contact-advisor" element={<PageRoute path="/contact-advisor" fallback={<DetailPageSkeleton />}><ContactAdvisor /></PageRoute>} />
+          {/* Demo-only pages kept from this build (not in the live app). */}
+          <Route path="/peer-tutoring" element={<PageRoute path="/peer-tutoring" fallback={<TabbedPageSkeleton />}><PeerTutoring /></PageRoute>} />
+          <Route path="/recovery" element={<PageRoute path="/recovery" fallback={<TabbedPageSkeleton />}><Recovery /></PageRoute>} />
+          <Route path="/benchmarking" element={<PageRoute path="/benchmarking" fallback={<TabbedPageSkeleton />}><Benchmarking /></PageRoute>} />
+          <Route path="/mobile" element={<PageRoute path="/mobile" fallback={<TabbedPageSkeleton />}><Mobile /></PageRoute>} />
           <Route path="/grades" element={<PageRoute path="/grades" fallback={<TabbedPageSkeleton />}><Grades /></PageRoute>} />
+          <Route path="/agent-core" element={<PageRoute path="/agent-core" fallback={<DetailPageSkeleton />}><AgentCore /></PageRoute>} />
         </Routes>
       </AppShell>
     </ErrorBoundary>

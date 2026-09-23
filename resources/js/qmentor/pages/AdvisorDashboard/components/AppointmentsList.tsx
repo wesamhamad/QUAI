@@ -16,6 +16,9 @@ export default function AppointmentsList({ appointments }: AppointmentsListProps
       <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
         {t('المواعيد القادمة', 'Upcoming Appointments')}
       </h3>
+      {appointments.length === 0 && (
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('لا مواعيد مسجّلة.', 'No appointments recorded.')}</p>
+      )}
 
       {today.length > 0 && (
         <div className="mb-4">

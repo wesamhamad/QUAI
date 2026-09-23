@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useRole } from '../contexts/RoleContext';
+import HomeSummary from './Home';
 import { canAccess } from '../lib/rolePermissions';
 import { StaggerContainer, StaggerItem } from '../lib/motion';
 import {
@@ -18,10 +19,6 @@ import {
   MessageSquare,
   Bell,
   GraduationCap,
-  HandHelping,
-  HeartPulse,
-  GitCompareArrows,
-  Smartphone,
   Settings,
   Bot,
   ArrowUpRight,
@@ -54,6 +51,18 @@ interface ServiceItem {
 }
 
 const services: ServiceItem[] = [
+  // المرشد الذكي — how the agent reads, detects, decides; first, because it explains the rest
+  {
+    icon: Sparkles,
+    titleAr: 'المرشد الذكي',
+    titleEn: 'Smart Mentor',
+    descriptionAr: 'وكيل واحد يقرأ من أنظمة المنظومة، يرصد الإشارات، يقرّر ويتابع — الحلقة كاملة في صفحة',
+    descriptionEn: 'One agent reads the academic systems, detects signals, decides and follows up — the whole loop on one page',
+    path: '/agent-core',
+    accent: 'border-t-sa-500',
+    iconBg: 'bg-sa-500 text-white dark:bg-sa-500 dark:text-white',
+    featured: true,
+  },
   // Student-focused services
   {
     icon: BarChart3,
@@ -161,52 +170,12 @@ const services: ServiceItem[] = [
     iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
   },
   {
-    icon: HandHelping,
-    titleAr: 'التدريس بالأقران',
-    titleEn: 'Peer Tutoring',
-    descriptionAr: 'ربط الطلاب المتفوقين بزملائهم للمساعدة الأكاديمية',
-    descriptionEn: 'Connect high-performing students with peers for academic help',
-    path: '/peer-tutoring',
-    accent: 'border-t-sa-500',
-    iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
-  },
-  {
-    icon: HeartPulse,
-    titleAr: 'برنامج التعافي',
-    titleEn: 'Recovery Program',
-    descriptionAr: 'برامج دعم مخصصة للطلاب المتعثرين أكاديمياً',
-    descriptionEn: 'Tailored support programs for academically struggling students',
-    path: '/recovery',
-    accent: 'border-t-sa-500',
-    iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
-  },
-  {
-    icon: GitCompareArrows,
-    titleAr: 'المقارنة المعيارية',
-    titleEn: 'Benchmarking',
-    descriptionAr: 'مقارنة الأداء المؤسسي مع المعايير المحلية والعالمية',
-    descriptionEn: 'Compare institutional performance against local and global benchmarks',
-    path: '/benchmarking',
-    accent: 'border-t-sa-500',
-    iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
-  },
-  {
     icon: Bot,
     titleAr: 'نشاط الوكيل الذكي',
     titleEn: 'AI Agent Activity',
     descriptionAr: 'مراقبة المهام المستقلة للوكيل الذكي ومصفوفة الاستقلالية',
     descriptionEn: 'Monitor autonomous agent tasks and the autonomy matrix',
     path: '/agent-activity',
-    accent: 'border-t-sa-500',
-    iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
-  },
-  {
-    icon: Smartphone,
-    titleAr: 'الجوال والرسائل',
-    titleEn: 'Mobile & Messaging',
-    descriptionAr: 'إشعارات فورية عبر الجوال والرسائل النصية',
-    descriptionEn: 'Instant mobile notifications and text messaging',
-    path: '/mobile',
     accent: 'border-t-sa-500',
     iconBg: 'bg-sa-50 text-sa-700 dark:bg-sa-950 dark:text-sa-400',
   },
@@ -467,7 +436,7 @@ function AcademicAdvisorTab({ t }: { t: (a: string, e: string) => string }) {
             {t('جامعة القصيم', 'Qassim University')}
           </p>
           <h1 className="text-display text-white">
-            {t('مرحباً بك في QMentor', 'Welcome to QMentor')}
+            {t('مرحباً بك في +QSpark', 'Welcome to QSpark+')}
           </h1>
           <p className="mt-3 text-sa-200 text-base leading-relaxed">
             {t(
@@ -941,6 +910,7 @@ type TabKey = 'advisor' | 'digital-record' | 'learning';
 
 export default function Dashboard() {
   const { t } = useLanguage();
+  const { role } = useRole();
   const [searchParams] = useSearchParams();
   const initialTab = (() => {
     const param = searchParams.get('tab');
@@ -958,6 +928,19 @@ export default function Dashboard() {
     { key: 'digital-record', labelAr: 'سجلك الرقمي',                         labelEn: 'Digital Record',           icon: Award },
     { key: 'learning',       labelAr: 'منصة التعلم والتجربة الأكاديمية',     labelEn: 'Learning Platform',        icon: BookOpen },
   ];
+
+  // The home of everyone but a student is a summary of what they are
+  // responsible for — the cohort by college for the admin, the caseload for
+  // an advisor, the taught sections for an instructor — read from
+  // /api/home/summary, which scopes by the signed-in user. The student keeps
+  // the three tabs: their advisor, their record, their learning platform.
+  if (role === 'admin' || role === 'advisor' || role === 'instructor') {
+    return (
+      <div className="space-y-6">
+        <HomeSummary role={role} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

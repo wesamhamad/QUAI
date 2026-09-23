@@ -7,6 +7,7 @@ const riskColors = {
   medium: { bg: 'bg-gold-100 dark:bg-gold-900', text: 'text-gold-700 dark:text-gold-300', label: 'متوسط', labelEn: 'Medium' },
   high: { bg: 'bg-error-100 dark:bg-red-900', text: 'text-error-500 dark:text-red-300', label: 'مرتفع', labelEn: 'High' },
   critical: { bg: 'bg-error-100 dark:bg-red-900', text: 'text-error-600 dark:text-red-200', label: 'حرج', labelEn: 'Critical' },
+  unscored: { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-600 dark:text-gray-300', label: 'غير مقيَّم', labelEn: 'Unscored' },
 };
 
 interface Props {

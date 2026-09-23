@@ -7,7 +7,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { RoleProvider } from './contexts/RoleContext';
 import { ToastProvider } from './components/shared/Toast';
+import { installChunkReloadHandler } from './lib/chunkReload';
 import './styles/qmentor.css';
+
+installChunkReloadHandler();
 
 const queryClient = new QueryClient({
   defaultOptions: {

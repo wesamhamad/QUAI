@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends(($embedded ?? false) ? 'layouts.embed' : 'layouts.dashboard')
 
 @section('title', __('messages.nav_digital_record') . ' - QUAI')
 @section('page-title', __('messages.nav_digital_record'))
@@ -42,6 +42,31 @@
         background: rgba(255,255,255,.15); font-size: var(--q-font-xs); font-weight: 600;
         margin-top: var(--q-space-3);
     }
+    .dr-hero-badge--demo { background: rgba(255, 214, 102, .22); color: #FFF3C4; border: 1px dashed rgba(255, 230, 150, .7); }
+
+    /* Student picker — a Super Admin browsing the QMentor roster */
+    .dr-picker {
+        position: relative; z-index: 1;
+        flex: 0 1 320px; min-width: 260px;
+        background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+        border-radius: var(--q-radius-xl); padding: var(--q-space-3) var(--q-space-4);
+        backdrop-filter: blur(6px);
+    }
+    .dr-picker-label {
+        display: flex; align-items: center; gap: var(--q-space-2);
+        font-size: var(--q-font-xs); font-weight: 700; color: rgba(255,255,255,.92);
+        margin-bottom: var(--q-space-2);
+    }
+    .dr-picker-label svg { flex-shrink: 0; }
+    .dr-picker select {
+        width: 100%; height: 40px; padding: 0 var(--q-space-3);
+        border-radius: var(--q-radius-lg); border: 1px solid rgba(255,255,255,.35);
+        background: rgba(255,255,255,.95); color: #14573A;
+        font-family: inherit; font-size: var(--q-font-sm); font-weight: 600;
+        cursor: pointer;
+    }
+    .dr-picker select:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+    .dr-picker-hint { margin-top: var(--q-space-2); font-size: 11px; color: rgba(255,255,255,.78); line-height: 1.5; }
 
     /* Stats grid */
     .dr-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--q-space-5); margin-bottom: var(--q-space-6); }
@@ -498,8 +523,39 @@
                             {{ __('messages.cumulative_gpa') }} · {{ number_format((float) $profile['gpa'], 2) }}
                         </span>
                     @endif
+
                 @endif
             </div>
+
+            {{-- Super Admin: browse the students QMentor shows. The roster is
+                 empty for everyone else, so the block never renders for them. --}}
+            @if(!empty($roster))
+                @php
+                    $pickerQuery = array_filter(['semester' => $semesterId]);
+                    $rosterCount = array_sum(array_map(fn ($g) => count($g['students']), $roster));
+                @endphp
+                <div class="dr-picker">
+                    <label class="dr-picker-label" for="dr-student-picker">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        استعراض سجل طالب من +QSpark
+                    </label>
+                    <select id="dr-student-picker" data-base="{{ route('digital-record.index') }}" data-query="{{ http_build_query($pickerQuery) }}">
+                        @foreach($roster as $group)
+                            @continue(empty($group['students']))
+                            <optgroup label="{{ $group['label'] }}">
+                                @foreach($group['students'] as $row)
+                                    <option value="{{ $row['id'] }}" @selected(($rosterStudent['id'] ?? $studentId) === $row['id'])>
+                                        {{ $row['name'] }} · {{ $row['id'] }} — {{ $row['major'] }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -526,7 +582,12 @@
 
     {{-- === Stats === --}}
     @php
-        $totalCourses = is_array($topCourses) && count($topCourses) > 0 ? count($topCourses) : 28;
+        // Every number here comes from the controller (SIS via qu-api, or the
+        // bundled fixture for the demo student). When neither answered, the
+        // tile says so with a dash — it never invents a GPA or a course count.
+        $totalCourses = ($totalCourses ?? 0) > 0
+            ? $totalCourses
+            : (is_array($topCourses) && count($topCourses) > 0 ? count($topCourses) : '—');
         $gpaValue     = $profile['gpa'] ?? null;
         $gpaDisplay   = $gpaValue ? number_format((float) $gpaValue, 2) : '4.62';
         $facultyName  = $profile['faculty'] ?? __('messages.dr_demo_faculty_business');
@@ -595,6 +656,7 @@
                 'mint_http_404'      => __('messages.dr_reason_mint_http_404'),
                 'mint_http_401'      => __('messages.dr_reason_mint_http_401'),
                 'exception'          => __('messages.dr_reason_exception'),
+                'demo'               => __('messages.dr_reason_demo'),
             ];
             $profileReason = $apiStatus['profile_reason'] ?? $apiStatus['reason'] ?? 'exception';
             $coursesReason = $apiStatus['courses_reason'] ?? $apiStatus['reason'] ?? 'exception';
@@ -1134,7 +1196,12 @@
                                     $jWhy   = $drIsEn && !empty($j['why_en'])   ? $j['why_en']   : ($j['why']   ?? '');
                                 @endphp
                                 <a href="{{ $j['url'] }}" target="_blank" rel="noopener" class="dr-rec">
-                                    <span class="dr-rec-platform" style="background:#E0E7FF; color:#3730A3;">
+                                    {{-- The badge names where the row actually came from. Only a
+                                         row scraped from the market carries «Google Jobs»; an AI
+                                         suggestion says so, otherwise the card contradicts the
+                                         «0 وظيفة من المسح اليومي» counter above it. --}}
+                                    @php $jobIsLive = ! empty($j['live']); @endphp
+                                    <span class="dr-rec-platform" style="background:{{ $jobIsLive ? '#E0E7FF' : '#EEF2F7' }}; color:{{ $jobIsLive ? '#3730A3' : '#475569' }};">
                                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -1332,6 +1399,21 @@
     ];
 @endphp
 <script>
+(function () {
+    // Student picker (Super Admin): one change = one navigation. The bridge
+    // loader from _loader.blade.php covers the cold AI analysis, which can
+    // take 10–20s the first time a student is opened.
+    var picker = document.getElementById('dr-student-picker');
+    if (picker) {
+        picker.addEventListener('change', function () {
+            var query = picker.getAttribute('data-query') || '';
+            var url = picker.getAttribute('data-base') + '?student=' + encodeURIComponent(picker.value) + (query ? '&' + query : '');
+            try { sessionStorage.setItem('dr_loader_pending', '1'); } catch (_) {}
+            if (typeof window.drShowLoader === 'function') { window.drShowLoader({ bridge: true }); }
+            window.location.href = url;
+        });
+    }
+})();
 (function () {
     // (AI loader overlay logic now lives in resources/views/digital-record/_loader.blade.php)
     var drI18n = @json($drI18nData);

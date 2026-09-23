@@ -125,7 +125,7 @@ const maleNames = [
   { ar: 'وسيم حسام الطويرقي', en: 'Waseem Al-Tuwairqi' },
   { ar: 'رامي عثمان الريس', en: 'Rami Al-Rais' },
   { ar: 'عادل صقر الجعيد', en: 'Adel Al-Juaid' },
-  { ar: 'مراد حافظ العلياني', en: 'Murad Al-Alyani' },
+  { ar: 'مراد حافظ العفيصلي', en: 'Murad Al-Alyani' },
   { ar: 'صهيب ممدوح الفهاد', en: 'Suhaib Al-Fahad' },
   { ar: 'عامر جابر القرشي', en: 'Amer Al-Qurashi' },
   { ar: 'وليد حمود العضياني', en: 'Waleed Al-Adhyani' },

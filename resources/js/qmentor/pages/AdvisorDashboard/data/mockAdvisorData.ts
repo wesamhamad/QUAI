@@ -75,19 +75,19 @@ export interface AgentAction {
 }
 
 export const mockAgentActions: AgentAction[] = [
-  { id: 'aa-1', timestamp: '2026-04-13T09:15:00', studentName: 'ليان', studentNameEn: 'Layan', studentId: '441099001', actionAr: 'تم تحليل التوأم الرقمي — انخفاض الحضور بنسبة 18% خلال أسبوعين', actionEn: 'Digital Twin analyzed — attendance dropped 18% over 2 weeks', typeIcon: 'analysis', status: 'completed' },
-  { id: 'aa-2', timestamp: '2026-04-13T09:20:00', studentName: 'ليان', studentNameEn: 'Layan', studentId: '441099001', actionAr: 'تم جدولة اجتماع Teams مع المرشد — الأحد 10:00 ص', actionEn: 'Scheduled Teams meeting with advisor — Sunday 10:00 AM', typeIcon: 'meeting', status: 'scheduled' },
+  { id: 'aa-1', timestamp: '2026-04-13T09:15:00', studentName: 'فيصل', studentNameEn: 'Faisal', studentId: '441099001', actionAr: 'تم تحليل التوأم الرقمي — انخفاض الحضور بنسبة 18% خلال أسبوعين', actionEn: 'Digital Twin analyzed — attendance dropped 18% over 2 weeks', typeIcon: 'analysis', status: 'completed' },
+  { id: 'aa-2', timestamp: '2026-04-13T09:20:00', studentName: 'فيصل', studentNameEn: 'Faisal', studentId: '441099001', actionAr: 'تم جدولة اجتماع Teams مع المرشد — الأحد 10:00 ص', actionEn: 'Scheduled Teams meeting with advisor — Sunday 10:00 AM', typeIcon: 'meeting', status: 'scheduled' },
   { id: 'aa-3', timestamp: '2026-04-13T08:45:00', studentName: 'أحمد محمد عتيب', studentNameEn: 'Ahmed Mohammed Otaib', studentId: '441001234', actionAr: 'إرسال تنبيه تلقائي — المعدل أقل من 2.0 للفصل الثاني', actionEn: 'Auto-sent alert — GPA below 2.0 for second semester', typeIcon: 'alert', status: 'completed' },
-  { id: 'aa-4', timestamp: '2026-04-13T08:30:00', studentName: 'ليان', studentNameEn: 'Layan', studentId: '441099001', actionAr: 'إرسال بريد إلكتروني للطالبة — دعوة لجلسة إرشادية', actionEn: 'Emailed student — invitation for advisory session', typeIcon: 'email', status: 'completed' },
+  { id: 'aa-4', timestamp: '2026-04-13T08:30:00', studentName: 'فيصل', studentNameEn: 'Faisal', studentId: '441099001', actionAr: 'إرسال بريد إلكتروني للطالبة — دعوة لجلسة إرشادية', actionEn: 'Emailed student — invitation for advisory session', typeIcon: 'email', status: 'completed' },
   { id: 'aa-5', timestamp: '2026-04-12T16:00:00', studentName: 'فهد عبدالله قحطان', studentNameEn: 'Fahd Mohammed Qahtan', studentId: '441002345', actionAr: 'تحويل تلقائي لبرنامج التعافي — غياب متكرر', actionEn: 'Auto-referred to Recovery Program — frequent absences', typeIcon: 'referral', status: 'pending_approval' },
-  { id: 'aa-6', timestamp: '2026-04-12T14:30:00', studentName: 'ليان', studentNameEn: 'Layan', studentId: '441099001', actionAr: 'تم إنشاء ملف التوأم الرقمي وإرساله للمرشد', actionEn: 'Created Digital Twin profile and sent to advisor', typeIcon: 'analysis', status: 'completed' },
+  { id: 'aa-6', timestamp: '2026-04-12T14:30:00', studentName: 'فيصل', studentNameEn: 'Faisal', studentId: '441099001', actionAr: 'تم إنشاء ملف التوأم الرقمي وإرساله للمرشد', actionEn: 'Created Digital Twin profile and sent to advisor', typeIcon: 'analysis', status: 'completed' },
   { id: 'aa-7', timestamp: '2026-04-12T11:00:00', studentName: 'ماجد عبدالمحسن الخليفة', studentNameEn: 'Majed Al-Khalifa', studentId: '441022345', actionAr: 'جدولة اجتماع Teams طارئ — احتمالية فصل أكاديمي', actionEn: 'Scheduled emergency Teams meeting — potential dismissal', typeIcon: 'meeting', status: 'completed' },
 ];
 
-/* Layan's Digital Twin snapshot sent by agent */
+/* Faisal's Digital Twin snapshot sent by agent */
 export const layanDigitalTwin = {
-  name: 'ليان',
-  nameEn: 'Layan',
+  name: 'فيصل',
+  nameEn: 'Faisal',
   studentId: '441099001',
   department: 'علوم الحاسب',
   departmentEn: 'Computer Science',
@@ -123,7 +123,7 @@ export interface TeamsMeeting {
 }
 
 export const mockTeamsMeetings: TeamsMeeting[] = [
-  { id: 'tm-1', studentName: 'ليان', studentNameEn: 'Layan', date: '2026-04-14', time: '10:00', durationMin: 30, topicAr: 'مراجعة وضع الحضور والأداء الأكاديمي', topicEn: 'Review attendance and academic performance', teamsLink: 'https://teams.microsoft.com/l/meetup-join/meeting_1', status: 'upcoming', scheduledBy: 'agent' },
+  { id: 'tm-1', studentName: 'فيصل', studentNameEn: 'Faisal', date: '2026-04-14', time: '10:00', durationMin: 30, topicAr: 'مراجعة وضع الحضور والأداء الأكاديمي', topicEn: 'Review attendance and academic performance', teamsLink: 'https://teams.microsoft.com/l/meetup-join/meeting_1', status: 'upcoming', scheduledBy: 'agent' },
   { id: 'tm-2', studentName: 'ماجد عبدالمحسن الخليفة', studentNameEn: 'Majed Al-Khalifa', date: '2026-04-13', time: '14:00', durationMin: 45, topicAr: 'جلسة طارئة — مراجعة الوضع الأكاديمي', topicEn: 'Emergency session — academic status review', teamsLink: 'https://teams.microsoft.com/l/meetup-join/meeting_2', status: 'upcoming', scheduledBy: 'agent' },
   { id: 'tm-3', studentName: 'أحمد محمد عتيب', studentNameEn: 'Ahmed Mohammed Otaib', date: '2026-04-15', time: '11:00', durationMin: 30, topicAr: 'متابعة خطة التحسين', topicEn: 'Follow up on improvement plan', teamsLink: 'https://teams.microsoft.com/l/meetup-join/meeting_3', status: 'upcoming', scheduledBy: 'advisor' },
   { id: 'tm-4', studentName: 'نورة سعد شمر', studentNameEn: 'Noura Mohammed Shammar', date: '2026-04-16', time: '09:30', durationMin: 30, topicAr: 'متابعة التحويل لمركز الإرشاد', topicEn: 'Follow up on counseling referral', teamsLink: 'https://teams.microsoft.com/l/meetup-join/meeting_4', status: 'upcoming', scheduledBy: 'advisor' },

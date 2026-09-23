@@ -25,7 +25,7 @@ export default function ChatHeader({ onToggleMinimize, minimized }: ChatHeaderPr
         </div>
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
-            {t('مساعد QMentor الذكي', 'QMentor AI Assistant')}
+            {t('مساعد +QSpark الذكي', 'QSpark+ AI Assistant')}
           </h2>
           <p className="text-xs text-success-600 dark:text-success-400">
             {t('متصل الآن', 'Online')}

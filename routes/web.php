@@ -40,11 +40,21 @@ Route::get('/sdaia-policy', function () {
 
 // QMentor SPA — same React app reused for the +QSpark branding via /qspark-plus.
 // In demo mode, faculty can append ?as=<student_id> to view any student's data.
-Route::get('/qmentor/{any?}', function () {
-    return view('qmentor.app');
-})->where('any', '.*')->middleware(['auth'])->name('qmentor');
+// The old address. Every link now points at /qspark-plus, but bookmarks
+// still land here: same path, same query, new prefix.
+Route::get('/qmentor/{any?}', function (?string $any = null) {
+    return redirect('/qspark-plus'.($any ? '/'.$any : '').(request()->getQueryString() ? '?'.request()->getQueryString() : ''), 301);
+})->where('any', '.*')->name('qmentor');
 
-Route::get('/qspark-plus/{any?}', function () {
+Route::get('/qspark-plus/{any?}', function (?string $any = null) {
+    // A faculty member entering lands on their own list, not the student-style
+    // home: the advisor desk (the demo faculty account advises and teaches).
+    $user = request()->user();
+    if (($any === null || trim($any, '/') === '') && $user
+        && $user->hasRole('Faculty') && ! $user->isAdmin() && ! $user->isStudent() && ! request()->filled('as')) {
+        return redirect('/qspark-plus/advisor-dashboard');
+    }
+
     return view('qmentor.app');
 })->where('any', '.*')->middleware(['auth'])->name('qspark-plus');
 

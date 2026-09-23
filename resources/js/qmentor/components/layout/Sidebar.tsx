@@ -1,4 +1,5 @@
 import { NavLink, useLocation, useSearchParams } from 'react-router-dom';
+import { isRoadmap } from '../../lib/roadmap';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useRole } from '../../contexts/RoleContext';
 import { canAccess } from '../../lib/rolePermissions';
@@ -7,13 +8,11 @@ import {
   UserCircleIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
+  ShieldExclamationIcon,
   AcademicCapIcon,
   ChatBubbleLeftRightIcon,
   BellAlertIcon,
-  BuildingLibraryIcon,
   UsersIcon,
-  ShieldExclamationIcon,
-  PresentationChartBarIcon,
   Cog6ToothIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
@@ -23,7 +22,10 @@ import {
   ClipboardDocumentListIcon,
   CalendarDaysIcon,
   PhoneIcon,
+  SparklesIcon,
   TrophyIcon,
+  BuildingLibraryIcon,
+  PresentationChartBarIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -35,6 +37,7 @@ interface SidebarProps {
 
 const navItems = [
   { path: '/', icon: HomeIcon, ar: 'الرئيسية', en: 'Dashboard' },
+  { path: '/agent-core', icon: SparklesIcon, ar: 'المرشد الذكي', en: 'Smart Mentor' },
   // Student-specific pages
   { path: '/student-dashboard', icon: ShieldCheckIcon, ar: 'حالة المخاطر', en: 'My Risk Status' },
   { path: '/indicator-detail', icon: ExclamationTriangleIcon, ar: 'تفاصيل المؤشرات', en: 'Indicator Detail' },
@@ -42,10 +45,12 @@ const navItems = [
   { path: '/schedule', icon: CalendarDaysIcon, ar: 'الجدول والمواعيد', en: 'Schedule & Deadlines' },
   { path: '/contact-advisor', icon: PhoneIcon, ar: 'تواصل مع المرشد', en: 'Contact Advisor' },
   { path: '/grades', icon: TrophyIcon, ar: 'الدرجات والتقييمات', en: 'Grades & Assessments' },
-  // Advisor/Admin pages
+  // Instructor / Advisor / Admin pages
+  { path: '/instructor', icon: UsersIcon, ar: 'طلاب مقرراتي', en: 'My Course Students' },
+  { path: '/advisor-dashboard', icon: ChartBarIcon, ar: 'طلابي', en: 'My Advisees' },
   { path: '/digital-twin', icon: UserCircleIcon, ar: 'التوأم الرقمي', en: 'Digital Twin' },
-  { path: '/advisor-dashboard', icon: ChartBarIcon, ar: 'لوحة المرشد', en: 'Advisor Dashboard' },
   { path: '/risk-analytics', icon: ExclamationTriangleIcon, ar: 'تحليل المخاطر', en: 'Risk Analytics' },
+  { path: '/at-risk', icon: ShieldExclamationIcon, ar: 'الطلاب المعرضون للخطر', en: 'At-Risk Students' },
   { path: '/study-plan', icon: AcademicCapIcon, ar: 'الخطة الدراسية', en: 'Study Plan' },
   { path: '/chatbot', icon: ChatBubbleLeftRightIcon, ar: 'المحادثة الذكية', en: 'Advising Chatbot' },
   { path: '/alerts', icon: BellAlertIcon, ar: 'التنبيهات', en: 'Smart Alerts' },
@@ -54,6 +59,7 @@ const navItems = [
   { path: '/recovery', icon: ShieldExclamationIcon, ar: 'برنامج التعافي', en: 'Recovery Program' },
   { path: '/benchmarking', icon: PresentationChartBarIcon, ar: 'المقارنة المعيارية', en: 'Benchmarking' },
   { path: '/agent-activity', icon: CpuChipIcon, ar: 'نشاط الوكيل', en: 'Agent Activity' },
+  { path: '/system-usage', icon: ChartBarIcon, ar: 'لوحة النظام', en: 'System' },
   { path: '/settings', icon: Cog6ToothIcon, ar: 'الإعدادات', en: 'Settings' },
 ];
 
@@ -67,7 +73,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
     && location.pathname === '/'
     && searchParams.get('solo') !== '1';
   const isRtl = dir === 'rtl';
-  const visibleItems = navItems.filter(item => canAccess(role, item.path));
+  const visibleItems = navItems.filter(item => canAccess(role, item.path) && !isRoadmap(item.path));
   // The "Q" brand mark leaves the SPA and returns to the QUAI platform home.
   const homeUrl = (window as { __qmentor_links?: { home?: string } })
     .__qmentor_links?.home ?? '/';
@@ -93,6 +99,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggle, onMobileClose
     >
       {/* Header — the brand mark links back to the QUAI platform home. */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+        {/* The mark is the way out: one click leaves the app for the QU home page. */}
         {!collapsed && (
           <a
             href={homeUrl}

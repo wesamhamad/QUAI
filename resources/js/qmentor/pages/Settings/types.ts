@@ -58,4 +58,4 @@ export interface SearchResult {
   href: string;
 }
 
-export type SettingsTab = 'profile' | 'preferences' | 'security' | 'help' | 'about';
+export type SettingsTab = 'profile' | 'preferences' | 'help' | 'about';

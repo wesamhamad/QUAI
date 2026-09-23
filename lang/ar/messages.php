@@ -1150,6 +1150,7 @@ return [
     'dr_credit_hours_long' => ':n ساعة',
 
     // Digital Record — API failure reasons
+    'dr_reason_demo' => 'بيانات عرض توضيحي لطالب من قائمة +QSpark التجريبية.',
     'dr_reason_no_token' => 'لم يتم إصدار رمز API الجامعي بعد لهذا الحساب.',
     'dr_reason_http_401' => 'رمز الدخول للـ API الجامعي غير صالح أو منتهي الصلاحية.',
     'dr_reason_http_403' => 'الحساب الحالي لا يملك صلاحية لقراءة بيانات هذا الطالب من الـ API الجامعي.',

@@ -155,7 +155,7 @@ export default function StudentTable({ students }: StudentTableProps) {
             {paginated.map(student => (
               <tr
                 key={student.id}
-                onClick={() => navigate('/digital-twin')}
+                onClick={() => navigate(`/advisee/${student.id}`)}
                 className="hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors"
               >
                 <td className="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">

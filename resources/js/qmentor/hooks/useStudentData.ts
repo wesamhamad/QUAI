@@ -174,3 +174,36 @@ export function useMajorComparison<T>(targetMajorNo: string, mockData: T) {
     mockData
   );
 }
+
+// ── Ported from the live build ──────────────────────────────────────────
+
+/** Server-side risk evaluation (31 indicators). `data.scored === false` means not evaluated yet. */
+export function useRiskMe<T>(mockData: T) {
+  return useApiWithFallback(['qmentor', 'risk', 'me'], () => apiClient.getRiskMe(), mockData);
+}
+
+export function useRiskBacktest<T>(mockData: T) {
+  return useApiWithFallback(['qmentor', 'risk', 'backtest'], () => apiClient.getRiskBacktest(), mockData);
+}
+
+export function useRiskCohort<T>(mockData: T, faculty?: string) {
+  return useApiWithFallback(['qmentor', 'risk', 'cohort', faculty ?? 'all'], () => apiClient.getRiskCohort(faculty), mockData);
+}
+
+/** لوحة هيئة التدريس — cohort aggregates by college/department/course; null data = not an advisor/admin. */
+export function useFacultyOverview<T>(mockData: T, faculty?: string) {
+  return useApiWithFallback(['qmentor', 'faculty', 'overview', faculty ?? 'all'], () => apiClient.getFacultyOverview(faculty), mockData);
+}
+
+export function useMyRecommendations<T>(mockData: T) {
+  return useApiWithFallback(['qmentor', 'recommendations'], () => apiClient.getMyRecommendations(), mockData);
+}
+
+export function useMyTimeline<T>(mockData: T) {
+  return useApiWithFallback(['qmentor', 'timeline'], () => apiClient.getMyTimeline(), mockData);
+}
+
+/** Own Blackboard slice from the cohort snapshots ({grades, activity, submissions}). */
+export function useMyBlackboard<T>(mockData: T) {
+  return useApiWithFallback(['qmentor', 'blackboard', 'me'], () => apiClient.getMyBlackboard(), mockData);
+}

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Bars3Icon, SunIcon, MoonIcon, LanguageIcon, MagnifyingGlassIcon, ChevronDownIcon, UsersIcon, HomeIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline';
-import { Bot, GraduationCap, Shield, User, type LucideIcon } from 'lucide-react';
+import { BookOpen, GraduationCap, Shield, User, type LucideIcon } from 'lucide-react';
 
 interface DemoStudent {
   student_id: string;
@@ -20,7 +20,7 @@ import { dropdownTrigger, dropdownPanel, dropdownHeader, dropdownItem, dropdownI
 
 const roleConfig: { value: Role; ar: string; en: string; icon: LucideIcon }[] = [
   { value: 'student', ar: 'طالب', en: 'Student', icon: User },
-  { value: 'agent', ar: 'الوكيل الذكي', en: 'AI Agent', icon: Bot },
+  { value: 'instructor', ar: 'عضو هيئة تدريس', en: 'Instructor', icon: BookOpen },
   { value: 'advisor', ar: 'مرشد أكاديمي', en: 'Academic Advisor', icon: GraduationCap },
   { value: 'admin', ar: 'مدير', en: 'Admin', icon: Shield },
 ];
@@ -35,15 +35,15 @@ interface TopBarProps {
 export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLanguage, t } = useLanguage();
-  const { role, setRole, canSwitchRole, viewOnly } = useRole();
+  const { role, setRole, canSwitchRole, allowedRoles, viewOnly } = useRole();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const isQSparkBrand = typeof window !== 'undefined'
     && window.location.pathname.startsWith('/qspark-plus')
     && location.pathname === '/'
     && searchParams.get('solo') !== '1';
-  const [searchOpen, setSearchOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [studentMenuOpen, setStudentMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -77,13 +77,10 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
   // The roster is injected by the Blade layout for every signed-in user, so
   // the switcher is available to students too (not just faculty/admin).
   const qmentorUser = (window as { __qmentor_user?: { is_faculty?: boolean; is_admin?: boolean; is_super_admin?: boolean; student_id?: string | null } }).__qmentor_user;
-  // Faculty (who aren't super admins) only switch between the agent and advisor
-  // views — the student and admin roles are reserved for super admins. The plain
-  // admin account is handled separately (pinned to the read-only مدير view).
-  const isFacultyOnly = !!qmentorUser?.is_faculty && !qmentorUser?.is_super_admin && !qmentorUser?.is_admin;
-  const availableRoles = isFacultyOnly
-    ? roleConfig.filter(r => r.value !== 'student' && r.value !== 'admin')
-    : roleConfig;
+  // The seats this person may take, as the server described them (RoleContext).
+  const availableRoles = roleConfig.filter(r => allowedRoles.includes(r.value));
+  // Faculty seats only (no student/admin seat): the student-case switcher is a demo/admin affordance.
+  const isFacultyOnly = !allowedRoles.includes('admin') && !allowedRoles.includes('student');
   const studentRoster = ((window as { __qmentor_students?: DemoStudent[] }).__qmentor_students) ?? [];
   // Faculty (non-super-admin) don't get the student-case switcher — it's a
   // demo/admin affordance, not part of the faculty view.
@@ -138,18 +135,6 @@ export default function TopBar({ onMenuClick, hideMenuButton = false }: TopBarPr
               : t('منصة QMentor', 'QMentor Platform')}
           </h1>
         </div>
-
-        {/* Center: Search bar */}
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors max-w-xs w-full"
-        >
-          <MagnifyingGlassIcon className="w-4 h-4 shrink-0" />
-          <span className="flex-1 text-start truncate">{t('بحث...', 'Search...')}</span>
-          <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-            ⌘K
-          </kbd>
-        </button>
 
         {/* Right: Controls */}
         <div className="flex items-center gap-0.5 sm:gap-2 min-w-0">

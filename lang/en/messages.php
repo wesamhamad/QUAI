@@ -1147,6 +1147,7 @@ return [
     'dr_credit_hours_long' => ':n hours',
 
     // Digital Record — API failure reasons
+    'dr_reason_demo' => 'Demonstration data for a student on the +QSpark demo roster.',
     'dr_reason_no_token' => 'No university API token has been issued for this account yet.',
     'dr_reason_http_401' => 'University API access token is invalid or expired.',
     'dr_reason_http_403' => 'The current account is not permitted to read this student\u0027s data from the university API.',

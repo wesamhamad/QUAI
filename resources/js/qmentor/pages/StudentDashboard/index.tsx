@@ -2,10 +2,10 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import PageHeader from '../../components/shared/PageHeader';
-import DataSourceBadge from '../../components/shared/DataSourceBadge';
-import { useStudentProfile, useAbsences, useAllCourseGrades } from '../../hooks/useStudentData';
+import { useStudentProfile, useRiskMe } from '../../hooks/useStudentData';
 import {
   ShieldAlert,
+  AlertTriangle,
   TrendingDown,
   TrendingUp,
   Clock,
@@ -31,13 +31,15 @@ interface RiskIndicator {
   id: string;
   nameAr: string;
   nameEn: string;
-  category: 'A' | 'G' | 'S';
+  category: string;
   value: number;
   unit: string;
   unitAr: string;
   threshold: number;
   severity: RiskLevel;
   icon: typeof Clock;
+  /** What the engine read for this indicator, in its own words. */
+  evidence: string;
 }
 
 interface WeekTrend {
@@ -45,69 +47,101 @@ interface WeekTrend {
   score: number;
 }
 
-interface MockStudentRisk {
+interface StudentRisk {
   riskLevel: RiskLevel;
   riskScore: number;
   indicators: RiskIndicator[];
+  /** How many indicators the engine could evaluate (the fired ones are `indicators`). */
+  evaluated: number;
   trend: WeekTrend[];
+  computedAt: string | null;
+  modelVersion: string | null;
 }
-
-// ---------------------------------------------------------------------------
-// Mock data (fallback)
-// ---------------------------------------------------------------------------
-
-const mockStudentRisk: MockStudentRisk = {
-  riskLevel: 'medium',
-  riskScore: 62,
-  indicators: [
-    {
-      id: 'A-01',
-      nameAr: 'نسبة الغياب',
-      nameEn: 'Attendance Rate',
-      category: 'A',
-      value: 18,
-      unit: '%',
-      unitAr: '٪',
-      threshold: 25,
-      severity: 'high',
-      icon: Clock,
-    },
-    {
-      id: 'G-02',
-      nameAr: 'متوسط الاختبارات القصيرة',
-      nameEn: 'Quiz Average',
-      category: 'G',
-      value: 55,
-      unit: '%',
-      unitAr: '٪',
-      threshold: 60,
-      severity: 'medium',
-      icon: BookOpen,
-    },
-    {
-      id: 'S-01',
-      nameAr: 'الواجبات المفقودة',
-      nameEn: 'Missing Assignments',
-      category: 'S',
-      value: 30,
-      unit: '%',
-      unitAr: '٪',
-      threshold: 20,
-      severity: 'high',
-      icon: ClipboardList,
-    },
-  ],
-  trend: [
-    { week: 1, score: 45 },
-    { week: 2, score: 52 },
-    { week: 3, score: 58 },
-    { week: 4, score: 62 },
-  ],
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Server risk evaluation → the shape this page renders
+// ---------------------------------------------------------------------------
+
+interface EngineIndicator {
+  id: string;
+  label: string;
+  category: string;
+  available: boolean;
+  level: number | null;
+  value: number | boolean | null;
+  evidence: string;
+}
+
+interface EngineRisk {
+  scored: boolean;
+  score: number;
+  computed_at?: string | null;
+  model_version?: string | null;
+  level: { level: number; key: RiskLevel; ar: string };
+  top_factors: { id: string; label: string; level: number; value: unknown; evidence: string }[];
+  indicators: EngineIndicator[];
+  history: { computed_at: string; score: number; level: number }[];
+  thresholds: Record<string, { dir: 'up' | 'down'; bands: (number | string)[]; unit: string }>;
+  available_count: number;
+}
+
+const LEVEL_KEYS: RiskLevel[] = ['low', 'medium', 'high', 'critical'];
+
+const categoryIcon: Record<string, typeof Clock> = {
+  A: Clock, G: TrendingDown, S: ClipboardList, AC: AlertTriangle, T: BookOpen, P: BookOpen, C: AlertTriangle, E: Clock, R: BookOpen,
+};
+
+function fromEngine(e: EngineRisk): StudentRisk {
+  const measured = e.indicators
+    .filter(i => i.available && i.level !== null)
+    .sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
+  // Only the indicators that fired: the green «0» cards are noise. How many
+  // were evaluated is shown as a count next to the heading instead.
+  const shown = measured.filter(i => (i.level ?? 0) > 0);
+
+  const indicators: RiskIndicator[] = shown.map(i => {
+    const th = e.thresholds[i.id];
+    const numeric = typeof i.value === 'number' ? i.value : typeof i.value === 'boolean' ? (i.value ? 1 : 0) : (i.level ?? 0);
+    const bands = th?.bands ?? [];
+    const threshold = typeof bands[th?.dir === 'down' ? 0 : 2] === 'number' ? (bands[th?.dir === 'down' ? 0 : 2] as number) : Math.max(1, numeric);
+    return {
+      id: i.id,
+      nameAr: i.label,
+      nameEn: i.label,
+      category: i.category,
+      value: Math.round(numeric * 100) / 100,
+      unit: th?.unit ?? '',
+      unitAr: th?.unit ?? '',
+      threshold,
+      severity: LEVEL_KEYS[i.level ?? 0],
+      icon: categoryIcon[i.category] ?? Clock,
+      evidence: i.evidence,
+    };
+  });
+
+  const trend: WeekTrend[] = e.history.slice(-4).map((h, idx) => ({ week: idx + 1, score: h.score }));
+
+  return {
+    riskLevel: e.level.key,
+    riskScore: e.score,
+    indicators,
+    evaluated: measured.length,
+    trend: trend.length ? trend : [{ week: 1, score: e.score }],
+    computedAt: e.computed_at ?? null,
+    modelVersion: e.model_version ?? null,
+  };
+}
+
+/** Gregorian day, as SIS prints its terms. */
+function fmtDate(iso: string | null | undefined, lang: 'ar' | 'en'): string {
+  if (!iso) return '';
+  const d = new Date(iso.includes('T') ? iso : iso.replace(' ', 'T'));
+  return Number.isNaN(d.getTime()) ? String(iso).slice(0, 10) : d.toLocaleDateString(lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+}
 
 const riskMeta: Record<RiskLevel, { labelAr: string; labelEn: string; bg: string; text: string; border: string; ring: string; badgeBg: string }> = {
   low: {
@@ -147,13 +181,6 @@ const riskMeta: Record<RiskLevel, { labelAr: string; labelEn: string; bg: string
     badgeBg: 'bg-red-500',
   },
 };
-
-function computeRiskLevel(score: number): RiskLevel {
-  if (score >= 75) return 'critical';
-  if (score >= 50) return 'high';
-  if (score >= 25) return 'medium';
-  return 'low';
-}
 
 // ---------------------------------------------------------------------------
 // Sparkline component (pure SVG, no library)
@@ -255,72 +282,17 @@ export default function StudentDashboard() {
   const isRtl = dir === 'rtl';
   const ArrowForward = isRtl ? ArrowLeft : ArrowRight;
 
-  // Data hooks with mock fallback
   const profileResult = useStudentProfile(null);
-  const absencesResult = useAbsences(null);
-  const gradesResult = useAllCourseGrades(null);
 
-  const sources = [profileResult.source, absencesResult.source, gradesResult.source];
-  const overallSource = sources.includes('api') ? ('api' as const) : ('mock' as const);
+  // The server's nightly evaluation (31 indicators, SRS §5.B/§5.C). When it
+  // exists it IS the risk picture; the client-side arithmetic below is only
+  // the fallback for a student the engine has not scored yet.
+  const riskResult = useRiskMe<EngineRisk | null>(null);
+  const engine = riskResult.source === 'api' && riskResult.data?.scored ? riskResult.data : null;
 
-  // Compute risk from real data or fall back to mock
-  const riskData = useMemo<MockStudentRisk>(() => {
-    if (profileResult.source !== 'api' || !profileResult.data) return mockStudentRisk;
-
-    const raw = profileResult.data as Record<string, unknown>;
-    const profile = (raw.profile ?? raw) as Record<string, unknown>;
-    const academic = (profile.academic ?? {}) as Record<string, unknown>;
-    const gpa = parseFloat(String(academic.last_recorded_gpa ?? academic.cumulative_gpa ?? '0'));
-
-    const indicators: RiskIndicator[] = [...mockStudentRisk.indicators];
-
-    // Override attendance indicator with real data
-    if (absencesResult.source === 'api' && Array.isArray(absencesResult.data)) {
-      const courses = absencesResult.data as Record<string, unknown>[];
-      const avgAbsence =
-        courses.length > 0
-          ? courses.reduce((sum, c) => sum + (parseFloat(String(c.absence_all_percent ?? '0')) || 0), 0) / courses.length
-          : 0;
-      if (avgAbsence > 0) {
-        const idx = indicators.findIndex(ind => ind.id === 'A-01');
-        if (idx >= 0) {
-          indicators[idx] = {
-            ...indicators[idx],
-            value: Math.round(avgAbsence),
-            severity: avgAbsence >= 20 ? 'critical' : avgAbsence >= 15 ? 'high' : avgAbsence >= 10 ? 'medium' : 'low',
-          };
-        }
-      }
-    }
-
-    // Compute a rough risk score from GPA and indicators
-    let score = mockStudentRisk.riskScore;
-    if (gpa > 0) {
-      // GPA-based scoring: lower GPA = higher risk
-      score = Math.round(Math.max(0, Math.min(100, (5 - gpa) * 20)));
-    }
-
-    return {
-      riskLevel: computeRiskLevel(score),
-      riskScore: score,
-      indicators,
-      trend: mockStudentRisk.trend.map((pt, i, arr) => ({
-        ...pt,
-        score: i === arr.length - 1 ? score : pt.score,
-      })),
-    };
-  }, [profileResult.source, profileResult.data, absencesResult.source, absencesResult.data]);
-
-  const meta = riskMeta[riskData.riskLevel];
-  const trendDirection = riskData.trend.length >= 2
-    ? riskData.trend[riskData.trend.length - 1].score - riskData.trend[riskData.trend.length - 2].score
-    : 0;
-
-  const sparklineColor =
-    riskData.riskLevel === 'low' ? '#10b981'
-    : riskData.riskLevel === 'medium' ? '#f59e0b'
-    : riskData.riskLevel === 'high' ? '#f97316'
-    : '#ef4444';
+  // The engine's evaluation is the only risk picture: no client-side scoring,
+  // no sample student. Not evaluated yet → the page says so and stops.
+  const riskData = useMemo<StudentRisk | null>(() => (engine ? fromEngine(engine) : null), [engine]);
 
   // Student name from profile
   const studentName = useMemo(() => {
@@ -333,22 +305,57 @@ export default function StudentDashboard() {
     };
   }, [profileResult.source, profileResult.data]);
 
+  const header = (
+    <PageHeader
+      title={t('لوحة الطالب', 'Student Dashboard')}
+      subtitle={
+        studentName
+          ? t(`مرحبا ${studentName.ar} — إليك ملخص حالتك الأكاديمية`, `Welcome ${studentName.en} — here is your academic status summary`)
+          : t('ملخص حالتك الأكاديمية ومستوى المخاطر', 'Your academic status and risk level summary')
+      }
+      breadcrumbs={[
+        { label: t('الرئيسية', 'Home'), href: '/' },
+        { label: t('لوحة الطالب', 'Student Dashboard') },
+      ]}
+      accentColor="bg-sa-500"
+    />
+  );
+
+  if (!riskData) {
+    return (
+      <div>
+        {header}
+        <div className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 mb-6 text-center">
+          {riskResult.isLoading ? (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sa-500 mx-auto" />
+          ) : (
+            <>
+              <ShieldAlert className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('لم يُقيَّم ملفك بعد', 'Your record has not been evaluated yet')}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+                {t('يظهر التقدير بعد التقييم الليلي لمؤشراتك؛ ولا يُعرض قبل ذلك أي رقم.', 'The estimate appears after the nightly evaluation of your indicators; no figure is shown before that.')}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const meta = riskMeta[riskData.riskLevel];
+  const trendDirection = riskData.trend.length >= 2
+    ? riskData.trend[riskData.trend.length - 1].score - riskData.trend[riskData.trend.length - 2].score
+    : 0;
+
+  const sparklineColor =
+    riskData.riskLevel === 'low' ? '#10b981'
+    : riskData.riskLevel === 'medium' ? '#f59e0b'
+    : riskData.riskLevel === 'high' ? '#f97316'
+    : '#ef4444';
+
   return (
     <div>
-      <PageHeader
-        title={t('لوحة الطالب', 'Student Dashboard')}
-        subtitle={
-          studentName
-            ? t(`مرحبا ${studentName.ar} — إليك ملخص حالتك الأكاديمية`, `Welcome ${studentName.en} — here is your academic status summary`)
-            : t('ملخص حالتك الأكاديمية ومستوى المخاطر', 'Your academic status and risk level summary')
-        }
-        breadcrumbs={[
-          { label: t('الرئيسية', 'Home'), href: '/' },
-          { label: t('لوحة الطالب', 'Student Dashboard') },
-        ]}
-        actions={<DataSourceBadge source={overallSource} />}
-        accentColor="bg-sa-500"
-      />
+      {header}
 
       {/* ---------- Risk Badge Card ---------- */}
       <div className={`rounded-2xl border-2 ${meta.border} ${meta.bg} p-6 sm:p-8 mb-6 transition-colors`}>
@@ -357,9 +364,12 @@ export default function StudentDashboard() {
           <div className="relative flex-shrink-0">
             <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center ring-4 ${meta.ring} ${meta.bg}`}>
               <span className={`text-3xl sm:text-4xl font-bold ${meta.text}`}>{riskData.riskScore}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">/ 100</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('من 100', 'of 100')}</span>
             </div>
-            <div className={`absolute -bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-semibold text-white ${meta.badgeBg}`}>
+            <div
+              className={`absolute -bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-semibold text-white ${meta.badgeBg}`}
+              title={riskData.riskLevel === 'critical' ? 'حرج = إحالة للمرشد النفسي: مؤشران مرتفعان فأكثر مع غياب بعذر طبي أو وفاة أو حادث' : undefined}
+            >
               {t(meta.labelAr, meta.labelEn)}
             </div>
           </div>
@@ -374,6 +384,9 @@ export default function StudentDashboard() {
               {riskData.riskLevel === 'medium' && t('هناك بعض المؤشرات التي تحتاج انتباهك.', 'Some indicators need your attention.')}
               {riskData.riskLevel === 'high' && t('عدة مؤشرات تحتاج تدخل سريع لتحسين وضعك.', 'Several indicators require prompt action to improve your status.')}
               {riskData.riskLevel === 'critical' && t('وضعك يحتاج تدخل فوري — تواصل مع مرشدك الأكاديمي الآن.', 'Your status needs immediate attention — contact your advisor now.')}
+            </p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+              {t('تقدير احتمالي يُحدَّث مع كل مزامنة', 'A probabilistic estimate, refreshed with every sync')}{riskData.modelVersion ? t(` · إصدار النموذج ${riskData.modelVersion}`, ` · model version ${riskData.modelVersion}`) : ''}
             </p>
 
             {/* Trend sparkline inline */}
@@ -404,9 +417,17 @@ export default function StudentDashboard() {
       </Link>
 
       {/* ---------- Top 3 Indicator Cards ---------- */}
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {t('أهم المؤشرات المؤثرة', 'Top Contributing Indicators')}
-      </h3>
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {t('ما رصده النظام في هذا الطالب', 'What the system observed for this student')}
+        </h3>
+        <span className="text-xs text-gray-400 dark:text-gray-500">
+          {t(`قُيّم ${riskData.evaluated} مؤشراً، رُصد ${riskData.indicators.length}`, `${riskData.evaluated} indicators evaluated, ${riskData.indicators.length} observed`)}
+        </span>
+      </div>
+      {riskData.indicators.length === 0 && (
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{t('لا مؤشرات مرصودة حالياً', 'No indicators observed at present')}</p>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {riskData.indicators.map(indicator => {
           const indMeta = riskMeta[indicator.severity];
@@ -432,8 +453,8 @@ export default function StudentDashboard() {
                       <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {t(indicator.nameAr, indicator.nameEn)}
                       </span>
-                      <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${indMeta.bg} ${indMeta.text}`}>
-                        {indicator.id}
+                      <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
+                        {t('الرمز', 'Code')} {indicator.id}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1 mt-1">
@@ -445,6 +466,10 @@ export default function StudentDashboard() {
                       <span>0</span>
                       <span>{t('الحد', 'Threshold')}: {indicator.threshold}{t(indicator.unitAr, indicator.unit)}</span>
                     </div>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+                      {t(`رُصد ${indicator.nameAr}: ${indicator.evidence || 'غير محدد'}`, `Observed ${indicator.nameEn}: ${indicator.evidence || 'not specified'}`)}
+                      {riskData.computedAt ? t(` · آخر تحديث ${fmtDate(riskData.computedAt, 'ar')}`, ` · updated ${fmtDate(riskData.computedAt, 'en')}`) : ''}
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -471,10 +496,8 @@ export default function StudentDashboard() {
                     <span className={indMeta.text}>{t(indMeta.labelAr, indMeta.labelEn)}</span>
                   </p>
                   <p>
-                    <span className="font-medium">{t('التوصية', 'Recommendation')}:</span>{' '}
-                    {indicator.id === 'A-01' && t('حافظ على الحضور المنتظم وتجنب الغياب غير المبرر.', 'Maintain regular attendance and avoid unexcused absences.')}
-                    {indicator.id === 'G-02' && t('راجع مواد الاختبارات القصيرة واطلب مساعدة من زملائك.', 'Review quiz material and seek peer tutoring support.')}
-                    {indicator.id === 'S-01' && t('أكمل الواجبات المتأخرة وحدد جدول زمني للتسليم.', 'Complete overdue assignments and set a submission schedule.')}
+                    <span className="font-medium">{t('ما رُصد', 'Observed')}:</span>{' '}
+                    {indicator.evidence || t('غير محدد', 'Not specified')}
                   </p>
                 </div>
               )}
@@ -518,10 +541,10 @@ export default function StudentDashboard() {
           },
           {
             icon: MessageSquare,
-            titleAr: 'محادثة QMentor',
-            titleEn: 'Chat with QMentor',
-            descAr: 'اسأل المرشد الذكي عن أي شيء',
-            descEn: 'Ask the AI advisor anything',
+            titleAr: 'محادثة +QSpark',
+            titleEn: 'Chat with QSpark+',
+            descAr: 'اسأل مساعد +QSpark عن أي شيء',
+            descEn: 'Ask the QSpark+ assistant anything',
             to: '/chatbot',
             iconBg: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400',
           },

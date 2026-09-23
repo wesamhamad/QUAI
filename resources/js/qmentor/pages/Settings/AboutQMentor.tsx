@@ -9,15 +9,15 @@ import {
 
 const changelog = [
   { version: '2.1.0', dateAr: '١٢ أبريل ٢٠٢٦', dateEn: 'April 12, 2026', descAr: 'إضافة واجهة المقارنة المعيارية ونظام الإعدادات المحسّن', descEn: 'Added Benchmarking dashboard and enhanced Settings interface' },
-  { version: '2.0.0', dateAr: '١ مارس ٢٠٢٦', dateEn: 'March 1, 2026', descAr: 'إطلاق منصة QMentor الجديدة مع واجهة React', descEn: 'Launched new QMentor platform with React interface' },
+  { version: '2.0.0', dateAr: '١ مارس ٢٠٢٦', dateEn: 'March 1, 2026', descAr: 'إطلاق +QSpark الجديدة مع واجهة React', descEn: 'Launched new QSpark+ with React interface' },
   { version: '1.5.0', dateAr: '١٥ يناير ٢٠٢٦', dateEn: 'January 15, 2026', descAr: 'إضافة الخطة الدراسية الذكية والمحادثة الذكية', descEn: 'Added Smart Study Plan and Advising Chatbot' },
-  { version: '1.0.0', dateAr: '١ سبتمبر ٢٠٢٥', dateEn: 'September 1, 2025', descAr: 'الإصدار الأول من منصة QMentor', descEn: 'Initial release of QMentor platform' },
+  { version: '1.0.0', dateAr: '١ سبتمبر ٢٠٢٥', dateEn: 'September 1, 2025', descAr: 'الإصدار الأول من +QSpark', descEn: 'Initial release of QSpark+' },
 ];
 
 const credits = [
   { ar: 'جامعة القصيم - عمادة تقنية المعلومات', en: 'Qassim University - IT Deanship' },
   { ar: 'مركز التميز في الذكاء الاصطناعي', en: 'AI Excellence Center' },
-  { ar: 'فريق تطوير QMentor', en: 'QMentor Development Team' },
+  { ar: 'فريق تطوير +QSpark', en: 'QSpark+ Development Team' },
 ];
 
 export default function AboutQMentor() {
@@ -31,7 +31,7 @@ export default function AboutQMentor() {
           <span className="text-white font-bold text-2xl">Q</span>
         </div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-          {t('منصة QMentor', 'QMentor Platform')}
+          {t('+QSpark', 'QSpark+')}
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
           {t('الإرشاد الأكاديمي الذكي', 'AI-Powered Academic Advising')}

@@ -47,6 +47,7 @@ const dayLabels = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خم
 const dayLabelsEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
 const heatmapColors: Record<AttendanceHeatmapEntry['status'], string> = {
   present: '#25935F',
+  future: '#E5E7EB',
   'absent-excused': '#F5BD02',
   'absent-unexcused': '#F04438',
   'no-class': '#E5E7EB',
@@ -186,9 +187,9 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
 
       {/* Gauge Rings */}
       <div className="grid grid-cols-3 gap-4">
-        <GaugeRing value={behavioral.attendanceRate} label={t('نسبة الحضور', 'Attendance Rate')} color="#25935F" />
-        <GaugeRing value={behavioral.assignmentSubmissionRate} label={t('تسليم الواجبات', 'Assignment Submission')} color="#F5BD02" />
-        <GaugeRing value={Math.min(100, Math.round(behavioral.lmsLoginFrequency / 7 * 100))} label={t('دخول المنصة', 'LMS Logins')} color="#2E90FA" />
+        <GaugeRing value={behavioral.attendanceRate ?? 0} label={t('نسبة الحضور', 'Attendance Rate')} color="#25935F" />
+        <GaugeRing value={behavioral.assignmentSubmissionRate ?? 0} label={t('تسليم الواجبات', 'Assignment Submission')} color="#F5BD02" />
+        <GaugeRing value={Math.min(100, Math.round((behavioral.lmsLoginFrequency ?? 0) / 7 * 100))} label={t('دخول المنصة', 'LMS Logins')} color="#2E90FA" />
       </div>
 
       {/* Quick Stats */}
@@ -296,7 +297,7 @@ export default function BehavioralAnalytics({ behavioral, absenceBreakdown, sour
               <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(ce.hours / 8) * 100}%` }}
+                  animate={{ width: `${((ce.hours ?? 0) / 8) * 100}%` }}
                   transition={{ duration: 0.6, delay: i * 0.04 }}
                   className="h-full bg-info-500 rounded-full"
                 />

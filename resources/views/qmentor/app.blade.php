@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>QMentor - {{ config('app.name') }}</title>
+    <title>+QSpark - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -65,6 +65,10 @@
                 'is_admin' => $u->hasRole('Admin'),
                 'is_super_admin' => $u->isSuperAdmin(),
                 'impersonating' => ($canImpersonate || $wantsFeatured) && $impersonate ? $impersonate : null,
+                // Seats a faculty member may take. The demo faculty account both
+                // teaches and advises, so it gets the instructor/advisor switch.
+                'teaches_count' => ($canImpersonate && !$u->isStudent()) ? count(\App\Support\DemoData::students()) : 0,
+                'advises_count' => ($canImpersonate && !$u->isStudent()) ? count(\App\Support\DemoData::students()) : 0,
             ];
             // The roster is always exposed so the switcher renders for every
             // signed-in user — not just faculty/admin.
@@ -84,7 +88,16 @@
             'digitalRecord' => route('digital-record.index'),
             'home' => route('home'),
             'logout' => route('demo.logout'),
+            // Same-origin QSpark admin/faculty desks and the agent core page.
+            'qsparkAdmin' => url('/qspark/admin/dashboard'),
+            'qsparkFaculty' => url('/qspark/faculty/dashboard'),
+            'agentCore' => url('/qspark-plus/agent-core'),
         ]) !!};
+        {{-- The roster («طلابي» / «التوأم الرقمي») for the admin's list-first
+             screens, and the running term the fallback boards date themselves
+             from. Both synthetic (DemoData) — no SIS behind this build. --}}
+        window.__qmentor_roster = {!! json_encode(\App\Support\DemoData::rosterGrouped(), JSON_UNESCAPED_UNICODE) !!};
+        window.__qmentor_term = {!! json_encode(\App\Support\DemoData::currentTermForBrowser(), JSON_UNESCAPED_UNICODE) !!};
         window.__qmentor_csrf = @json(csrf_token());
     </script>
     @endauth

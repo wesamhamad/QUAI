@@ -22,14 +22,19 @@ export const mockStudent: DigitalTwinData = {
     level: 7,
   },
 
+  // Labelled with the SIS term codes the boards use everywhere else, the same
+  // series فيصل's twin is drawn against (mockFaisal.semesterGPAs), so the two
+  // charts read on one scale instead of one saying «فصل ١٤٤٠/١» and the other
+  // «443».
   semesterGPAs: [
-    { semester: '١٤٤٠/١ فصل', semesterEn: 'Fall 1440', gpa: 3.2, creditHours: 15 },
-    { semester: '١٤٤٠/٢ فصل', semesterEn: 'Spring 1440', gpa: 3.5, creditHours: 16 },
-    { semester: '١٤٤١/١ فصل', semesterEn: 'Fall 1441', gpa: 3.7, creditHours: 18 },
-    { semester: '١٤٤١/٢ فصل', semesterEn: 'Spring 1441', gpa: 3.6, creditHours: 17 },
-    { semester: '١٤٤٢/١ فصل', semesterEn: 'Fall 1442', gpa: 4.0, creditHours: 15 },
-    { semester: '١٤٤٢/٢ فصل', semesterEn: 'Spring 1442', gpa: 3.9, creditHours: 16 },
-    { semester: '١٤٤٣/١ فصل', semesterEn: 'Fall 1443', gpa: 4.2, creditHours: 15 },
+    { semester: '443', semesterEn: '443', gpa: 3.2, creditHours: 15 },
+    { semester: '452', semesterEn: '452', gpa: 3.5, creditHours: 16 },
+    { semester: '455', semesterEn: '455', gpa: 3.7, creditHours: 18 },
+    { semester: '461', semesterEn: '461', gpa: 3.6, creditHours: 17 },
+    { semester: '462', semesterEn: '462', gpa: 4.0, creditHours: 15 },
+    { semester: '465', semesterEn: '465', gpa: 3.9, creditHours: 16 },
+    { semester: '471', semesterEn: '471', gpa: 4.2, creditHours: 15 },
+    { semester: '472', semesterEn: '472', gpa: 4.1, creditHours: 14 },
   ],
 
   currentCourses: [
@@ -75,7 +80,6 @@ export const mockStudent: DigitalTwinData = {
     lmsLoginFrequency: 5.2,
     assignmentSubmissionRate: 92,
     attendanceRate: 88,
-    libraryVisits: 12,
     lmsHoursPerWeek: 14.5,
     attendanceByMonth: [
       { month: 'سبتمبر', monthEn: 'Sep', rate: 95 },
@@ -85,14 +89,6 @@ export const mockStudent: DigitalTwinData = {
       { month: 'يناير', monthEn: 'Jan', rate: 88 },
       { month: 'فبراير', monthEn: 'Feb', rate: 92 },
       { month: 'مارس', monthEn: 'Mar', rate: 87 },
-    ],
-    studyPatterns: [
-      { hour: 6, activity: 5 }, { hour: 7, activity: 10 }, { hour: 8, activity: 35 },
-      { hour: 9, activity: 60 }, { hour: 10, activity: 75 }, { hour: 11, activity: 65 },
-      { hour: 12, activity: 30 }, { hour: 13, activity: 20 }, { hour: 14, activity: 40 },
-      { hour: 15, activity: 55 }, { hour: 16, activity: 70 }, { hour: 17, activity: 50 },
-      { hour: 18, activity: 25 }, { hour: 19, activity: 15 }, { hour: 20, activity: 45 },
-      { hour: 21, activity: 65 }, { hour: 22, activity: 55 }, { hour: 23, activity: 30 },
     ],
     courseEngagement: [
       { course: 'CS401', hours: 4.2, submissions: 8 },
@@ -156,28 +152,24 @@ export const mockStudent: DigitalTwinData = {
       description: 'ينصح بزيارة المرشد الأكاديمي لمناقشة الخطة الدراسية للفصل القادم وتخفيف العبء الأكاديمي',
       descriptionEn: 'Visit your academic advisor to discuss next semester plan and reduce course load',
       category: 'academic', priority: 'important',
-      actionLabel: 'حجز موعد', actionLabelEn: 'Book Appointment',
     },
     {
       id: 'rec2', title: 'تحسين إدارة الوقت', titleEn: 'Improve Time Management',
       description: 'استخدام تقنية بومودورو وتطبيقات تنظيم الوقت لتحسين الإنتاجية الدراسية',
       descriptionEn: 'Use Pomodoro technique and time management apps to improve study productivity',
       category: 'behavioral', priority: 'suggestion',
-      actionLabel: 'عرض الموارد', actionLabelEn: 'View Resources',
     },
     {
       id: 'rec3', title: 'المشاركة في الأنشطة الطلابية', titleEn: 'Join Student Activities',
       description: 'الانضمام لنادي الحاسب الآلي أو المشاركة في هاكاثون الجامعة لتعزيز التكامل الاجتماعي',
       descriptionEn: 'Join the Computer Club or participate in university hackathons to boost social integration',
       category: 'wellness', priority: 'suggestion',
-      actionLabel: 'استعراض الأنشطة', actionLabelEn: 'Browse Activities',
     },
     {
       id: 'rec4', title: 'تسليم الواجبات في موعدها', titleEn: 'Submit Assignments On Time',
       description: 'تم رصد تأخير في بعض التسليمات. يرجى الالتزام بالمواعيد النهائية لتحسين التقييم',
       descriptionEn: 'Late submissions detected. Please meet deadlines to improve assessment scores',
       category: 'academic', priority: 'urgent',
-      actionLabel: 'عرض المواعيد', actionLabelEn: 'View Deadlines',
     },
   ],
 

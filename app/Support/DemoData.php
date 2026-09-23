@@ -1437,4 +1437,34 @@ class DemoData
             . "• الساعات المسجّلة هذا الفصل: {$s['enrolled_hours']}\n\n"
             . "لو سؤالك حول الخطة، الدرجات، الاختبارات، أو QSpark — اذكر الكلمة المفتاحية وسأقدّم خطوات عملية مباشرة.";
     }
+    /**
+     * The roster the +QSpark admin's list-first screens read
+     * (window.__qmentor_roster): the demo students grouped the way the live
+     * build groups its cases. Same rows the Blade student picker serves.
+     */
+    public static function rosterGrouped(): array
+    {
+        $groups = [
+            'featured' => ['label' => 'الحالات الثلاث المميّزة', 'students' => []],
+            'others'   => ['label' => 'بقية طلاب العرض', 'students' => []],
+        ];
+        foreach (self::students() as $s) {
+            $key = \in_array($s['student_id'], ['443211517', '443100021', '443100022'], true) ? 'featured' : 'others';
+            $groups[$key]['students'][] = [
+                'id' => $s['student_id'], 'name' => $s['name'], 'name_en' => $s['name_en'],
+                'major' => $s['major'], 'major_en' => $s['major_en'],
+                'faculty' => $s['faculty'], 'faculty_en' => $s['faculty_en'],
+                'gpa' => $s['gpa'], 'group' => $key,
+            ];
+        }
+
+        return $groups;
+    }
+
+    /** The running term and its dates (window.__qmentor_term) — from DemoCohort. */
+    public static function currentTermForBrowser(): array
+    {
+        return DemoCohort::term();
+    }
+
 }

@@ -12,20 +12,64 @@ import TrendAnalysis from './components/TrendAnalysis';
 import AtRiskStudents from './components/AtRiskStudents';
 import WorkloadAnalysis from './components/WorkloadAnalysis';
 import {
-  colleges, allDepartments, allCourses, facultyMembers as mockFacultyMembers, semesterTrends, heatmapData,
+  colleges as mockColleges, allDepartments as mockDepartments, allCourses as mockCourses, facultyMembers as mockFacultyMembers, semesterTrends as mockTrends, heatmapData as mockHeatmap,
 
 } from './data/mockFacultyData';
-import { useCurrentCourses } from '../../hooks/useStudentData';
+import { useCurrentCourses, useFacultyOverview } from '../../hooks/useStudentData';
+import { adaptOverview, semesterLabel, type FacultyOverview } from './adapters';
 import type { FacultyMember } from './types';
+import { Link } from 'react-router-dom';
+import { useRole } from '../../contexts/RoleContext';
+import EmptyState from '../DigitalTwin/components/EmptyState';
 
 type TabKey = 'heatmap' | 'courses' | 'departments' | 'colleges' | 'faculty' | 'atrisk' | 'workload' | 'trends';
 
 export default function FacultyDashboard() {
+  const { role } = useRole();
+  return role === 'advisor' ? <AdvisorFacultyNotice /> : <FacultyAnalytics />;
+}
+
+/** The college/department aggregates are not scoped to anyone's advisees, so faculty do not read them (the API 403s). */
+function AdvisorFacultyNotice() {
+  const { t } = useLanguage();
+  return (
+    <div>
+      <PageHeader
+        title={t('لوحة أعضاء هيئة التدريس', 'Faculty Analytics Dashboard')}
+        subtitle={t('تحليلات الكليات والأقسام متاحة للمشرف العام فقط', 'College and department analytics are available to the administrator only')}
+        breadcrumbs={[{ label: t('الرئيسية', 'Home'), href: '/' }, { label: t('لوحة هيئة التدريس', 'Faculty Dashboard') }]}
+        accentColor="bg-sa-500"
+      />
+      <EmptyState
+        title={t('لا توجد بيانات ضمن نطاقك هنا', 'Nothing in your scope here')}
+        description={t('بيانات طلابك الإرشاديين في «طلابي» و«الطلاب المعرضون للخطر».', 'Your advisees are under My Advisees and At-Risk Students.')}
+        icon="chart"
+      />
+      <div className="mt-4 flex justify-center gap-4 text-sm">
+        <Link to="/advisor-dashboard" className="text-sa-600 hover:underline">{t('طلابي', 'My Advisees')}</Link>
+        <Link to="/advisor-dashboard?tab=at-risk" className="text-sa-600 hover:underline">{t('الطلاب المعرضون للخطر', 'At-Risk Students')}</Link>
+      </div>
+    </div>
+  );
+}
+
+function FacultyAnalytics() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabKey>('heatmap');
 
   const coursesResult = useCurrentCourses(null);
-  const overallSource = coursesResult.source === 'api' ? 'api' as const : 'mock' as const;
+
+  // The cohort aggregates (college / department / course) — live when the
+  // signed-in user is an advisor or the admin and the cohort tables are loaded.
+  const overview = useFacultyOverview<FacultyOverview | null>(null);
+  const live = overview.source === 'api' && overview.data != null;
+  const overallSource = live ? 'api' as const : 'mock' as const;
+  const shaped = useMemo(() => live ? adaptOverview(overview.data as FacultyOverview) : null, [live, overview.data]);
+  const colleges = shaped?.colleges ?? mockColleges;
+  const allDepartments = shaped?.departments ?? mockDepartments;
+  const allCourses = shaped?.courses ?? mockCourses;
+  const semesterTrends = shaped?.trends ?? mockTrends;
+  const heatmapData = shaped?.heatmap ?? mockHeatmap;
 
   // Inject real course instructors into faculty list
   const facultyMembers: FacultyMember[] = useMemo(() => {
@@ -71,7 +115,7 @@ export default function FacultyDashboard() {
     return [...newFaculty, ...mockFacultyMembers];
   }, [coursesResult.source, coursesResult.data]);
 
-  const tabs: { key: TabKey; labelAr: string; labelEn: string }[] = [
+  const allTabs: { key: TabKey; labelAr: string; labelEn: string }[] = [
     { key: 'heatmap', labelAr: 'خريطة الشعب', labelEn: 'Section Heatmap' },
     { key: 'courses', labelAr: 'إحصائيات المقررات', labelEn: 'Course Statistics' },
     { key: 'departments', labelAr: 'الأقسام', labelEn: 'Departments' },
@@ -81,15 +125,25 @@ export default function FacultyDashboard() {
     { key: 'workload', labelAr: 'تحليل الأعباء', labelEn: 'Workload Analysis' },
     { key: 'trends', labelAr: 'تحليل الاتجاهات', labelEn: 'Trend Analysis' },
   ];
+  // The transcript feed names no instructor, so the two per-member tabs have
+  // nothing real to show once live data is in; they stay on the roadmap.
+  const tabs = live ? allTabs.filter(t => t.key !== 'faculty' && t.key !== 'workload') : allTabs;
+  const gradedLabel = live ? semesterLabel((overview.data as FacultyOverview).graded_semester) : null;
+  const rosterLabel = live ? semesterLabel((overview.data as FacultyOverview).roster_semester) : null;
 
   return (
     <div>
       <PageHeader
         title={t('لوحة أعضاء هيئة التدريس', 'Faculty Analytics Dashboard')}
-        subtitle={t(
-          `تحليلات ${colleges.length} كليات · ${allDepartments.length} قسم · ${allCourses.length} مقرر · ${facultyMembers.length} عضو هيئة تدريس`,
-          `Analytics across ${colleges.length} colleges · ${allDepartments.length} departments · ${allCourses.length} courses · ${facultyMembers.length} faculty members`
-        )}
+        subtitle={live
+          ? t(
+            `${colleges.length} كليات · ${allDepartments.length} قسم · ${allCourses.length} مقرر · التسجيل من فصل ${rosterLabel?.ar} والنتائج من فصل ${gradedLabel?.ar} · «الشعبة» هنا = مقرر × قسم`,
+            `${colleges.length} colleges · ${allDepartments.length} departments · ${allCourses.length} courses · enrolment from ${rosterLabel?.en}, results from ${gradedLabel?.en} · a "section" here is course × department`
+          )
+          : t(
+            `تحليلات ${colleges.length} كليات · ${allDepartments.length} قسم · ${allCourses.length} مقرر · ${facultyMembers.length} عضو هيئة تدريس`,
+            `Analytics across ${colleges.length} colleges · ${allDepartments.length} departments · ${allCourses.length} courses · ${facultyMembers.length} faculty members`
+          )}
         breadcrumbs={[
           { label: t('الرئيسية', 'Home'), href: '/' },
           { label: t('لوحة هيئة التدريس', 'Faculty Dashboard') },

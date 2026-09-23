@@ -41,8 +41,8 @@ export default function TeamsMeetings({ meetings }: Props) {
       .finally(() => setLoadingEvents(false));
   }, []);
 
-  // Schedule a test meeting with Layan
-  const handleScheduleWithLayan = async () => {
+  // Schedule a test meeting with Faisal
+  const handleScheduleWithFaisal = async () => {
     setScheduling(true);
     setScheduleResult(null);
     try {
@@ -56,11 +56,11 @@ export default function TeamsMeetings({ meetings }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: 'جلسة إرشادية — ليان حمد الجريش | Advisory Session — Layan Aljuraysh',
+          subject: 'جلسة إرشادية — فيصل خالد محمد | Advisory Session — Faisal Khalid Mohammed',
           startTime: start.toISOString(),
           endTime: end.toISOString(),
           attendees: ['443211517@qu.edu.sa', 'w.aljuraysh@qu.edu.sa'],
-          body: '<p>جلسة إرشادية لمراجعة الوضع الأكاديمي — مجدولة تلقائياً بواسطة QMentor AI Agent</p><p>Advisory session to review academic status — auto-scheduled by QMentor AI Agent</p>',
+          body: '<p>جلسة إرشادية لمراجعة الوضع الأكاديمي — مجدولة تلقائياً بواسطة +QSpark AI Agent</p><p>Advisory session to review academic status — auto-scheduled by QSpark+ AI Agent</p>',
         }),
       });
       const data = await res.json();
@@ -99,14 +99,14 @@ export default function TeamsMeetings({ meetings }: Props) {
           )}
         </div>
 
-        {/* Schedule with Layan button */}
+        {/* Schedule with Faisal button */}
         <button
-          onClick={handleScheduleWithLayan}
+          onClick={handleScheduleWithFaisal}
           disabled={scheduling}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sa-500 text-white text-xs font-semibold hover:bg-sa-600 disabled:opacity-50 transition-colors"
         >
           {scheduling ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-          {t('جدولة مع ليان', 'Schedule with Layan')}
+          {t('جدولة مع فيصل', 'Schedule with Faisal')}
         </button>
       </div>
 

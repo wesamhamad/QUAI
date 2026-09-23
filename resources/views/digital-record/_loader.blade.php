@@ -122,6 +122,18 @@
     }
     .dr-loader-skip:hover { background: #F3FCF6; }
 
+    .dr-loader-wait {
+        margin: 0 1.15rem .55rem;
+        padding: .55rem .7rem;
+        border-radius: 10px;
+        background: #F3FCF6;
+        border: 1px solid #DFF6E7;
+        color: #2F6B4F;
+        font-size: .72rem;
+        line-height: 1.7;
+        text-align: center;
+    }
+
     body.dr-loading .dr-wrapper { animation: none; }
 </style>
 
@@ -242,12 +254,21 @@
     var timer = null;
     var done = false;
     var running = false;
-    var stepMs = 180;
+    // Long enough to actually read a step title and its meta line before it
+    // ticks over. The old 180ms cascade was a blur — five steps in under a
+    // second, which reads as a flicker, not as work being done.
+    var STEP_MS_WRAPUP = 500;   // data is already rendered behind us: brisk but legible
+    var STEP_MS_BRIDGE = 750;   // the server is still working: keep it moving
+    var stepMs = STEP_MS_WRAPUP;
+    var bridging = false;
+    var waitNote = null;
 
     function setProgress(pct) { if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
 
     function resetSteps() {
         idx = 0; done = false;
+        if (waitNote && waitNote.parentNode) { waitNote.parentNode.removeChild(waitNote); }
+        waitNote = null;
         steps.forEach(function (el, i) { el.setAttribute('data-state', i === 0 ? 'active' : 'pending'); });
         setProgress(8);
     }
@@ -261,13 +282,17 @@
         loader.setAttribute('aria-hidden', 'false');
         document.body.classList.add('dr-loading');
 
-        // Bridge overlay (source page during navigation): keep first step active —
-        // the orb spinner + dot pulse already convey progress without faking advance.
-        if (opts && opts.bridge) return;
+        // Bridge overlay (source page during navigation): the server is still
+        // working — first the SIS/skills reads, then one LLM call that can take
+        // tens of seconds on a student analysed for the first time. It used to
+        // freeze on step one for all of it, which reads as a hung dialog. Walk
+        // the steps slowly instead, hold on the last one, and after a while say
+        // out loud that the analysis is what we are waiting for.
+        bridging = !!(opts && opts.bridge);
+        stepMs = (opts && typeof opts.stepMs === 'number')
+            ? opts.stepMs
+            : (bridging ? STEP_MS_BRIDGE : STEP_MS_WRAPUP);
 
-        // Wrap-up: server-side fetch already finished and data is rendered, so
-        // cascade through remaining steps quickly and dismiss.
-        stepMs = (opts && typeof opts.stepMs === 'number') ? opts.stepMs : 180;
         if (timer) { clearTimeout(timer); }
         timer = setTimeout(advance, stepMs);
     }
@@ -282,10 +307,35 @@
             steps[idx].setAttribute('data-state', 'active');
             setProgress(((idx + 0.5) / steps.length) * 100);
             timer = setTimeout(advance, stepMs);
-        } else {
-            setProgress(100);
-            timer = setTimeout(dismiss, 220);
+            return;
         }
+
+        // Out of steps.
+        if (bridging) {
+            // The page has not arrived yet. Never dismiss — the navigation will
+            // replace this document — but stop pretending to finish: hold the
+            // last step active at 92% and explain the wait.
+            steps[steps.length - 1].setAttribute('data-state', 'active');
+            setProgress(92);
+            showWaitNote();
+            return;
+        }
+
+        setProgress(100);
+        timer = setTimeout(dismiss, 400);
+    }
+
+    // A line under the steps, only on the bridge overlay and only once the
+    // steps have run out: silence at that point is what makes it look stuck.
+    function showWaitNote() {
+        if (waitNote) return;
+        var foot = loader.querySelector('.dr-loader-foot');
+        if (!foot) return;
+        waitNote = document.createElement('div');
+        waitNote.className = 'dr-loader-wait';
+        waitNote.setAttribute('role', 'status');
+        waitNote.textContent = 'التحليل يُبنى لأول مرة لهذا الطالب وقد يستغرق لحظات — النتيجة تُحفظ فتفتح فوراً في المرات القادمة.';
+        foot.parentNode.insertBefore(waitNote, foot);
     }
 
     function dismiss() {
@@ -319,7 +369,9 @@
         // Skip new-tab / modified clicks — those don't navigate the current page.
         if (link.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
 
-        try { sessionStorage.setItem(PENDING_KEY, '1'); } catch (_) {}
+        // The value is the click time: the destination reads it to know how long
+        // the server took, and paces its own cascade accordingly.
+        try { sessionStorage.setItem(PENDING_KEY, String(Date.now())); } catch (_) {}
         // Bridge overlay on the source page — visible until the browser unloads.
         // Don't preventDefault — let navigation proceed normally.
         show({ bridge: true });
@@ -331,11 +383,17 @@
     // above, so its presence proves the user came from another page.
     var onDigitalRecord = window.location.pathname.replace(/\/+$/, '') === DR_PATH;
     if (onDigitalRecord) {
-        var pending = false;
-        try { pending = sessionStorage.getItem(PENDING_KEY) === '1'; } catch (_) {}
+        var pending = null;
+        try { pending = sessionStorage.getItem(PENDING_KEY); } catch (_) {}
         if (pending) {
             try { sessionStorage.removeItem(PENDING_KEY); } catch (_) {}
-            show();
+
+            // Someone who already sat through a slow bridge overlay has read
+            // these five lines once; replaying them at full pace would add
+            // seconds to a wait they just finished. A fast arrival gets the
+            // readable pace, a slow one gets a brisk confirmation.
+            var waited = /^\d+$/.test(pending) ? (Date.now() - parseInt(pending, 10)) : 0;
+            show(waited > 3000 ? { stepMs: 320 } : undefined);
         }
     }
 })();

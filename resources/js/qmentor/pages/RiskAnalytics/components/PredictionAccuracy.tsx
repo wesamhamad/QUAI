@@ -1,144 +1,84 @@
-import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import Card from '../../../components/ui/Card';
+import { useRiskBacktest } from '../../../hooks/useStudentData';
+import EmptyState from '../../DigitalTwin/components/EmptyState';
 
-// Simulated model performance metrics
-const modelMetrics = {
-  accuracy: 87.3,
-  precision: 84.1,
-  recall: 91.2,
-  f1Score: 87.5,
-  auc: 0.923,
-  lastTrained: '2026-04-01',
-  dataPoints: 142580,
-  truePositives: 1842,
-  falsePositives: 348,
-  trueNegatives: 65340,
-  falseNegatives: 178,
-};
+interface Backtest {
+  generated_on: string | null; as_of: string | null; outcome_semester: string | null;
+  students: number; tp: number; fp: number; tn: number; fn: number;
+  precision: number; recall: number; f1: number; accuracy: number; base_rate: number;
+  by_level: { level: number; n: number; failed: number; rate: number; ar: string; en: string; color: string }[];
+  model_version: string; definition: { positive: string; predicted: string };
+}
 
-const weeklyAccuracy = [
-  { weekAr: 'أسبوع 1', weekEn: 'Week 1', accuracy: 82.1, precision: 79.3, recall: 88.5 },
-  { weekAr: 'أسبوع 2', weekEn: 'Week 2', accuracy: 83.8, precision: 80.7, recall: 89.1 },
-  { weekAr: 'أسبوع 3', weekEn: 'Week 3', accuracy: 85.2, precision: 81.9, recall: 89.8 },
-  { weekAr: 'أسبوع 4', weekEn: 'Week 4', accuracy: 84.9, precision: 82.5, recall: 90.3 },
-  { weekAr: 'أسبوع 5', weekEn: 'Week 5', accuracy: 86.1, precision: 83.2, recall: 90.7 },
-  { weekAr: 'أسبوع 6', weekEn: 'Week 6', accuracy: 86.7, precision: 83.8, recall: 91.0 },
-  { weekAr: 'أسبوع 7', weekEn: 'Week 7', accuracy: 87.0, precision: 84.0, recall: 91.1 },
-  { weekAr: 'أسبوع 8', weekEn: 'Week 8', accuracy: 87.3, precision: 84.1, recall: 91.2 },
-];
-
+/**
+ * أداء النموذج — the ground-truth backtest as the evidence command measured
+ * it (engine run as-of a past term vs. the next term's posted results).
+ * Every figure comes from the stored CSV; nothing here is a target.
+ */
 export default function PredictionAccuracy() {
   const { t } = useLanguage();
-
-  const chartData = weeklyAccuracy.map(w => ({
-    week: t(w.weekAr, w.weekEn),
-    [t('الدقة', 'Accuracy')]: w.accuracy,
-    [t('الضبط', 'Precision')]: w.precision,
-    [t('الاستدعاء', 'Recall')]: w.recall,
-  }));
-
-  const MetricCard = ({ labelAr, labelEn, value, unit = '%', color }: { labelAr: string; labelEn: string; value: number | string; unit?: string; color: string }) => (
+  const { data, source, isLoading } = useRiskBacktest<Backtest | null>(null);
+  if (source !== 'api' || !data) {
+    return <EmptyState title={isLoading ? t('يُحمَّل…', 'Loading…') : t('لم يُشغَّل الاختبار الرجعي بعد', 'Backtest not run yet')} description={t('يُحسب من qmentor:evidence backtest: المحرك على فصل سابق مقابل نتائج الفصل التالي.', 'Produced by qmentor:evidence backtest.')} icon="chart" />;
+  }
+  const n = (v: number) => v.toLocaleString('en');
+  const Metric = ({ ar, en, value, unit = '%', color }: { ar: string; en: string; value: number | string; unit?: string; color: string }) => (
     <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 text-center">
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t(labelAr, labelEn)}</p>
-      <p className={`text-2xl font-bold ${color}`}>
-        {typeof value === 'number' ? value.toFixed(1) : value}
-        <span className="text-sm font-normal text-gray-400 ms-0.5">{unit}</span>
-      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t(ar, en)}</p>
+      <p className={`text-2xl font-bold ${color}`}>{value}{unit}</p>
     </div>
   );
+  const lift = data.base_rate > 0 ? data.by_level.map(l => ({ ...l, lift: Math.round((l.rate / data.base_rate) * 100) / 100 })) : data.by_level.map(l => ({ ...l, lift: 0 }));
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-        {t('أداء النموذج التنبؤي', 'Prediction Model Performance')}
-      </h2>
-
-      {/* Key metrics grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <MetricCard labelAr="الدقة الكلية" labelEn="Accuracy" value={modelMetrics.accuracy} color="text-sa-600 dark:text-sa-400" />
-        <MetricCard labelAr="الضبط" labelEn="Precision" value={modelMetrics.precision} color="text-info-600 dark:text-info-400" />
-        <MetricCard labelAr="الاستدعاء" labelEn="Recall" value={modelMetrics.recall} color="text-lavender-600 dark:text-lavender-400" />
-        <MetricCard labelAr="درجة F1" labelEn="F1 Score" value={modelMetrics.f1Score} color="text-warning-600 dark:text-warning-400" />
-        <MetricCard labelAr="مساحة AUC" labelEn="AUC" value={modelMetrics.auc} unit="" color="text-purple-600 dark:text-purple-400" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Accuracy trend chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">
-            {t('اتجاه أداء النموذج (8 أسابيع)', 'Model Performance Trend (8 Weeks)')}
-          </h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="week" tick={{ fontSize: 10 }} />
-                <YAxis domain={[70, 100]} tick={{ fontSize: 10 }} />
-                <Tooltip contentStyle={{ borderRadius: '8px', fontSize: '11px' }} />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Line type="monotone" dataKey={t('الدقة', 'Accuracy')} stroke="#25935F" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey={t('الضبط', 'Precision')} stroke="#3B82F6" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey={t('الاستدعاء', 'Recall')} stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
+    <div className="space-y-6">
+      <Card>
+        <div className="flex items-start justify-between flex-wrap gap-2 mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('اختبار رجعي على نتائج فعلية', 'Ground-truth backtest')}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t(`المحرك (${data.model_version}) شُغّل كما لو كان في فصل ${data.as_of} على ${n(data.students)} طالباً، ثم قورن بنتائج فصل ${data.outcome_semester} المعتمدة · أُنتج ${data.generated_on}`,
+                 `Engine ${data.model_version} run as of term ${data.as_of} on ${n(data.students)} students, checked against term ${data.outcome_semester} · produced ${data.generated_on}`)}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t(`التعثّر = ${data.definition.positive} · التنبؤ = ${data.definition.predicted}`, '')}</p>
           </div>
         </div>
-
-        {/* Confusion Matrix */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">
-            {t('مصفوفة الارتباك', 'Confusion Matrix')}
-          </h3>
-          <div className="flex items-center justify-center h-64">
-            <div className="grid grid-cols-2 gap-2 w-64">
-              {/* Headers */}
-              <div className="col-span-2 text-center text-xs text-gray-500 dark:text-gray-400 mb-1">
-                {t('القيم المتوقعة', 'Predicted Values')}
-              </div>
-              {/* TP */}
-              <div className="bg-success-100 dark:bg-success-900/30 rounded-xl p-4 text-center">
-                <p className="text-xs text-success-600 dark:text-success-400 mb-1">
-                  {t('إيجابي صحيح', 'True Positive')}
-                </p>
-                <p className="text-xl font-bold text-success-700 dark:text-success-300">
-                  {modelMetrics.truePositives.toLocaleString()}
-                </p>
-              </div>
-              {/* FP */}
-              <div className="bg-error-50 dark:bg-error-900/20 rounded-xl p-4 text-center">
-                <p className="text-xs text-error-500 dark:text-error-400 mb-1">
-                  {t('إيجابي خاطئ', 'False Positive')}
-                </p>
-                <p className="text-xl font-bold text-error-600 dark:text-error-400">
-                  {modelMetrics.falsePositives.toLocaleString()}
-                </p>
-              </div>
-              {/* FN */}
-              <div className="bg-warning-50 dark:bg-warning-900/20 rounded-xl p-4 text-center">
-                <p className="text-xs text-warning-600 dark:text-warning-400 mb-1">
-                  {t('سلبي خاطئ', 'False Negative')}
-                </p>
-                <p className="text-xl font-bold text-warning-700 dark:text-warning-400">
-                  {modelMetrics.falseNegatives.toLocaleString()}
-                </p>
-              </div>
-              {/* TN */}
-              <div className="bg-info-50 dark:bg-info-900/20 rounded-xl p-4 text-center">
-                <p className="text-xs text-info-600 dark:text-info-400 mb-1">
-                  {t('سلبي صحيح', 'True Negative')}
-                </p>
-                <p className="text-xl font-bold text-info-700 dark:text-info-400">
-                  {modelMetrics.trueNegatives.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">
-            {t(`آخر تدريب: ${modelMetrics.lastTrained} · ${modelMetrics.dataPoints.toLocaleString()} نقطة بيانات`, `Last trained: ${modelMetrics.lastTrained} · ${modelMetrics.dataPoints.toLocaleString()} data points`)}
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Metric ar="الدقة (Precision)" en="Precision" value={data.precision} color="text-sa-600" />
+          <Metric ar="الاستدعاء (Recall)" en="Recall" value={data.recall} color="text-sa-600" />
+          <Metric ar="F1" en="F1" value={data.f1} color="text-sa-600" />
+          <Metric ar="الصواب الكلي" en="Accuracy" value={data.accuracy} color="text-gray-800 dark:text-gray-100" />
+          <Metric ar="نسبة التعثّر الأساسية" en="Base rate" value={data.base_rate} color="text-gray-800 dark:text-gray-100" />
         </div>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">{t('مصفوفة الالتباس', 'Confusion matrix')}</h3>
+          <div className="grid grid-cols-2 gap-2 text-center text-sm">
+            <div className="rounded-lg bg-sa-50 dark:bg-sa-950 p-3"><div className="text-xs text-gray-500">{t('تنبّأ وتعثّر (TP)', 'TP')}</div><div className="text-xl font-bold text-sa-700 dark:text-sa-300">{n(data.tp)}</div></div>
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950 p-3"><div className="text-xs text-gray-500">{t('تنبّأ ولم يتعثّر (FP)', 'FP')}</div><div className="text-xl font-bold text-amber-700 dark:text-amber-300">{n(data.fp)}</div></div>
+            <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3"><div className="text-xs text-gray-500">{t('لم يتنبّأ وتعثّر (FN)', 'FN')}</div><div className="text-xl font-bold text-red-700 dark:text-red-300">{n(data.fn)}</div></div>
+            <div className="rounded-lg bg-gray-50 dark:bg-gray-700/30 p-3"><div className="text-xs text-gray-500">{t('لم يتنبّأ ولم يتعثّر (TN)', 'TN')}</div><div className="text-xl font-bold text-gray-800 dark:text-gray-100">{n(data.tn)}</div></div>
+          </div>
+        </Card>
+        <Card>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">{t('التعثّر الفعلي بحسب مستوى التنبؤ', 'Observed failure by predicted level')}</h3>
+          <p className="text-[11px] text-gray-400 mb-3">{t('الرفع = نسبة التعثّر في المستوى ÷ النسبة الأساسية', 'lift = level rate ÷ base rate')}</p>
+          <table className="w-full text-xs">
+            <thead><tr className="text-gray-400 text-right"><th className="py-1">المستوى</th><th className="py-1">طلاب</th><th className="py-1">تعثّروا</th><th className="py-1">النسبة</th><th className="py-1">الرفع</th></tr></thead>
+            <tbody>
+              {lift.map(l => (
+                <tr key={l.level} className="border-t border-gray-100 dark:border-gray-700">
+                  <td className="py-1.5 font-semibold text-gray-800 dark:text-gray-100">{t(l.ar, l.en)}</td>
+                  <td className="py-1.5 tabular-nums">{n(l.n)}</td><td className="py-1.5 tabular-nums">{n(l.failed)}</td>
+                  <td className="py-1.5 tabular-nums">{l.rate}%</td><td className="py-1.5 tabular-nums font-semibold">×{l.lift}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
       </div>
     </div>
   );

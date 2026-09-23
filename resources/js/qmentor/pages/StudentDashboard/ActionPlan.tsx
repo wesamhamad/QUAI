@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Target, Clock, TrendingUp, CheckCircle2, Calendar, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import PageHeader from '../../components/shared/PageHeader';
-import DataSourceBadge from '../../components/shared/DataSourceBadge';
 import {
   useStudentProfile,
   useAbsences,
@@ -12,7 +11,29 @@ import {
   useWarnings,
   useHaltReasons,
   usePenalties,
+  useRiskMe,
 } from '../../hooks/useStudentData';
+
+interface EngineAction {
+  indicator: string;
+  level: number;
+  evidence: string;
+  ar: string;
+  en: string;
+  desc_ar: string;
+  desc_en: string;
+  impact: 'high' | 'medium' | 'low';
+  difficulty: 'easy' | 'medium' | 'hard';
+  time_ar: string;
+  time_en: string;
+}
+
+interface EngineRiskPlan {
+  scored: boolean;
+  score: number;
+  level: { level: number; key: 'low' | 'medium' | 'high' | 'critical'; ar: string };
+  actions: EngineAction[];
+}
 
 interface ActionItem {
   id: string;
@@ -328,6 +349,8 @@ export default function ActionPlan() {
   const { t } = useLanguage();
   const [completed, setCompleted] = useState<Set<string>>(new Set());
 
+  const riskResult = useRiskMe<EngineRiskPlan | null>(null);
+  const engine = riskResult.source === 'api' && riskResult.data?.scored ? riskResult.data : null;
   const profileResult = useStudentProfile<ProfileData | null>(null);
   const absencesResult = useAbsences<AbsenceCourse[] | null>(null);
   const advisorResult = useAdvisorInfo<AdvisorInfo | null>(null);
@@ -336,18 +359,27 @@ export default function ActionPlan() {
   const haltsResult = useHaltReasons<HaltRecord[] | null>(null);
   const penaltiesResult = usePenalties<PenaltyRecord[] | null>(null);
 
-  const sources = [
-    profileResult.source,
-    absencesResult.source,
-    advisorResult.source,
-    coursesResult.source,
-    warningsResult.source,
-    haltsResult.source,
-    penaltiesResult.source,
-  ];
-  const overallSource = sources.includes('api') ? ('api' as const) : ('mock' as const);
-
   const actions = useMemo<ActionItem[]>(() => {
+    // The server's rule-based plan (UC-STU-03): one action per fired
+    // indicator, worst first. A scored student with nothing fired gets the
+    // advisor-meeting item alone, which is the honest plan for a clean record.
+    if (engine) {
+      if (engine.actions.length) {
+        return engine.actions.map(a => ({
+          id: `engine-${a.indicator}`,
+          titleAr: a.ar,
+          titleEn: a.en,
+          descriptionAr: `${a.desc_ar} (${a.evidence})`,
+          descriptionEn: `${a.desc_en} (${a.evidence})`,
+          impact: a.impact,
+          difficulty: a.difficulty,
+          estimatedTimeAr: a.time_ar,
+          estimatedTimeEn: a.time_en,
+          indicator: a.indicator,
+        }));
+      }
+      return mockActions.filter(a => a.indicator === 'overall');
+    }
     const derived = buildActionsFromData(
       profileResult.source === 'api' ? profileResult.data : null,
       absencesResult.source === 'api' ? absencesResult.data : null,
@@ -359,6 +391,7 @@ export default function ActionPlan() {
     );
     return derived ?? mockActions;
   }, [
+    engine,
     profileResult.source, profileResult.data,
     absencesResult.source, absencesResult.data,
     advisorResult.source, advisorResult.data,
@@ -411,7 +444,6 @@ export default function ActionPlan() {
           { label: t('خطة الأعمال الأكاديمية', 'Academic Action Plan') },
         ]}
         accentColor="bg-sa-500"
-        actions={<DataSourceBadge source={overallSource} />}
       />
 
       {/* Summary Card */}
@@ -555,7 +587,7 @@ export default function ActionPlan() {
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 font-semibold text-sm transition-colors duration-200"
         >
           <MessageSquare className="w-4 h-4" />
-          {t('محادثة مع QMentor', 'Chat with QMentor')}
+          {t('محادثة مع +QSpark', 'Chat with QSpark+')}
         </Link>
       </div>
     </div>

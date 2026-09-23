@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { isChunkLoadError, reloadForStaleChunk } from '@qmentor/lib/chunkReload';
 
 interface Props {
   children: ReactNode;
@@ -17,7 +18,18 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error) {
+    // A stale lazy chunk after a rebuild is not a real failure: reload once
+    // instead of showing the user an error card.
+    if (isChunkLoadError(error)) reloadForStaleChunk();
+  }
+
   private handleRetry = () => {
+    if (isChunkLoadError(this.state.error)) {
+      window.location.reload();
+      return;
+    }
+
     this.setState({ hasError: false, error: undefined });
   };
 

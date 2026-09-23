@@ -1,8 +1,8 @@
 import type { Course, StudentPlanProfile, SemesterPlan, ElectiveRecommendation, ScheduleOption } from '../types';
 
 export const studentProfile: StudentPlanProfile = {
-  name: 'ليان أحمد دوسر',
-  nameEn: 'Layan Ahmad Dosar',
+  name: 'فيصل أحمد دوسر',
+  nameEn: 'Faisal Ahmad Dosar',
   studentId: '443200156',
   major: 'علوم الحاسب',
   majorEn: 'Computer Science',

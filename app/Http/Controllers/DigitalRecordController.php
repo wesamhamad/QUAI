@@ -24,12 +24,16 @@ class DigitalRecordController extends Controller
 
         // Faculty/Admin can preview any student's record via ?student_id=...
         // Students always see their own. Fallback to the first demo student.
-        $impersonate = $request->query('student_id');
+        // `?student=` is what the +QSpark twin and the roster page send; `?student_id=`
+        // is the older spelling this build's picker used. Both mean the same.
+        $impersonate = $request->query('student_id', $request->query('student'));
         $hasImpersonation = is_string($impersonate) && $impersonate !== '';
+        // `?embed=1`: the page is inside the twin's iframe — no sidebar/topbar.
+        $embedded = $request->boolean('embed');
 
         // Faculty land on a roster of all their students rather than a single
         // record — they pick a student to drill into their digital record.
-        if ($isFaculty && !$hasImpersonation) {
+        if ($isFaculty && !$hasImpersonation && !$embedded) {
             $needle   = trim((string) $request->query('q', ''));
             $students = DemoData::students();
 
@@ -54,7 +58,7 @@ class DigitalRecordController extends Controller
         }
 
         $semesterId  = $request->query('semester');
-        $student     = DemoData::findStudent($studentId) ?? DemoData::students()[0];
+        $student     = DemoData::findStudent($studentId) ?? $this->cohortStudent($studentId) ?? DemoData::students()[0];
         $isEnLocale  = app()->getLocale() === 'en';
         $studentName = $isEnLocale && !empty($student['name_en'])
             ? $student['name_en']
@@ -86,6 +90,8 @@ class DigitalRecordController extends Controller
         $charts = $this->buildCharts($analysis, $topCourses, $skillsResult, $grades);
 
         return view('digital-record.index', [
+            'embedded'          => $embedded,
+            'isDemoRecord'      => true,
             'studentId'         => $studentId,
             'studentName'       => $studentName,
             'semesterId'        => $semesterId,
@@ -99,6 +105,26 @@ class DigitalRecordController extends Controller
             'apiStatus'         => $apiStatus,
             'charts'            => $charts,
         ]);
+    }
+
+    /**
+     * A student of the synthetic +QSpark cohort (DemoCohort) who is not one of
+     * the eight DemoData students: the twin can open any cohort student's
+     * record, so shape the row the way DemoData::students() does.
+     */
+    private function cohortStudent(string $studentId): ?array
+    {
+        $s = \App\Support\DemoCohort::find($studentId);
+        if ($s === null) {
+            return null;
+        }
+
+        return [
+            'student_id' => $s['student_id'], 'name' => $s['name'], 'name_en' => $s['name_en'],
+            'major' => $s['major_name'], 'major_en' => $s['major_name_en'], 'major_no' => $s['major_no'],
+            'faculty' => $s['faculty_name'], 'faculty_en' => $s['faculty_name_en'], 'faculty_no' => $s['faculty_no'],
+            'gpa' => $s['cumulative_gpa'], 'level' => $s['student_level'], 'enrolled_hours' => $s['registered_hours'],
+        ];
     }
 
     /**

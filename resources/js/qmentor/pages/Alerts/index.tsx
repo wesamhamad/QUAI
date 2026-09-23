@@ -1,265 +1,186 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CheckCircleIcon, BellAlertIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
-import AnimatedTab from '../../components/shared/AnimatedTab';
 import PageHeader from '../../components/shared/PageHeader';
 import DataSourceBadge from '../../components/shared/DataSourceBadge';
 import AlertFeed from './components/AlertFeed';
-import AlertPreferences from './components/AlertPreferences';
-import EscalationTimeline from './components/EscalationTimeline';
-import AlertAnalytics from './components/AlertAnalytics';
-import CreateAlertModal from './components/CreateAlertModal';
-import { mockAlerts, roleAlerts, defaultPreferences, analyticsData } from './data/mockAlertData';
-import type { Alert, AlertStatus, AlertPreference } from './types';
-import { useStudentProfile, useAbsences } from '../../hooks/useStudentData';
+import type { Alert, AlertStatus } from './types';
 import { useRole } from '../../contexts/RoleContext';
-import {
-  BellAlertIcon,
-  Cog6ToothIcon,
-  ArrowTrendingUpIcon,
-  ChartBarIcon,
-  PlusIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-  ArrowUpCircleIcon,
-} from '@heroicons/react/24/outline';
+import { useAdvisees, useRiskCaseload } from '../../hooks/useAdvisorData';
+import { useTaughtStudents } from '../../hooks/useInstructorData';
+import { useRiskAlerts, useMarkAlertRead, type RiskAlert } from '../../hooks/useAlerts';
+import EmptyState from '../DigitalTwin/components/EmptyState';
 
-type TabKey = 'feed' | 'preferences' | 'escalation' | 'analytics';
+const LEVEL_AR = ['منخفض', 'متوسط', 'مرتفع', 'حرج'];
+const LEVEL_EN = ['Low', 'Medium', 'High', 'Critical'];
 
+/**
+ * التنبيهات — three readers, three scopes, all decided on the server:
+ *   student / admin → the alerts the engine wrote for that student
+ *                     (/risk/alerts; the admin reads the demo student's).
+ *   advisor         → the high/critical verdicts on their own advisees.
+ *   instructor      → the same, over the students of their sections.
+ * No sample rows anywhere (mockAlertData removed 2026-09-16).
+ */
 export default function AlertsPage() {
-  const { t } = useLanguage();
   const { role } = useRole();
-  const [activeTab, setActiveTab] = useState<TabKey>('feed');
+  if (role === 'advisor') return <CaseloadAlerts scope="advisees" />;
+  if (role === 'instructor') return <CaseloadAlerts scope="taught" />;
+  return <OwnAlerts />;
+}
 
-  const profileResult = useStudentProfile(null);
-  const absencesResult = useAbsences(null);
-  const overallSource = (profileResult.source === 'api' || absencesResult.source === 'api') ? 'api' as const : 'mock' as const;
+/** The engine's platform alerts for the signed-in student, newest first; a click marks one read. */
+function OwnAlerts() {
+  const { t, lang } = useLanguage();
+  const alerts = useRiskAlerts();
+  const markRead = useMarkAlertRead();
+  const rows = alerts.data?.alerts ?? [];
+  const unread = alerts.data?.unread ?? 0;
 
-  // Generate real alerts from absence data and merge with mock
-  const initialAlerts = useMemo(() => {
-    const realAlerts: Alert[] = [];
-
-    if (profileResult.source === 'api' && profileResult.data && absencesResult.source === 'api' && Array.isArray(absencesResult.data)) {
-      const raw = profileResult.data as Record<string, unknown>;
-      const profile = (raw.profile ?? raw) as Record<string, unknown>;
-      const name = String(profile.name ?? '');
-      const nameEn = String(profile.name_en ?? '');
-      const studentId = String(profile.student_id ?? profile.id ?? '');
-
-      (absencesResult.data as Record<string, unknown>[]).forEach((course, i) => {
-        const pct = parseFloat(String(course.absence_all_percent ?? '0')) || 0;
-        if (pct >= 10) {
-          const code = String(course.cource_code ?? course.course_code ?? '');
-          const courseName = String(course.cource_name ?? course.course_name ?? code);
-          realAlerts.push({
-            id: `ALT-REAL-${i}`,
-            type: 'attendance',
-            severity: pct >= 25 ? 'critical' : pct >= 20 ? 'urgent' : pct >= 15 ? 'warning' : 'info',
-            status: 'active',
-            title: `غياب ${courseName} وصل ${pct}%`,
-            titleEn: `${code} absence at ${pct}%`,
-            description: `نسبة الغياب في ${courseName} (${code}) وصلت ${pct}% — تقترب من حد الحرمان 25%`,
-            descriptionEn: `Absence in ${courseName} (${code}) reached ${pct}% — approaching 25% deprivation limit`,
-            studentId,
-            studentName: name,
-            studentNameEn: nameEn,
-            timestamp: new Date().toISOString(),
-          });
-        }
-      });
+  const describe = (a: RiskAlert) => {
+    const to = a.level_to != null ? (lang === 'ar' ? LEVEL_AR[a.level_to] : LEVEL_EN[a.level_to]) : null;
+    const from = a.level_from != null ? (lang === 'ar' ? LEVEL_AR[a.level_from] : LEVEL_EN[a.level_from]) : null;
+    if (a.kind === 'level_change' || (from && to)) {
+      return t(`تغيّر مستوى الخطر${from ? ` من ${from}` : ''}${to ? ` إلى ${to}` : ''}`, `Risk level changed${from ? ` from ${from}` : ''}${to ? ` to ${to}` : ''}`);
     }
-
-    const myRoleAlerts = roleAlerts.filter(a => a.targetRole === role || a.targetRole === 'all');
-    const genericAlerts = mockAlerts.map(a => ({ ...a, targetRole: undefined as Alert['targetRole'] }));
-    return [...realAlerts, ...myRoleAlerts, ...genericAlerts]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [profileResult.source, profileResult.data, absencesResult.source, absencesResult.data, role]);
-
-  const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
-  const [preferences, setPreferences] = useState<AlertPreference[]>(defaultPreferences);
-  const [selectedAlerts, setSelectedAlerts] = useState<Set<string>>(new Set());
-  const [escalationAlert, setEscalationAlert] = useState<Alert | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // Sync alerts when API data becomes available
-  useEffect(() => {
-    setAlerts(initialAlerts);
-  }, [initialAlerts]);
-
-  const activeCount = alerts.filter(a => a.status === 'active').length;
-  const urgentCount = alerts.filter(a => (a.severity === 'critical' || a.severity === 'urgent') && a.status === 'active').length;
-
-  const tabs: { key: TabKey; labelAr: string; labelEn: string; icon: typeof BellAlertIcon }[] = [
-    { key: 'feed', labelAr: 'التنبيهات', labelEn: 'Alert Feed', icon: BellAlertIcon },
-    { key: 'preferences', labelAr: 'التفضيلات', labelEn: 'Preferences', icon: Cog6ToothIcon },
-    { key: 'escalation', labelAr: 'التصعيد', labelEn: 'Escalation', icon: ArrowTrendingUpIcon },
-    { key: 'analytics', labelAr: 'التحليلات', labelEn: 'Analytics', icon: ChartBarIcon },
-  ];
-
-  const handleStatusChange = useCallback((id: string, status: AlertStatus) => {
-    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-    setSelectedAlerts(prev => { const n = new Set(prev); n.delete(id); return n; });
-  }, []);
-
-  const handleToggleSelect = useCallback((id: string) => {
-    setSelectedAlerts(prev => {
-      const n = new Set(prev);
-      if (n.has(id)) n.delete(id); else n.add(id);
-      return n;
-    });
-  }, []);
-
-  function handleBulkAction(status: AlertStatus) {
-    setAlerts(prev => prev.map(a => selectedAlerts.has(a.id) ? { ...a, status } : a));
-    setSelectedAlerts(new Set());
-  }
-
-  function handleViewEscalation(alert: Alert) {
-    setEscalationAlert(alert);
-    setActiveTab('escalation');
-  }
-
-  function handleCreateAlert(data: {
-    type: Alert['type'];
-    severity: Alert['severity'];
-    studentId: string;
-    titleAr: string;
-    titleEn: string;
-    descriptionAr: string;
-    descriptionEn: string;
-  }) {
-    const newAlert: Alert = {
-      id: `ALT-${String(alerts.length + 1).padStart(4, '0')}`,
-      type: data.type,
-      severity: data.severity,
-      status: 'active',
-      title: data.titleAr,
-      titleEn: data.titleEn,
-      description: data.descriptionAr,
-      descriptionEn: data.descriptionEn,
-      studentId: data.studentId,
-      studentName: 'طالب جديد',
-      studentNameEn: 'New Student',
-      timestamp: new Date().toISOString(),
-    };
-    setAlerts(prev => [newAlert, ...prev]);
-  }
+    return to ? t(`مستوى الخطر: ${to}`, `Risk level: ${to}`) : a.kind;
+  };
 
   return (
     <div>
       <PageHeader
         accentColor="bg-sa-500"
         title={t('التنبيهات الذكية', 'Smart Alerts')}
-        subtitle={t(
-          `${activeCount} تنبيه نشط · ${urgentCount} عاجل/حرج`,
-          `${activeCount} active alerts · ${urgentCount} urgent/critical`
-        )}
-        breadcrumbs={[
-          { label: t('الرئيسية', 'Home'), href: '/' },
-          { label: t('التنبيهات', 'Alerts') },
-        ]}
-        actions={<div className="flex items-center gap-2"><DataSourceBadge source={overallSource} />
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-sa-500 text-white hover:bg-sa-600 transition-colors"
-          >
-            <PlusIcon className="w-4 h-4" />
-            {t('إنشاء تنبيه', 'Create Alert')}
-          </button></div>
-        }
+        subtitle={alerts.source === 'api' ? t(`${rows.length} تنبيه · ${unread} غير مقروء`, `${rows.length} alerts · ${unread} unread`) : t('تنبيهات محرك المخاطر على سجلك', 'The risk engine’s alerts on your record')}
+        breadcrumbs={[{ label: t('الرئيسية', 'Home'), href: '/' }, { label: t('التنبيهات', 'Alerts') }]}
+        actions={<DataSourceBadge source={alerts.source === 'api' ? 'api' : 'mock'} />}
       />
-
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-        <div className="flex overflow-x-auto gap-6 scrollbar-hide">
-          {tabs.map(tab => {
-            const Icon = tab.icon;
+      {alerts.isLoading ? (
+        <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sa-500" /></div>
+      ) : alerts.source !== 'api' ? (
+        <EmptyState title={t('تعذّر جلب التنبيهات', 'Could not load alerts')} description={t('حاول لاحقاً.', 'Please try again later.')} icon="shield" />
+      ) : rows.length === 0 ? (
+        <EmptyState title={t('لا تنبيهات', 'No alerts')} description={t('يظهر هنا كل تنبيه يكتبه محرك المخاطر عند تغيّر مستواك.', 'Every alert the risk engine writes when your level changes appears here.')} icon="shield" />
+      ) : (
+        <div className="space-y-3">
+          {rows.map(a => {
+            const read = !!a.read_at;
+            const tone = (a.level_to ?? 0) >= 3 ? 'border-s-error-500' : (a.level_to ?? 0) === 2 ? 'border-s-orange-500' : (a.level_to ?? 0) === 1 ? 'border-s-gold-500' : 'border-s-sa-500';
             return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className="tab-underline flex items-center gap-1.5 text-sm whitespace-nowrap pb-3"
-                data-active={activeTab === tab.key}
-              >
-                <Icon className="w-4 h-4" />
-                {t(tab.labelAr, tab.labelEn)}
-                {tab.key === 'feed' && activeCount > 0 && (
-                  <span className="ms-1 px-1.5 py-0.5 rounded-full text-xs font-bold bg-error-500 text-white">
-                    {activeCount}
-                  </span>
-                )}
-              </button>
+              <div key={a.id} className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-s-4 ${tone} p-4 ${read ? 'opacity-75' : ''}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <BellAlertIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                      <p className="font-semibold text-gray-900 dark:text-white">{describe(a)}</p>
+                      {!read && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-error-500 text-white">{t('جديد', 'New')}</span>}
+                      {a.confidential && <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500">{t('سرّي', 'Confidential')}</span>}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {new Date(a.created_at).toLocaleString(lang === 'ar' ? 'ar-SA' : 'en-GB')}
+                      {a.score != null && <> · {t('الدرجة', 'Score')} {a.score}</>}
+                    </p>
+                    {a.top_factors && a.top_factors.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {a.top_factors.slice(0, 4).map((f, i) => (
+                          <span key={i} className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400">{f.label}{f.evidence ? ` — ${f.evidence}` : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    <Link to="/student-dashboard" className="inline-block mt-2 text-xs text-sa-700 dark:text-sa-300 font-semibold hover:underline">{t('حالة المخاطر وخطة العمل', 'Risk status & action plan')}</Link>
+                  </div>
+                  {!read && (
+                    <button
+                      type="button"
+                      onClick={() => markRead.mutate({ id: a.id })}
+                      disabled={markRead.isPending}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-success-500 text-white hover:bg-success-600 transition-colors disabled:opacity-50 shrink-0"
+                    >
+                      <CheckCircleIcon className="w-4 h-4" />
+                      {t('قرأته', 'Mark read')}
+                    </button>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
-      </div>
-
-      {/* Bulk Actions Bar */}
-      {selectedAlerts.size > 0 && activeTab === 'feed' && (
-        <div className="bg-sa-50 dark:bg-sa-900/20 border border-sa-200 dark:border-sa-800 rounded-xl p-3 mb-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-sa-700 dark:text-sa-300">
-            {t(`${selectedAlerts.size} تنبيه محدد`, `${selectedAlerts.size} alerts selected`)}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleBulkAction('acknowledged')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-success-500 text-white hover:bg-success-600 transition-colors"
-            >
-              <CheckCircleIcon className="w-4 h-4" />
-              {t('قبول الكل', 'Acknowledge All')}
-            </button>
-            <button
-              onClick={() => handleBulkAction('dismissed')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors"
-            >
-              <XMarkIcon className="w-4 h-4" />
-              {t('رفض الكل', 'Dismiss All')}
-            </button>
-            <button
-              onClick={() => handleBulkAction('escalated')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gold-500 text-white hover:bg-gold-600 transition-colors"
-            >
-              <ArrowUpCircleIcon className="w-4 h-4" />
-              {t('تصعيد الكل', 'Escalate All')}
-            </button>
-          </div>
-        </div>
       )}
+    </div>
+  );
+}
 
-      {/* Tab Content */}
-      <AnimatedTab activeKey={activeTab} className="space-y-6">
-        {activeTab === 'feed' && (
-          <AlertFeed
-            alerts={alerts}
-            selectedAlerts={selectedAlerts}
-            onToggleSelect={handleToggleSelect}
-            onStatusChange={handleStatusChange}
-            onViewEscalation={handleViewEscalation}
-          />
-        )}
-        {activeTab === 'preferences' && (
-          <AlertPreferences preferences={preferences} onSave={setPreferences} />
-        )}
-        {activeTab === 'escalation' && (
-          <EscalationTimeline alert={escalationAlert} onClose={() => setEscalationAlert(null)} />
-        )}
-        {activeTab === 'analytics' && (
-          <AlertAnalytics data={analyticsData} />
-        )}
-      </AnimatedTab>
+/**
+ * A faculty member's alerts: the risk engine's high/critical verdicts on the
+ * students in their scope — advisees (/advisor/advisees) or the students of
+ * their sections (/instructor/students) — joined to /risk/caseload. Nothing
+ * from confidential counselling referrals: those are never part of the verdict.
+ */
+function CaseloadAlerts({ scope }: { scope: 'advisees' | 'taught' }) {
+  const { t } = useLanguage();
+  const advisees = useAdvisees(undefined, false);
+  const taught = useTaughtStudents();
+  const roster = scope === 'advisees' ? advisees : taught;
+  const rows = useMemo(() => (roster.source === 'api' && Array.isArray(roster.data) ? roster.data : []), [roster.source, roster.data]);
+  const ids = useMemo(() => rows.map(r => r.student_id), [rows]);
+  const risk = useRiskCaseload(ids);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [statuses, setStatuses] = useState<Record<string, AlertStatus>>({});
 
-      {/* No escalation selected */}
-      {activeTab === 'escalation' && !escalationAlert && (
-        <div className="text-center py-16 text-gray-500 dark:text-gray-400">
-          <ArrowTrendingUpIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p className="text-sm">{t('اختر تنبيهًا من القائمة لعرض مسار التصعيد', 'Select an alert from the feed to view its escalation timeline')}</p>
-        </div>
-      )}
+  const alerts = useMemo<Alert[]>(() => {
+    const st = risk.source === 'api' ? (risk.data?.students ?? {}) : {};
+    const out: Alert[] = [];
+    for (const r of rows) {
+      const v = st[r.student_id];
+      if (!v || v.level.level < 2) continue;
+      const f = v.top_factors?.[0];
+      const id = `RISK-${r.student_id}`;
+      out.push({
+        id,
+        type: 'academic_warning',
+        severity: v.level.level >= 3 ? 'critical' : 'urgent',
+        status: statuses[id] ?? 'active',
+        title: `${v.level.ar}: ${f?.label ?? 'مؤشرات الخطر'}`,
+        titleEn: `${v.level.key} risk${f ? `: ${f.label}` : ''}`,
+        description: f?.evidence ?? '',
+        descriptionEn: f?.evidence ?? '',
+        studentId: r.student_id,
+        studentName: r.student_name ?? r.student_id,
+        studentNameEn: r.student_name_en ?? r.student_name ?? r.student_id,
+        timestamp: v.computed_at,
+      });
+    }
+    return out.sort((a, b) => (a.severity === b.severity ? 0 : a.severity === 'critical' ? -1 : 1));
+  }, [rows, risk.source, risk.data, statuses]);
 
-      <CreateAlertModal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreate={handleCreateAlert}
+  const loading = roster.isLoading || risk.isLoading;
+  const who = scope === 'advisees' ? t('لطلابك الإرشاديين', 'for your advisees') : t('لطلاب مقرراتك', 'for your course students');
+
+  return (
+    <div>
+      <PageHeader
+        accentColor="bg-sa-500"
+        title={t('التنبيهات الذكية', 'Smart Alerts')}
+        subtitle={`${alerts.length} ${t('تنبيه', 'alerts')} ${who}`}
+        breadcrumbs={[{ label: t('الرئيسية', 'Home'), href: '/' }, { label: t('التنبيهات', 'Alerts') }]}
+        actions={roster.source === 'api' ? <DataSourceBadge source="api" /> : undefined}
       />
+      {loading ? (
+        <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-sa-500" /></div>
+      ) : roster.source !== 'api' ? (
+        <EmptyState title={scope === 'advisees' ? t('تعذّر جلب قائمة طلابك الإرشاديين', 'Could not load your advisees') : t('تعذّر جلب قائمة طلاب مقرراتك', 'Could not load your course students')} description={t('حاول لاحقاً.', 'Please try again later.')} icon="list" />
+      ) : alerts.length === 0 ? (
+        <EmptyState title={t('لا تنبيهات لطلابك', 'No alerts for your students')} description={t('يظهر هنا كل طالب في نطاقك يضعه محرك الخطر في مستوى مرتفع أو حرج.', 'Students in your scope the risk engine places at high or critical appear here.')} icon="shield" />
+      ) : (
+        <AlertFeed
+          alerts={alerts}
+          selectedAlerts={selected}
+          onToggleSelect={id => setSelected(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; })}
+          onStatusChange={(id, status) => setStatuses(prev => ({ ...prev, [id]: status }))}
+          onViewEscalation={() => {}}
+        />
+      )}
     </div>
   );
 }

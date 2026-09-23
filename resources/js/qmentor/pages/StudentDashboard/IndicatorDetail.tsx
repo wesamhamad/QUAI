@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   AlertTriangle,
   TrendingDown,
@@ -16,10 +16,10 @@ import {
   GraduationCap,
   ShieldAlert,
   BarChart3,
+  FileText,
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import PageHeader from '../../components/shared/PageHeader';
-import DataSourceBadge from '../../components/shared/DataSourceBadge';
 import {
   useStudentProfile,
   useAbsences,
@@ -28,9 +28,13 @@ import {
   useHaltReasons,
   usePenalties,
   useCurrentCourses,
+  useRiskMe,
 } from '../../hooks/useStudentData';
 import { useQueries } from '@tanstack/react-query';
 import { apiClient } from '../../lib/api';
+import { toElapsedWeeks, weeksElapsed } from '../../lib/term';
+import { mockFaisal } from '../DigitalTwin/data/mockFaisal';
+import DigitalRecordFrame from '../DigitalTwin/components/DigitalRecordFrame';
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -55,12 +59,129 @@ interface Indicator {
   weeklyData: number[];
   weekLabelsAr: string[];
   weekLabelsEn: string[];
+  /** What one point on the trend line is. Default: a week of the running term. */
+  trendUnit?: 'week' | 'semester';
   thresholds: { low: number; medium: number; high: number; critical: number; max: number };
+  /** Set when nothing has been measured yet this term — the indicator shows this
+   *  note instead of a value, a trend badge and a gauge position. */
+  awaitingDataAr?: string;
+  awaitingDataEn?: string;
   contextualEvents: ContextualEvent[];
   icon: typeof Activity;
 }
 
+// ── Server risk evaluation (31 indicators) → this page's Indicator shape ──
+
+interface EngineIndicatorRow {
+  id: string;
+  label: string;
+  category: string;
+  available: boolean;
+  level: number | null;
+  value: number | boolean | null;
+  evidence: string;
+}
+
+interface EngineRiskDetail {
+  scored: boolean;
+  computed_at: string;
+  indicators: EngineIndicatorRow[];
+  indicator_history: Record<string, { at: string; value: number | boolean | null; level: number | null }[]>;
+  thresholds: Record<string, { dir: 'up' | 'down'; bands: (number | string)[]; unit: string }>;
+}
+
+const LEVEL_NAMES: Severity[] = ['low', 'medium', 'high', 'critical'];
+
+const categoryLabel: Record<string, [string, string]> = {
+  A: ['الحضور', 'Attendance'], G: ['الأداء الأكاديمي', 'Grades'], S: ['الواجبات', 'Assignments'],
+  E: ['التفاعل مع المنصة', 'LMS Engagement'], AC: ['الوضع الأكاديمي', 'Academic Standing'],
+  R: ['سلوك التسجيل', 'Registration'], T: ['الاختبارات', 'Exams'], C: ['مؤشرات مركّبة', 'Compound'], P: ['مسار التخرج', 'Graduation Path'],
+};
+
+const categoryIconMap: Record<string, typeof Activity> = {
+  A: Calendar, G: BarChart3, S: ClipboardList, E: Activity, AC: ShieldAlert, R: FileText, T: GraduationCap, C: AlertTriangle, P: GraduationCap,
+};
+
+/** Only measured indicators are shown; a gap (E-02, R-01 …) is a line in the doc, not an empty card. */
+function indicatorsFromEngine(e: EngineRiskDetail): Indicator[] {
+  return e.indicators
+    .filter(i => i.available && i.level !== null)
+    .map(i => {
+      const th = e.thresholds[i.id];
+      const bands = (th?.bands ?? []).map(b => (typeof b === 'number' ? b : NaN));
+      const numeric = typeof i.value === 'number' ? i.value : typeof i.value === 'boolean' ? (i.value ? 1 : 0) : (i.level ?? 0);
+      const up = th?.dir !== 'down';
+      const [m, h, c] = bands;
+      const thresholds = up
+        ? { low: 0, medium: m || 1, high: h || 2, critical: c || 3, max: Math.max(c || 3, numeric) * 1.25 }
+        : { low: 0, medium: c || 0, high: h || 0, critical: m || 0, max: Math.max(m || 1, numeric) * 1.25 };
+      const trail = (e.indicator_history[i.id] ?? []).map(x => (typeof x.value === 'number' ? x.value : typeof x.value === 'boolean' ? (x.value ? 1 : 0) : 0));
+      const labels = (e.indicator_history[i.id] ?? []).map(x => x.at.slice(5, 10));
+      const [catAr, catEn] = categoryLabel[i.category] ?? [i.category, i.category];
+      return {
+        id: i.id,
+        nameAr: i.label,
+        nameEn: i.id,
+        categoryAr: catAr,
+        categoryEn: catEn,
+        value: typeof i.value === 'boolean' ? (i.value ? 'نعم' : 'لا') : `${Math.round(numeric * 100) / 100}${th?.unit ?? ''}`,
+        numericValue: numeric,
+        unit: th?.unit ?? '',
+        severity: LEVEL_NAMES[i.level ?? 0],
+        weeklyData: trail.length ? trail : [numeric],
+        weekLabelsAr: labels.length ? labels : [e.computed_at.slice(5, 10)],
+        weekLabelsEn: labels.length ? labels : [e.computed_at.slice(5, 10)],
+        thresholds,
+        contextualEvents: [{ date: e.computed_at.slice(0, 10), descriptionAr: i.evidence, descriptionEn: i.evidence }],
+        icon: categoryIconMap[i.category] ?? Activity,
+      };
+    });
+}
+
 // ── Mock Data ─────────────────────────────────────────────────────────
+
+/**
+ * The fallback indicators — فيصل خالد محمد (443211517), the one live
+ * student, so this page never contradicts her digital twin.
+ *
+ * These used to be a computer-science student's numbers (CS101, MATH201,
+ * PHYS101, GPA 2.45 of 4, absence rising to 18%, 30% missing assignments) —
+ * a person who does not exist, shown to an accounting student with a 4.83 GPA
+ * whose only real flag is attendance. Every figure below now comes from the
+ * same two sources her twin is built on (mockFaisal.ts and the SIS fixture):
+ *   · absence, cut to the running term 481: two missed sessions in week one
+ *     (ACCT354 on Tuesday, ISPM356 on Wednesday) at 3% each, the other three
+ *     courses clean → 1% mean, against the 25% deprivation bar
+ *   · assignment submission 98% → 2% missing
+ *   · GPA 4.83 of 5, held across eight graded semesters
+ *
+ * Weeks and dates are relative to the running term, not a fixed April: a page
+ * opened in week 2 shows two weeks and events from the last few days.
+ */
+
+/** A date this many days back, as YYYY-MM-DD — events stay inside the term. */
+const dAgo = (n: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+};
+
+/** Week series and their labels, cut to the weeks the term has actually run. */
+const weekly = (values: number[]) => toElapsedWeeks(values);
+const weekLabels = (values: number[], en = false) =>
+  toElapsedWeeks(values).map((_, i) => (en ? `Week ${i + 1}` : `الأسبوع ${i + 1}`));
+
+/**
+ * TEMPORARY — read the fixture picture for absence instead of the live SIS feed.
+ *
+ * The running term's SIS rows disagree with every other screen: one absence in
+ * ACCT363, a course she is not registered in this term, against the two the
+ * fixture and her twin both hold (ACCT354 on Tuesday, ISPM356 on Wednesday,
+ * week one). Until that feed is reconciled the board must not contradict
+ * itself, so A-01 keeps the consistent picture. Flip to false to go back to
+ * the live feed.
+ */
+const USE_FIXTURE_ABSENCES = true;
 
 const mockIndicators: Indicator[] = [
   {
@@ -69,19 +190,17 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Absence Rate',
     categoryAr: 'الانخراط',
     categoryEn: 'Engagement',
-    value: '18%',
-    numericValue: 18,
+    value: '1%',
+    numericValue: 1,
     unit: '%',
-    severity: 'high',
-    weeklyData: [12, 14, 16, 18],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    severity: 'low',
+    weeklyData: weekly([0, 1, 1, 1]),
+    weekLabelsAr: weekLabels([0, 1, 1, 1]),
+    weekLabelsEn: weekLabels([0, 1, 1, 1], true),
     thresholds: { low: 0, medium: 10, high: 15, critical: 25, max: 35 },
     contextualEvents: [
-      { date: '2026-04-14', descriptionAr: 'غياب عن CS101 — محاضرة هياكل البيانات', descriptionEn: 'Missed CS101 — Data Structures lecture' },
-      { date: '2026-04-10', descriptionAr: 'غياب عن MATH201 — التفاضل والتكامل', descriptionEn: 'Missed MATH201 — Calculus class' },
-      { date: '2026-04-07', descriptionAr: 'غياب عن CS101 — مختبر عملي', descriptionEn: 'Missed CS101 — Lab session' },
-      { date: '2026-04-03', descriptionAr: 'غياب عن PHYS101 — الفيزياء العامة', descriptionEn: 'Missed PHYS101 — General Physics' },
+      { date: dAgo(7), descriptionAr: 'غياب عن ACCT354 — الثلاثاء، الأسبوع الأول (الغياب في المقرر 3%)', descriptionEn: 'Missed ACCT354 — Tuesday, week one (3% absence in this course)' },
+      { date: dAgo(6), descriptionAr: 'غياب عن ISPM356 — الأربعاء، الأسبوع الأول (الغياب في المقرر 3%)', descriptionEn: 'Missed ISPM356 — Wednesday, week one (3% absence in this course)' },
     ],
     icon: Calendar,
   },
@@ -91,19 +210,17 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Exam Average',
     categoryAr: 'الأداء الأكاديمي',
     categoryEn: 'Academic Performance',
-    value: '55%',
-    numericValue: 55,
-    unit: '%',
-    severity: 'medium',
-    weeklyData: [62, 58, 56, 55],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    value: '0',
+    numericValue: 0,
+    unit: '',
+    severity: 'low',
+    weeklyData: [],
+    weekLabelsAr: [],
+    weekLabelsEn: [],
     thresholds: { low: 70, medium: 55, high: 40, critical: 25, max: 100 },
-    contextualEvents: [
-      { date: '2026-04-15', descriptionAr: 'اختبار CS101 القصير 4: 50%', descriptionEn: 'CS101 Quiz 4 score: 50%' },
-      { date: '2026-04-08', descriptionAr: 'اختبار MATH201 القصير 3: 45%', descriptionEn: 'MATH201 Quiz 3 score: 45%' },
-      { date: '2026-04-01', descriptionAr: 'اختبار CS101 القصير 3: 62%', descriptionEn: 'CS101 Quiz 3 score: 62%' },
-    ],
+    awaitingDataAr: 'لم يتم عقد أي اختبار بعد — الفصل في أسبوعه الثاني',
+    awaitingDataEn: 'No exam has been held yet — the term is in week two',
+    contextualEvents: [],
     icon: BookOpen,
   },
   {
@@ -112,18 +229,24 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Cumulative GPA',
     categoryAr: 'الأداء الأكاديمي',
     categoryEn: 'Academic Performance',
-    value: '2.45',
-    numericValue: 2.45,
+    value: '4.83',
+    numericValue: 4.83,
     unit: 'GPA',
-    severity: 'medium',
-    weeklyData: [2.6, 2.55, 2.5, 2.45],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    thresholds: { low: 3.0, medium: 2.5, high: 2.0, critical: 1.5, max: 4.0 },
+    severity: 'low',
+    // The GPA does not move week to week — it moves term to term. The series
+    // is the digital twin's own (mockFaisal.semesterGPAs): the same eight graded
+    // terms, the same numbers, labelled by the term code the twin labels them
+    // with, so the two screens cannot disagree. Not passed through weekly():
+    // clamping a term series to the weeks elapsed in the running term is what
+    // flattened it to «الأسبوع 1 / الأسبوع 2».
+    trendUnit: 'semester',
+    weeklyData: mockFaisal.semesterGPAs.map(s => s.gpa),
+    weekLabelsAr: mockFaisal.semesterGPAs.map(s => s.semester),
+    weekLabelsEn: mockFaisal.semesterGPAs.map(s => s.semesterEn || s.semester),
+    // Out of 5, the Qassim scale — the old thresholds were a 4-point scale.
+    thresholds: { low: 4.5, medium: 3.75, high: 2.75, critical: 2.0, max: 5.0 },
     contextualEvents: [
-      { date: '2026-04-12', descriptionAr: 'نتيجة اختبار MATH201 النصفي: C-', descriptionEn: 'MATH201 midterm result: C-' },
-      { date: '2026-04-05', descriptionAr: 'نتيجة مشروع CS101: B-', descriptionEn: 'CS101 project result: B-' },
-      { date: '2026-03-28', descriptionAr: 'نتيجة اختبار PHYS101 النصفي: D+', descriptionEn: 'PHYS101 midterm result: D+' },
+      { date: dAgo(9), descriptionAr: 'المعدل 4.83 من 5 مستقر عبر ثمانية فصول مرصودة', descriptionEn: 'GPA 4.83 of 5, stable across eight graded semesters' },
     ],
     icon: GraduationCap,
   },
@@ -133,20 +256,17 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Missing Assignments',
     categoryAr: 'التسليمات',
     categoryEn: 'Submissions',
-    value: '30%',
-    numericValue: 30,
-    unit: '%',
-    severity: 'high',
-    weeklyData: [15, 20, 25, 30],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    value: '0',
+    numericValue: 0,
+    unit: '',
+    severity: 'low',
+    weeklyData: [],
+    weekLabelsAr: [],
+    weekLabelsEn: [],
     thresholds: { low: 0, medium: 15, high: 25, critical: 40, max: 50 },
-    contextualEvents: [
-      { date: '2026-04-16', descriptionAr: 'لم يُسلّم واجب CS101 — الموعد النهائي فات', descriptionEn: 'CS101 assignment not submitted — deadline passed' },
-      { date: '2026-04-11', descriptionAr: 'لم يُسلّم تقرير PHYS101 المعملي', descriptionEn: 'PHYS101 lab report not submitted' },
-      { date: '2026-04-06', descriptionAr: 'تأخر تسليم واجب MATH201 بيومين', descriptionEn: 'MATH201 homework submitted 2 days late' },
-      { date: '2026-03-30', descriptionAr: 'لم يُسلّم مشروع CS101 المرحلي', descriptionEn: 'CS101 milestone project not submitted' },
-    ],
+    awaitingDataAr: 'لا توجد واجبات مرفوعة بعد — الفصل في أسبوعه الثاني',
+    awaitingDataEn: 'No assignments posted yet — the term is in week two',
+    contextualEvents: [],
     icon: ClipboardList,
   },
   {
@@ -155,18 +275,16 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Performance Trajectory',
     categoryAr: 'الأداء الأكاديمي',
     categoryEn: 'Academic Performance',
-    value: 'متراجع',
-    numericValue: 75,
+    value: 'مستقر',
+    numericValue: 88,
     unit: '',
-    severity: 'high',
-    weeklyData: [85, 80, 78, 75],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    severity: 'low',
+    weeklyData: weekly([88, 87, 88, 88]),
+    weekLabelsAr: weekLabels([88, 87, 88, 88]),
+    weekLabelsEn: weekLabels([88, 87, 88, 88], true),
     thresholds: { low: 80, medium: 70, high: 55, critical: 40, max: 100 },
     contextualEvents: [
-      { date: '2026-04-14', descriptionAr: 'الاتجاه العام: انخفاض مستمر في 3 مقررات', descriptionEn: 'Trend: consistent decline across 3 courses' },
-      { date: '2026-04-07', descriptionAr: 'أداء الاختبار النصفي أقل من المتوقع', descriptionEn: 'Midterm performance below expectations' },
-      { date: '2026-03-31', descriptionAr: 'تراجع المشاركة الصفية بنسبة 40%', descriptionEn: 'Class participation dropped by 40%' },
+      { date: dAgo(2), descriptionAr: 'الاتجاه العام: أداء مستقر — الخطر من الحضور لا من الدرجات', descriptionEn: 'Trend: stable performance — the risk is attendance, not grades' },
     ],
     icon: BarChart3,
   },
@@ -176,13 +294,13 @@ const mockIndicators: Indicator[] = [
     nameEn: 'Academic Warnings',
     categoryAr: 'المخاطر الأكاديمية',
     categoryEn: 'Academic Risks',
-    value: '1',
-    numericValue: 1,
+    value: '0',
+    numericValue: 0,
     unit: '',
-    severity: 'medium',
-    weeklyData: [0, 0, 0, 1],
-    weekLabelsAr: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4'],
-    weekLabelsEn: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    severity: 'low',
+    weeklyData: weekly([0, 0, 0, 0]),
+    weekLabelsAr: weekLabels([0, 0, 0, 0]),
+    weekLabelsEn: weekLabels([0, 0, 0, 0], true),
     thresholds: { low: 0, medium: 1, high: 2, critical: 3, max: 4 },
     contextualEvents: [
       {
@@ -211,43 +329,23 @@ const severityFill: Record<Severity, string> = {
   critical: '#D92D20',
 };
 
-// Indicators where a higher numeric value means a *better* outcome (GPA-like).
-// Matches the inverted-gauge list so trend semantics and gauge zones stay consistent.
-const HIGHER_IS_BETTER_IDS = new Set(['G-02', 'G-04', 'G-07']);
-
 function getTrendDirection(data: number[]): 'up' | 'down' | 'flat' {
   if (data.length < 2) return 'flat';
-  const first = data[0];
   const last = data[data.length - 1];
-  const range = Math.max(...data) - Math.min(...data);
-  // Tolerance scales with the data range so tiny wiggles don't flip the label,
-  // but a clear 16.7→50 rise still registers as movement.
-  const tolerance = Math.max(range * 0.05, 0.001);
-  const diff = last - first;
-  if (diff > tolerance) return 'up';
-  if (diff < -tolerance) return 'down';
+  const prev = data[data.length - 2];
+  if (last > prev) return 'up';
+  if (last < prev) return 'down';
   return 'flat';
-}
-
-/** Maps raw direction to user-facing semantics. For absence/missing-assignments/
- *  warnings, an upward trend is *worsening*; for GPA-like indicators it's improving. */
-function getSemanticTrend(indicator: Indicator): 'improving' | 'declining' | 'stable' {
-  const dir = getTrendDirection(indicator.weeklyData);
-  if (dir === 'flat') return 'stable';
-  const higherIsBetter = HIGHER_IS_BETTER_IDS.has(indicator.id);
-  const wentUp = dir === 'up';
-  return wentUp === higherIsBetter ? 'improving' : 'declining';
 }
 
 // ── Threshold Gauge Component ─────────────────────────────────────────
 
 function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string, en: string) => string }) {
-  const { dir } = useLanguage();
   const { thresholds, numericValue } = indicator;
   const { max } = thresholds;
 
   // For GPA-like indicators where lower thresholds mean worse (inverted)
-  const isInverted = HIGHER_IS_BETTER_IDS.has(indicator.id);
+  const isInverted = indicator.id === 'G-02' || indicator.id === 'G-04' || indicator.id === 'G-07';
 
   const segments = isInverted
     ? [
@@ -265,10 +363,6 @@ function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string
       ];
 
   const markerPercent = Math.min(Math.max((numericValue / max) * 100, 2), 98);
-  // In RTL the flex segments render right-to-left, so a `left` offset would land
-  // the marker on the wrong zone. Mirror the offset so the marker tracks the
-  // visual order of segments regardless of direction.
-  const markerLeftPercent = dir === 'rtl' ? 100 - markerPercent : markerPercent;
 
   return (
     <div className="space-y-3">
@@ -291,10 +385,14 @@ function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string
           })}
         </div>
 
-        {/* Marker */}
+        {/* Marker — the segments are laid out by flex, so under RTL they run
+            right-to-left; a physical `left` put the needle at the mirror image
+            of its own value (4.83/5 landing under «حرج»). `insetInlineStart`
+            follows the same direction as the bar, and a zero-width centring
+            box needs no translate. */}
         <div
-          className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
-          style={{ left: `${markerLeftPercent}%` }}
+          className="absolute top-0 w-0 flex flex-col items-center"
+          style={{ insetInlineStart: `${markerPercent}%` }}
         >
           <div className="w-0.5 h-5 bg-gray-900 dark:bg-white" />
           <div className="mt-1 w-3 h-3 rotate-45 bg-gray-900 dark:bg-white rounded-sm -translate-y-0.5" />
@@ -320,6 +418,31 @@ function ThresholdGauge({ indicator, t }: { indicator: Indicator; t: (ar: string
 
 function TrendChart({ indicator, t }: { indicator: Indicator; t: (ar: string, en: string) => string }) {
   const { weeklyData } = indicator;
+
+  // A week-indexed series is cut to the weeks the term has actually lived
+  // (toElapsedWeeks). Two weeks in, that leaves two identical points, and a
+  // flat segment between them reads as a measured trend when nothing has been
+  // measured yet. Say so instead — the semester series (G-04) is unaffected.
+  const weeks = weeksElapsed();
+  if (indicator.trendUnit !== 'semester' && weeklyData.length < 3) {
+    return (
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          {t('اتجاه الأسابيع', 'Weekly Trend')}
+        </h3>
+        <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 p-8 text-center">
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            {weeks !== null
+              ? t(`لا يوجد اتجاه بعد — الفصل في أسبوعه ${weeks}.`, `No trend yet — the term is in week ${weeks}.`)
+              : t('لا يوجد اتجاه بعد — الفصل في بدايته.', 'No trend yet — the term has just started.')}
+          </p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {t('يظهر الخط بعد ثلاثة أسابيع من الرصد.', 'The line appears after three weeks of observation.')}
+          </p>
+        </div>
+      </div>
+    );
+  }
   const labels = t(indicator.weekLabelsAr.join(','), indicator.weekLabelsEn.join(',')).split(',');
 
   const svgW = 360;
@@ -357,7 +480,9 @@ function TrendChart({ indicator, t }: { indicator: Indicator; t: (ar: string, en
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-        {t('اتجاه 4 أسابيع', '4-Week Trend')}
+        {indicator.trendUnit === 'semester'
+          ? t(`اتجاه المعدل عبر ${indicator.weeklyData.length} فصول مرصودة`, `GPA across ${indicator.weeklyData.length} graded semesters`)
+          : t('اتجاه 4 أسابيع', '4-Week Trend')}
       </h3>
       <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full" aria-label={t('رسم بياني للاتجاه', 'Trend chart')}>
         {/* Grid lines */}
@@ -393,7 +518,9 @@ function TrendChart({ indicator, t }: { indicator: Indicator; t: (ar: string, en
               <circle cx={p.x} cy={p.y} r={4} fill={strokeColor} />
               <circle cx={p.x} cy={p.y} r={2} fill="white" />
               <text x={labelX} y={p.y - 10} textAnchor={labelAnchor} className="fill-gray-700 dark:fill-gray-300" fontSize={10} fontWeight={600}>
-                {indicator.unit === 'GPA' ? p.value.toFixed(2) : p.value}
+                {/* Two decimals at most — a computed percentage otherwise
+                    prints its full float (0.7799999999999998). */}
+                {indicator.unit === 'GPA' ? p.value.toFixed(2) : Number(p.value.toFixed(2))}
               </text>
               <text x={p.x} y={svgH - 6} textAnchor="middle" className="fill-gray-400 dark:fill-gray-500" fontSize={8}>
                 {labels[i]}
@@ -421,7 +548,7 @@ interface AbsenceCourse {
 }
 
 interface ProfileData {
-  profile?: { academic?: { cumulative_gpa?: number | string; last_recorded_gpa?: number | string; academic_status?: string } };
+  profile?: { name?: string; academic?: { cumulative_gpa?: number | string; last_recorded_gpa?: number | string; academic_status?: string } };
   academic?: { cumulative_gpa?: number | string; last_recorded_gpa?: number | string; academic_status?: string };
 }
 
@@ -430,37 +557,9 @@ interface TransactionSemester {
   semester_gpa?: number | string;
 }
 
-interface WarningRecord {
-  semester?: string;
-  reason_ar?: string;
-  reason_en?: string;
-  entry_date?: string;
-}
-
-interface WarningAutoSession {
-  advisor_name?: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  status_ar?: string;
-  status_en?: string;
-}
-
-interface WarningEscalation {
-  /** 'follow_up' → amber early-warning; 'dismissal_risk' → red, with auto session. */
-  level?: 'follow_up' | 'dismissal_risk' | string;
-  headline_ar?: string;
-  headline_en?: string;
-  message_ar?: string;
-  message_en?: string;
-  auto_session?: WarningAutoSession;
-}
-
 interface WarningsResponse {
   student_id?: string;
   warning_count?: number;
-  warnings?: WarningRecord[];
-  escalation?: WarningEscalation;
 }
 
 interface HaltRecord {
@@ -534,6 +633,9 @@ function classifyContents(courses: CurrentCourseShape[], contentResults: Array<{
 /** S-01 — visible assignments per course, with the assignment titles as events. */
 function overrideAssignmentsIndicator(base: Indicator, classified: ClassifiedContent[] | null): Indicator {
   if (!classified || classified.length === 0) return base;
+  // Nothing submitted yet this term — published Blackboard assignments are not
+  // the student's own submissions, and their synthetic ramp is not a trend.
+  if (base.awaitingDataAr) return base;
 
   const total = classified.reduce((a, c) => a + c.assignments.length, 0);
 
@@ -573,6 +675,9 @@ function overrideAssignmentsIndicator(base: Indicator, classified: ClassifiedCon
  *  Live scores require Blackboard 3LO so the value is the visible count, not an average. */
 function overrideExamsIndicator(base: Indicator, classified: ClassifiedContent[] | null): Indicator {
   if (!classified || classified.length === 0) return base;
+  // Nothing sat yet this term — a count of published Blackboard items is not
+  // an exam average, and its synthetic ramp is not a trend.
+  if (base.awaitingDataAr) return base;
 
   const total = classified.reduce((a, c) => a + c.exams.length, 0);
   const severity: Severity = total >= 8 ? 'high' : total >= 4 ? 'medium' : 'low';
@@ -624,15 +729,6 @@ function overrideWarningsIndicator(
     count >= 3 ? 'critical' : count === 2 ? 'high' : count === 1 ? 'medium' : 'low';
 
   const events: ContextualEvent[] = [];
-
-  for (const w of warnings?.warnings ?? []) {
-    const date = String(w.entry_date ?? '').slice(0, 10) || (w.semester ? String(w.semester) : '—');
-    events.push({
-      date,
-      descriptionAr: `إنذار أكاديمي${w.semester ? ` (الفصل ${w.semester})` : ''}: ${w.reason_ar ?? ''}`,
-      descriptionEn: `Academic warning${w.semester ? ` (Term ${w.semester})` : ''}: ${w.reason_en ?? ''}`,
-    });
-  }
 
   for (const h of halts ?? []) {
     const date = String(h.entry_date ?? '').slice(0, 10) || '—';
@@ -727,14 +823,15 @@ function overrideAbsenceIndicator(base: Indicator, absences: AbsenceCourse[] | n
   // Build contextual events from the most recent absence dates across courses
   const recentAbsences: ContextualEvent[] = absences
     .flatMap(c => {
+      // The code alone: the course names SIS returns are long enough to wrap
+      // the row twice, and the code is what the student's schedule calls it.
       const courseLabel = c.cource_code ?? c.course_code ?? '';
-      const courseName = c.cource_name ?? c.course_name ?? '';
       return (c.absences ?? [])
         .filter(a => a.absence_date)
         .map(a => ({
           date: String(a.absence_date).slice(0, 10),
-          descriptionAr: `غياب عن ${courseLabel}${courseName ? ` — ${courseName}` : ''}${Number(a.absence_excused) ? ' (بعذر)' : ''}`,
-          descriptionEn: `Missed ${courseLabel}${courseName ? ` — ${courseName}` : ''}${Number(a.absence_excused) ? ' (excused)' : ''}`,
+          descriptionAr: `غياب عن ${courseLabel}${Number(a.absence_excused) ? ' (بعذر)' : ''}`,
+          descriptionEn: `Missed ${courseLabel}${Number(a.absence_excused) ? ' (excused)' : ''}`,
         }));
     })
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -748,7 +845,13 @@ function overrideAbsenceIndicator(base: Indicator, absences: AbsenceCourse[] | n
     value: `${avg.toFixed(0)}%`,
     numericValue: Math.round(avg),
     severity,
-    weeklyData: pcts.length >= 4 ? pcts.slice(0, 4) : [Math.max(0, avg - 6), Math.max(0, avg - 4), Math.max(0, avg - 2), avg],
+    // Rounded to two decimals: the synthetic ramp below is float arithmetic on
+    // a percentage, and its raw output (0.7799999999999998) reaches the chart
+    // labels.
+    weeklyData: (pcts.length >= 4
+      ? pcts.slice(0, 4)
+      : [Math.max(0, avg - 6), Math.max(0, avg - 4), Math.max(0, avg - 2), avg]
+    ).map(v => Math.round(v * 100) / 100),
     contextualEvents: recentAbsences.length > 0 ? recentAbsences : base.contextualEvents,
   };
 }
@@ -760,39 +863,34 @@ function overrideGpaIndicator(
   transactions: TransactionSemester[] | null,
 ): Indicator {
   const academic = profile?.profile?.academic ?? profile?.academic ?? null;
-  const cumulativeRaw = academic
+  const cumulative = academic
     ? parseFloat(String(academic.last_recorded_gpa ?? academic.cumulative_gpa ?? '0'))
     : 0;
+  if (cumulative === 0 && (!transactions || transactions.length === 0)) return base;
 
   const semesterGpas = (transactions ?? [])
     .map(s => parseFloat(String(s.semester_gpa ?? '0')))
     .filter(n => !Number.isNaN(n) && n > 0);
+  // Every graded term, labelled by its own code — the twin's chart exactly.
+  // Fewer than two graded terms is not a trend: keep the seeded series.
+  const gradedTerms = (transactions ?? [])
+    .filter(s => parseFloat(String(s.semester_gpa ?? '0')) > 0)
+    .sort((a, b) => String(a.semester ?? '').localeCompare(String(b.semester ?? '')));
+  const trendData = semesterGpas.length >= 2
+    ? gradedTerms.map(s => parseFloat(String(s.semester_gpa ?? '0')))
+    : base.weeklyData;
+  const trendLabels = semesterGpas.length >= 2
+    ? gradedTerms.map(s => String(s.semester ?? ''))
+    : base.weekLabelsAr;
 
-  // Fall back to the most recent semester GPA when the cumulative isn't on
-  // file yet, so the card doesn't read 0.00 GPA while the chart shows real
-  // semester GPAs alongside it.
-  const cumulative = cumulativeRaw > 0
-    ? cumulativeRaw
-    : (semesterGpas.length > 0 ? semesterGpas[semesterGpas.length - 1] : 0);
+  const severity: Severity =
+    cumulative === 0 ? base.severity
+    : cumulative >= 3.5 ? 'low'
+    : cumulative >= 2.5 ? 'medium'
+    : cumulative >= 2.0 ? 'high'
+    : 'critical';
 
-  if (cumulative === 0 && semesterGpas.length === 0) return base;
-
-  const trendData = semesterGpas.length >= 2 ? semesterGpas.slice(-4) : [cumulative, cumulative, cumulative, cumulative];
-
-  // Detect a 5-point grading scale (Saudi system) by looking at the largest
-  // observed value; swap to matching thresholds so the gauge zones line up
-  // with the actual data range.
-  const maxObserved = Math.max(cumulative, ...trendData);
-  const isFivePointScale = maxObserved > 4;
-  const thresholds = isFivePointScale
-    ? { low: 4.5, medium: 3.75, high: 2.75, critical: 2.0, max: 5.0 }
-    : base.thresholds;
-
-  const severity: Severity = isFivePointScale
-    ? (cumulative >= 4.5 ? 'low' : cumulative >= 3.75 ? 'medium' : cumulative >= 2.75 ? 'high' : 'critical')
-    : (cumulative >= 3.5 ? 'low' : cumulative >= 2.5 ? 'medium' : cumulative >= 2.0 ? 'high' : 'critical');
-
-  const events: ContextualEvent[] = (transactions ?? [])
+  const events: ContextualEvent[] = gradedTerms
     .slice(-3)
     .reverse()
     .map(s => ({
@@ -806,109 +904,24 @@ function overrideGpaIndicator(
     value: cumulative.toFixed(2),
     numericValue: cumulative,
     severity,
-    thresholds,
+    trendUnit: 'semester',
     weeklyData: trendData,
-    weekLabelsAr: trendData.map((_, i) => `الفصل ${i + 1}`),
-    weekLabelsEn: trendData.map((_, i) => `Semester ${i + 1}`),
+    weekLabelsAr: trendLabels,
+    weekLabelsEn: semesterGpas.length >= 2 ? trendLabels : base.weekLabelsEn,
     contextualEvents: events.length > 0 ? events : base.contextualEvents,
   };
 }
 
-// ── Academic-standing escalation banner ───────────────────────────────
-//
-// Surfaced above the indicator tabs whenever the active student has an
-// academic-standing escalation. 'follow_up' (1 warning) shows an amber
-// early-warning; 'dismissal_risk' (2 warnings) shows a red banner plus the
-// advising session the platform auto-booked to head off a third warning.
-function EscalationBanner({
-  escalation,
-  t,
-  Chevron,
-}: {
-  escalation: WarningEscalation;
-  t: (ar: string, en: string) => string;
-  Chevron: typeof ChevronRight;
-}) {
-  const isCritical = escalation.level === 'dismissal_risk';
-  const session = escalation.auto_session;
-
-  const tone = isCritical
-    ? {
-        border: 'border-red-300 dark:border-red-700',
-        bg: 'bg-red-50 dark:bg-red-950/40',
-        icon: 'text-red-600 dark:text-red-400',
-        title: 'text-red-800 dark:text-red-300',
-        body: 'text-red-700 dark:text-red-300/90',
-      }
-    : {
-        border: 'border-amber-300 dark:border-amber-700',
-        bg: 'bg-amber-50 dark:bg-amber-950/40',
-        icon: 'text-amber-600 dark:text-amber-400',
-        title: 'text-amber-800 dark:text-amber-300',
-        body: 'text-amber-700 dark:text-amber-300/90',
-      };
-
-  return (
-    <div className={`mb-6 rounded-xl border ${tone.border} ${tone.bg} p-5`}>
-      <div className="flex items-start gap-3">
-        {isCritical
-          ? <ShieldAlert className={`w-6 h-6 shrink-0 mt-0.5 ${tone.icon}`} />
-          : <AlertTriangle className={`w-6 h-6 shrink-0 mt-0.5 ${tone.icon}`} />}
-        <div className="flex-1 min-w-0">
-          <h3 className={`text-base font-bold ${tone.title}`}>
-            {t(escalation.headline_ar ?? '', escalation.headline_en ?? '')}
-          </h3>
-          <p className={`mt-1 text-sm leading-relaxed ${tone.body}`}>
-            {t(escalation.message_ar ?? '', escalation.message_en ?? '')}
-          </p>
-
-          {session && (
-            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-red-500" />
-                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  {t('جلسة إرشادية محجوزة تلقائيًا', 'Auto-booked advising session')}
-                </span>
-              </div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                {[session.advisor_name, session.date, session.time].filter(Boolean).join(' · ')}
-              </span>
-              {session.location && (
-                <span className="text-sm text-gray-500 dark:text-gray-400">{session.location}</span>
-              )}
-              <span className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                {t(session.status_ar ?? 'مؤكدة', session.status_en ?? 'Confirmed')}
-              </span>
-            </div>
-          )}
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link
-              to="/contact-advisor"
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-white transition-colors ${isCritical ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}`}
-            >
-              <MessageCircle className="w-4 h-4" />
-              {t('تواصل مع المرشد', 'Contact Advisor')}
-              <Chevron className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/action-plan"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-            >
-              <Lightbulb className="w-4 h-4" />
-              {t('عرض خطة المعالجة', 'View Action Plan')}
-              <Chevron className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function IndicatorDetail() {
   const { t, dir } = useLanguage();
-  const [selectedId, setSelectedId] = useState(mockIndicators[0].id);
+  const [searchParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState(searchParams.get('id') ?? mockIndicators[0].id);
+  const riskResult = useRiskMe<EngineRiskDetail | null>(null);
+  const engine = riskResult.source === 'api' && riskResult.data?.scored ? riskResult.data : null;
+  // The two panels that sit beside the indicators rather than being one: the
+  // student's own digital record and their own learning-platform loop. Neither
+  // takes a student id here — the APIs scope to the viewer.
+  const [panel, setPanel] = useState<'indicator' | 'record'>('indicator');
 
   const profileResult = useStudentProfile<ProfileData | null>(null);
   const absencesResult = useAbsences<AbsenceCourse[] | null>(null);
@@ -955,20 +968,13 @@ export default function IndicatorDetail() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseList, contentQueries.map(q => q.data).join('|')]);
 
-  const sources = [
-    profileResult.source,
-    absencesResult.source,
-    transactionsResult.source,
-    warningsResult.source,
-    haltsResult.source,
-    penaltiesResult.source,
-    coursesResult.source,
-  ];
-  const overallSource = sources.includes('api') ? ('api' as const) : ('mock' as const);
-
   const indicators = useMemo<Indicator[]>(() => {
+    if (engine) {
+      const fromEngine = indicatorsFromEngine(engine);
+      if (fromEngine.length) return fromEngine;
+    }
     return mockIndicators.map(ind => {
-      if (ind.id === 'A-01' && absencesResult.source === 'api') {
+      if (ind.id === 'A-01' && !USE_FIXTURE_ABSENCES && absencesResult.source === 'api') {
         return overrideAbsenceIndicator(ind, absencesResult.data);
       }
       if (ind.id === 'G-04' && (profileResult.source === 'api' || transactionsResult.source === 'api')) {
@@ -997,6 +1003,7 @@ export default function IndicatorDetail() {
       return ind;
     });
   }, [
+    engine,
     profileResult.source, profileResult.data,
     absencesResult.source, absencesResult.data,
     transactionsResult.source, transactionsResult.data,
@@ -1007,15 +1014,10 @@ export default function IndicatorDetail() {
   ]);
 
   const selected = indicators.find((ind) => ind.id === selectedId) ?? indicators[0];
+  const awaitingData = Boolean(selected.awaitingDataAr && selected.awaitingDataEn);
   const sev = severityConfig[selected.severity];
-  const trend = getSemanticTrend(selected);
+  const trend = getTrendDirection(selected.weeklyData);
   const Chevron = dir === 'rtl' ? ChevronLeft : ChevronRight;
-
-  // Academic-standing escalation for the active student — drives the banner
-  // shown above the indicator tabs (early-warning at 1, dismissal-risk at 2).
-  const escalation = warningsResult.source === 'api'
-    ? (warningsResult.data?.escalation ?? null)
-    : null;
 
   return (
     <div>
@@ -1031,11 +1033,7 @@ export default function IndicatorDetail() {
           { label: t('تفاصيل المؤشر', 'Indicator Detail') },
         ]}
         accentColor="bg-sa-500"
-        actions={<DataSourceBadge source={overallSource} />}
       />
-
-      {/* ── Academic-standing escalation banner ─────────────── */}
-      {escalation && <EscalationBanner escalation={escalation} t={t} Chevron={Chevron} />}
 
       {/* ── Indicator Selector Tabs ─────────────────────────── */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-8 overflow-x-auto scrollbar-hide">
@@ -1047,9 +1045,9 @@ export default function IndicatorDetail() {
             return (
               <button
                 key={ind.id}
-                onClick={() => setSelectedId(ind.id)}
+                onClick={() => { setSelectedId(ind.id); setPanel('indicator'); }}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  isActive
+                  isActive && panel === 'indicator'
                     ? 'border-sa-500 text-sa-700 dark:text-sa-400'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
@@ -1062,10 +1060,36 @@ export default function IndicatorDetail() {
               </button>
             );
           })}
+
+          <button
+            onClick={() => setPanel('record')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+              panel === 'record'
+                ? 'border-sa-500 text-sa-700 dark:text-sa-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>{t('السجل الرقمي', 'Digital Record')}</span>
+          </button>
+
+          {/* On the student's own board this is not a panel: it hands her over
+              to her courses on the learning platform itself. The advisor's
+              digital twin keeps the in-page LearningPlatform view. */}
+          <a
+            href="/qspark/dashboard-student/courses"
+            className="flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span>{t('منصة التعلم والتجربة الأكاديمية', 'Learning Platform')}</span>
+          </a>
         </div>
       </div>
 
+      {panel === 'record' && <DigitalRecordFrame />}
+
       {/* ── Main Content Grid ───────────────────────────────── */}
+      {panel === 'indicator' && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* ── Left: Indicator Card + Gauge ──────────────────── */}
@@ -1075,8 +1099,12 @@ export default function IndicatorDetail() {
           <div className={`rounded-xl border ${sev.border} ${sev.bg} p-6 space-y-4`}>
             <div className="flex items-start justify-between">
               <div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${sev.bg} ${sev.color} border ${sev.border}`}>
-                  {t(sev.labelAr, sev.labelEn)}
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  awaitingData
+                    ? 'bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600'
+                    : `${sev.bg} ${sev.color} ${sev.border}`
+                } border`}>
+                  {awaitingData ? t('لا توجد بيانات بعد', 'No data yet') : t(sev.labelAr, sev.labelEn)}
                 </span>
                 <h2 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
                   {t(selected.nameAr, selected.nameEn)}
@@ -1090,22 +1118,26 @@ export default function IndicatorDetail() {
 
             {/* Current Value */}
             <div className="text-center py-3">
-              <span className={`text-5xl font-extrabold tracking-tight ${sev.color}`}>
-                {selected.id === 'G-07' ? t('متراجع', 'Declining') : selected.value}
+              <span className={`text-5xl font-extrabold tracking-tight ${awaitingData ? 'text-gray-300 dark:text-gray-600' : sev.color}`}>
+                {selected.value}
               </span>
-              {selected.unit && selected.id !== 'G-07' && (
+              {selected.unit && !awaitingData && (
                 <span className="ms-1 text-lg text-gray-500 dark:text-gray-400">{selected.unit}</span>
               )}
             </div>
 
-            {/* Trend badge */}
+            {/* Trend badge — a value that was never measured has no trend */}
             <div className="flex items-center justify-center gap-1.5 text-sm">
-              {trend === 'declining' ? (
+              {awaitingData ? (
+                <span className="text-gray-500 dark:text-gray-400 font-medium text-center px-2">
+                  {t(selected.awaitingDataAr!, selected.awaitingDataEn!)}
+                </span>
+              ) : trend === 'down' ? (
                 <>
                   <TrendingDown className="w-4 h-4 text-red-500" />
                   <span className="text-red-600 dark:text-red-400 font-medium">{t('في تراجع', 'Declining')}</span>
                 </>
-              ) : trend === 'improving' ? (
+              ) : trend === 'up' ? (
                 <>
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
                   <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t('في تحسّن', 'Improving')}</span>
@@ -1119,10 +1151,12 @@ export default function IndicatorDetail() {
             </div>
           </div>
 
-          {/* Threshold Gauge */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
-            <ThresholdGauge indicator={selected} t={t} />
-          </div>
+          {/* Threshold Gauge — omitted until there is a value to place on it */}
+          {!awaitingData && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+              <ThresholdGauge indicator={selected} t={t} />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -1139,7 +1173,7 @@ export default function IndicatorDetail() {
               className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm transition-colors border border-gray-200 dark:border-gray-700 shadow-sm"
             >
               <MessageCircle className="w-4 h-4" />
-              {t('تحدّث مع QMentor', 'Chat with QMentor')}
+              {t('تحدّث مع +QSpark', 'Chat with QSpark+')}
               <Chevron className="w-4 h-4" />
             </Link>
           </div>
@@ -1166,6 +1200,13 @@ export default function IndicatorDetail() {
             </div>
 
             <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+              {selected.contextualEvents.length === 0 && (
+                <p className="py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                  {awaitingData
+                    ? t(selected.awaitingDataAr!, selected.awaitingDataEn!)
+                    : t('لا توجد أحداث مسجّلة', 'No events recorded')}
+                </p>
+              )}
               {selected.contextualEvents.map((event, i) => (
                 <div key={i} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                   <div className="shrink-0 mt-0.5 w-2 h-2 rounded-full" style={{ backgroundColor: severityFill[selected.severity] }} />
@@ -1183,22 +1224,30 @@ export default function IndicatorDetail() {
           </div>
 
           {/* Summary insight */}
-          <div className={`rounded-xl border ${sev.border} ${sev.bg} p-4 flex items-start gap-3`}>
-            <Activity className={`w-5 h-5 shrink-0 mt-0.5 ${sev.color}`} />
+          <div className={`rounded-xl border p-4 flex items-start gap-3 ${
+            awaitingData
+              ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+              : `${sev.border} ${sev.bg}`
+          }`}>
+            <Activity className={`w-5 h-5 shrink-0 mt-0.5 ${awaitingData ? 'text-gray-400' : sev.color}`} />
             <div>
-              <p className={`text-sm font-semibold ${sev.color}`}>
+              <p className={`text-sm font-semibold ${awaitingData ? 'text-gray-600 dark:text-gray-300' : sev.color}`}>
                 {t('ملخص المؤشر', 'Indicator Summary')}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-                {t(
-                  `المؤشر ${selected.id} (${selected.nameAr}) بقيمة حالية ${selected.value} ومستوى ${sev.labelAr}. يُظهر الاتجاه ${trend === 'declining' ? 'تراجعاً' : trend === 'improving' ? 'تحسّناً' : 'استقراراً'} خلال الأسابيع الأربعة الماضية. يوجد ${selected.contextualEvents.length} أحداث سياقية مسجّلة.`,
-                  `Indicator ${selected.id} (${selected.nameEn}) has a current value of ${selected.value} at ${sev.labelEn} level. The trend shows ${trend === 'declining' ? 'a decline' : trend === 'improving' ? 'improvement' : 'stability'} over the past 4 weeks. There are ${selected.contextualEvents.length} contextual events recorded.`
+                {awaitingData ? t(
+                  `المؤشر ${selected.id} (${selected.nameAr}) — ${selected.awaitingDataAr}. سيظهر المتوسط والاتجاه بعد رصد أول درجة.`,
+                  `Indicator ${selected.id} (${selected.nameEn}) — ${selected.awaitingDataEn}. The average and its trend appear once a first score is recorded.`
+                ) : t(
+                  `المؤشر ${selected.id} (${selected.nameAr}) بقيمة حالية ${selected.value} ومستوى ${sev.labelAr}. يُظهر الاتجاه ${trend === 'down' ? 'تراجعاً' : trend === 'up' ? 'تحسّناً' : 'استقراراً'} خلال الأسابيع الأربعة الماضية. يوجد ${selected.contextualEvents.length} أحداث سياقية مسجّلة.`,
+                  `Indicator ${selected.id} (${selected.nameEn}) has a current value of ${selected.value} at ${sev.labelEn} level. The trend shows ${trend === 'down' ? 'a decline' : trend === 'up' ? 'improvement' : 'stability'} over the past 4 weeks. There are ${selected.contextualEvents.length} contextual events recorded.`
                 )}
               </p>
             </div>
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AnimatedTab from '../../components/shared/AnimatedTab';
-import { BarChart3, ClipboardList, TrendingUp, ShieldCheck, Bot, CalendarDays, User, ArrowRight, BookOpen, Printer } from 'lucide-react';
+import { BarChart3, ClipboardList, TrendingUp, ShieldCheck, Bot, CalendarDays, User, ArrowRight, BookOpen, Printer, FileText, GraduationCap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import StudentHeader from './components/StudentHeader';
 import AcademicPerformance from './components/AcademicPerformance';
@@ -12,6 +12,10 @@ import AIRecommendations from './components/AIRecommendations';
 import QuEvents from './components/QuEvents';
 import ActivityTimeline from './components/ActivityTimeline';
 import StudentSelector from './components/StudentSelector';
+import DigitalRecordFrame from './components/DigitalRecordFrame';
+import LearningPlatform from './components/LearningPlatform';
+import { buildMockQSparkSummary } from './data/mockLearningPlatform';
+import { useRole } from '../../contexts/RoleContext';
 import DataSourceBadge from '../../components/shared/DataSourceBadge';
 import { mockStudent } from './data/mockStudent';
 import type { StudentListItem } from './data/mockStudentList';
@@ -19,7 +23,7 @@ import { useStudentProfile, useCurrentCourses, useAcademicTransactions, useAbsen
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { StudentProfile, SemesterGPA, Course } from './types';
 
-type TabKey = 'academic' | 'courses' | 'studyplan' | 'behavioral' | 'risk' | 'recommendations' | 'timeline';
+type TabKey = 'academic' | 'courses' | 'studyplan' | 'behavioral' | 'risk' | 'recommendations' | 'timeline' | 'record' | 'learning';
 
 const tabs: { key: TabKey; label: string; labelEn: string; icon: LucideIcon }[] = [
   { key: 'academic', label: 'الأداء الأكاديمي', labelEn: 'Academic Performance', icon: BarChart3 },
@@ -29,6 +33,8 @@ const tabs: { key: TabKey; label: string; labelEn: string; icon: LucideIcon }[] 
   { key: 'risk', label: 'تقييم المخاطر', labelEn: 'Risk Assessment', icon: ShieldCheck },
   { key: 'recommendations', label: 'التوصيات', labelEn: 'Recommendations', icon: Bot },
   { key: 'timeline', label: 'السجل الزمني', labelEn: 'Timeline', icon: CalendarDays },
+  { key: 'record', label: 'السجل الرقمي', labelEn: 'Digital Record', icon: FileText },
+  { key: 'learning', label: 'منصة التعلم والتجربة الأكاديمية', labelEn: 'Learning Platform', icon: GraduationCap },
 ];
 
 // API profile response: { profile: { id, name, name_en, student_id, academic: { cumulative_gpa, last_recorded_gpa, total_plan_hours, total_earned_hours, current_registered_hours, remaining_hours_to_graduate, academic_status }, major: { name, name_en }, faculty: { name, name_en } } }
@@ -323,6 +329,10 @@ function TwinContent({
   lastGradedSemester: { semester: string; courses: Course[] } | null;
 }) {
   const { lang } = useLanguage();
+  const { role } = useRole();
+  // Faculty never see the السجل الرقمي tab — the record is the student's (and the admin previewing them).
+  const hideRecord = role === 'advisor' || role === 'instructor';
+  const visibleTabs = hideRecord ? tabs.filter(tb => tb.key !== 'record') : tabs;
   return (
     <div className="space-y-6">
       {/* Data source badge */}
@@ -343,7 +353,7 @@ function TwinContent({
       {/* Tab Navigation — icon + underline */}
       <div className="border-b border-gray-200 dark:border-gray-700 print:hidden">
         <div className="flex overflow-x-auto gap-5 scrollbar-hide">
-          {tabs.map(tab => (
+          {visibleTabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -391,6 +401,16 @@ function TwinContent({
         )}
         {activeTab === 'timeline' && (
           <ActivityTimeline events={mockStudent.timeline} />
+        )}
+        {activeTab === 'record' && !hideRecord && (
+          <DigitalRecordFrame studentId={profile.studentId} />
+        )}
+        {activeTab === 'learning' && (
+          <LearningPlatform
+            studentId={profile.studentId}
+            studentName={profile.name}
+            fallbackSummary={buildMockQSparkSummary(profile)}
+          />
         )}
       </AnimatedTab>
     </div>

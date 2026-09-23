@@ -72,11 +72,14 @@ interface ApiComparison {
 }
 
 // Fallback list shown only when /majors/my-faculty hasn't resolved.
+// The live student is an Accounting major in الأعمال والاقتصاد, so the
+// stand-in majors are her faculty's sister programs — the shared business
+// core (levels 1–3) is what transfers.
 const fallbackMajorOptions: MajorOption[] = [
-  { id: 'it', nameAr: 'تقنية المعلومات', nameEn: 'Information Technology', totalCredits: 132, transferableCredits: 70 },
-  { id: 'is', nameAr: 'نظم المعلومات', nameEn: 'Information Systems', totalCredits: 130, transferableCredits: 65 },
-  { id: 'ce', nameAr: 'هندسة الحاسب', nameEn: 'Computer Engineering', totalCredits: 140, transferableCredits: 60 },
-  { id: 'se', nameAr: 'هندسة البرمجيات', nameEn: 'Software Engineering', totalCredits: 136, transferableCredits: 75 },
+  { id: 'fin', nameAr: 'التمويل', nameEn: 'Finance', totalCredits: 129, transferableCredits: 52 },
+  { id: 'mis', nameAr: 'نظم المعلومات الإدارية', nameEn: 'Management Information Systems', totalCredits: 129, transferableCredits: 49 },
+  { id: 'bus', nameAr: 'إدارة الأعمال', nameEn: 'Business Administration', totalCredits: 129, transferableCredits: 52 },
+  { id: 'econ', nameAr: 'الاقتصاد', nameEn: 'Economics', totalCredits: 129, transferableCredits: 46 },
 ];
 
 export default function WhatIfSimulator({ profile, courses }: Props) {
