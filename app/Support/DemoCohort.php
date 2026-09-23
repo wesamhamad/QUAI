@@ -159,10 +159,11 @@ final class DemoCohort
                 $id = '4431'.str_pad((string) $n, 5, '0', STR_PAD_LEFT);
                 $gender = mt_rand(1, 100) <= 55 ? 1 : 2;
                 $first = $gender === 1 ? mt_rand(0, count($male) - 1) : mt_rand(0, count($female) - 1);
+                // Given name and father's name only — no family or tribal name
+                // anywhere in the demo, so no invented person can resemble a real one.
                 $father = mt_rand(0, count($male) - 1);
-                $family = mt_rand(0, count($male) - 1);
-                $name = ($gender === 1 ? $male[$first] : $female[$first]).' '.$male[$father].' '.$male[$family];
-                $nameEn = ($gender === 1 ? $maleEn[$first] : $femaleEn[$first]).' '.$maleEn[$father].' '.$maleEn[$family];
+                $name = ($gender === 1 ? $male[$first] : $female[$first]).' '.$male[$father];
+                $nameEn = ($gender === 1 ? $maleEn[$first] : $femaleEn[$first]).' '.$maleEn[$father];
                 $level = [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8][mt_rand(0, 12)];
                 $gpa = max(1.20, min(5.00, round(3.35 + self::gauss() * 0.75, 2)));
                 $rows[$id] = self::build($id, [
@@ -267,7 +268,10 @@ final class DemoCohort
 
         $student = [
             'student_id' => $id,
-            'name' => $seed['name'], 'name_en' => $seed['name_en'], 'gender' => $seed['gender'],
+            // Two tokens at most (given name + father's name): the boards never show a family name.
+            'name' => implode(' ', array_slice(preg_split('/\s+/u', trim($seed['name'])), 0, 2)),
+            'name_en' => implode(' ', array_slice(preg_split('/\s+/u', trim($seed['name_en'])), 0, 2)),
+            'gender' => $seed['gender'],
             'email' => $id.'@example.edu', 'mobile' => '05'.substr(str_pad((string) crc32($id), 8, '0', STR_PAD_LEFT), 0, 8),
             'faculty_no' => $seed['faculty_no'], 'faculty_name' => $faculty['name'], 'faculty_name_en' => $faculty['name_en'],
             'dept_no' => $seed['major_no'], 'dept_name' => $faculty['depts'][$seed['major_no']] ?? $major,
