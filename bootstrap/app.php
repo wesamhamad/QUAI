@@ -83,7 +83,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Redirect unauthenticated requests to the matching login form:
         // QSPARK routes to the QSPARK login, everything else to QUAI's.
-        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('qspark*')
+        // Note: /qspark-plus is the QMentor SPA, not QSPARK, so it uses QUAI's login.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('qspark', 'qspark/*')
             ? route('qspark.login')
             : route('demo.login'));
     })
