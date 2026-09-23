@@ -80,7 +80,15 @@
             <div class="q-sub-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--q-space-4);">
 
                 @if($showQMentor)
-                <a href="/qmentor?tab=advisor&solo=1" class="q-sub-card" data-tone="green">
+                @php
+                    // Q Mentor opens what the live site opens: the proactive-advising
+                    // board for the admin, the advisor desk for faculty, and the
+                    // student's own advisor view otherwise.
+                    $qmentorHref = $isAdmin
+                        ? \App\Filament\Pages\ProactiveAdvisingDashboard::getUrl()
+                        : ($isFaculty ? '/qspark-plus/advisor-dashboard' : '/qspark-plus?tab=advisor&solo=1');
+                @endphp
+                <a href="{{ $qmentorHref }}" class="q-sub-card" data-tone="green">
                     <div class="q-sub-card-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--q-primary);">
                             <circle cx="10" cy="7" r="3.2"/>
