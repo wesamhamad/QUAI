@@ -883,6 +883,7 @@ return [
     'admin_system' => 'النظام الإداري',
     'qspark_card_title' => 'Q SPARK',
     'qspark_card_desc' => 'منصة تعلم ذكية للطلاب وأعضاء هيئة التدريس — اختبارات وتتبع تقدم ومساعد ذكي.',
+    'qspark_card_role_hint' => 'تُفتح بحسابك الحالي مباشرة دون تسجيل دخول إضافي.',
     'qmentor_title' => 'Q Mentor',
     'qmentor_desc' => 'مرشد شخصي ذكي يوجّه الطلاب في خططهم الدراسية وقراراتهم الأكاديمية.',
     'digital_record_subtitle' => 'سجلك الرقمي',

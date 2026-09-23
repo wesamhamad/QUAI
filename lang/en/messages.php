@@ -880,6 +880,7 @@ return [
     'admin_system' => 'Administrative System',
     'qspark_card_title' => 'Q SPARK',
     'qspark_card_desc' => 'Smart learning platform for students and faculty — quizzes, progress tracking, and AI assistance.',
+    'qspark_card_role_hint' => 'Opens with your current account — no extra sign-in.',
     'qmentor_title' => 'Q Mentor',
     'qmentor_desc' => 'Personal AI mentor that guides students through study plans and academic decisions.',
     'digital_record_subtitle' => 'Digital Record',
