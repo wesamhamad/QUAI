@@ -27,16 +27,122 @@ final class DemoFacultyContent
         ];
     }
 
+    /**
+     * The roster — 25 invented students, the single source of every faculty
+     * figure: the per-course counts, the dashboard total, the GPA and
+     * attendance distributions, the students page and the reports.
+     *
+     * @return array<int, array{0: string, 1: string, 2: int, 3: float, 4: int}> [student_id, name, course index, GPA, attendance %]
+     */
+    public static function students(): array
+    {
+        return [
+            // ACCT201 — Financial Accounting (7 students)
+            ['444000001', 'نورة عبدالله سعد', 0, 4.90, 98],
+            ['444000002', 'ريم خالد',          0, 4.60, 95],
+            ['444000003', 'لينا فهد',          0, 4.20, 92],
+            ['444000004', 'دانة سعد',          0, 3.90, 88],
+            ['444000005', 'هاجر يوسف',         0, 3.40, 80],
+            ['444000006', 'بدور ناصر',         0, 2.60, 70],
+            ['444000007', 'تالا محمد',         0, 4.75, 91],
+            // ACCT305 — Managerial Accounting (6 students)
+            ['444000008', 'جوان عبدالعزيز',    1, 4.85, 97],
+            ['444000009', 'شهد إبراهيم',       1, 4.50, 93],
+            ['444000010', 'رزان حسن',          1, 4.00, 90],
+            ['444000011', 'لمى أحمد',          1, 3.80, 85],
+            ['444000012', 'عبير صالح',         1, 3.20, 78],
+            ['444000013', 'مزون فيصل',         1, 2.40, 55],
+            // ACCT410 — Auditing Principles (6 students)
+            ['444000014', 'وجد طارق',          2, 4.95, 99],
+            ['444000015', 'أسماء بدر',         2, 4.55, 94],
+            ['444000016', 'هند ماجد',          2, 4.10, 91],
+            ['444000017', 'منيرة محمد',        2, 3.85, 87],
+            ['444000018', 'سلمى علي',          2, 3.60, 90],
+            ['444000019', 'مها سعيد',          2, 3.10, 72],
+            // ACCT420 — Taxation (6 students)
+            ['444000020', 'يارا عبدالكريم',    3, 4.70, 96],
+            ['444000021', 'لمار سلطان',        3, 4.65, 93],
+            ['444000022', 'رنا عبدالرحمن',     3, 4.30, 90],
+            ['444000023', 'ساره خالد',         3, 3.95, 86],
+            ['444000024', 'دلال محمد',         3, 3.70, 82],
+            ['444000025', 'فاطمة عبدالله',     3, 3.30, 90],
+        ];
+    }
+
     /** Course rows in the shape SISService returns, for an instructor with no cached rows. */
     public static function courseRows(string $semester): array
     {
-        $counts = [8, 6, 6, 5];
+        $counts = array_fill(0, count(self::catalog()), 0);
+        foreach (self::students() as [, , $courseIndex]) {
+            $counts[$courseIndex]++;
+        }
 
         return array_map(fn (array $c, int $i) => (object) [
             'course_no' => $c[0], 'course_code' => $c[1], 'course_name' => $c[2], 'section' => $c[3],
             'activity_code' => $c[4], 'activity_name' => $c[5], 'semester' => $semester,
-            'student_count' => $counts[$i] ?? 5, 'campus_name' => 'Main Campus',
+            'student_count' => $counts[$i], 'campus_name' => 'Main Campus',
         ], self::catalog(), array_keys(self::catalog()));
+    }
+
+    /** Student rows in the shape SISService returns — the same roster the course counts are taken from. */
+    public static function studentRows(string $semester): array
+    {
+        $catalog = self::catalog();
+
+        return array_map(function (array $st) use ($catalog, $semester) {
+            [$id, $name, $courseIndex, $gpa, $attendance] = $st;
+            [$no, $code, $courseName, $section, $actCode] = $catalog[$courseIndex];
+
+            return (object) [
+                'student_id' => $id, 'student_name' => $name, 'course_no' => $no, 'course_code' => $code,
+                'course_name' => $courseName, 'section' => $section, 'activity_code' => $actCode,
+                'last_recorded_gpa' => (float) $gpa, 'attendance_percent' => (float) $attendance,
+                'absence_percent' => (float) (100 - $attendance), 'semester' => $semester,
+            ];
+        }, self::students());
+    }
+
+    /**
+     * Fill the instructor's cache tables from the demo catalog and roster
+     * when they hold nothing for the term. Every faculty screen — dashboard,
+     * courses, students, reports — reads these two tables, so filling them
+     * once is what keeps the screens in agreement with each other.
+     */
+    public static function ensureCaches(?string $instructorId, ?string $semester): void
+    {
+        if (! $instructorId || ! $semester) {
+            return;
+        }
+        try {
+            $courses = \Illuminate\Support\Facades\DB::table('faculty_courses_cache')->where('instructor_id', $instructorId)->where('semester', $semester);
+            $students = \Illuminate\Support\Facades\DB::table('faculty_students_cache')->where('instructor_id', $instructorId)->where('semester', $semester);
+            if ($courses->exists() && $students->exists()) {
+                return;
+            }
+            // Rebuild both together: a roster without its courses (or the reverse) is the contradiction to avoid.
+            $courses->delete();
+            $students->delete();
+            foreach (self::courseRows($semester) as $c) {
+                \Illuminate\Support\Facades\DB::table('faculty_courses_cache')->insert([
+                    'instructor_id' => $instructorId, 'course_no' => $c->course_no, 'semester' => $semester,
+                    'course_code' => $c->course_code, 'course_name' => $c->course_name, 'section' => $c->section,
+                    'activity_code' => $c->activity_code, 'activity_name' => $c->activity_name, 'student_count' => $c->student_count,
+                    'last_synced_at' => now(), 'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
+            foreach (self::studentRows($semester) as $st) {
+                \Illuminate\Support\Facades\DB::table('faculty_students_cache')->insert([
+                    'instructor_id' => $instructorId, 'student_id' => $st->student_id, 'course_no' => $st->course_no, 'semester' => $semester,
+                    'student_name' => $st->student_name, 'course_code' => $st->course_code, 'course_name' => $st->course_name,
+                    'section' => $st->section, 'activity_code' => $st->activity_code, 'last_recorded_gpa' => $st->last_recorded_gpa,
+                    'attendance_percent' => $st->attendance_percent, 'absence_percent' => $st->absence_percent,
+                    'last_synced_at' => now(), 'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // The runtime fallbacks in SISService still serve the same catalog and roster.
+            \Illuminate\Support\Facades\Log::warning('DemoFacultyContent::ensureCaches failed', ['error' => $e->getMessage()]);
+        }
     }
 
     /** The Blackboard shell matched to a course — what qu-api's /courses/blackboard adds per row. */

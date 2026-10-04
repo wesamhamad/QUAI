@@ -762,6 +762,7 @@ class SISService
     private function demoFacultyCourses($instructorId, $semester = null): array
     {
         $semester = $semester ?: '462';
+        \App\QSpark\Support\DemoFacultyContent::ensureCaches((string) $instructorId, (string) $semester);
         $rows = \App\QSpark\Models\FacultyCourseCache::getInstructorCourses($instructorId, $semester);
 
         // Nothing cached for this instructor (the seed was never run for them):
@@ -789,9 +790,16 @@ class SISService
     private function demoFacultyStudents($instructorId, $semester = null, bool $requireGpa = false): array
     {
         $semester = $semester ?: '462';
+        \App\QSpark\Support\DemoFacultyContent::ensureCaches((string) $instructorId, (string) $semester);
         $rows = $requireGpa
             ? \App\QSpark\Models\FacultyStudentCache::getAllWithGPA($instructorId, $semester)
             : \App\QSpark\Models\FacultyStudentCache::getInstructorStudents($instructorId, $semester);
+
+        // Nothing cached for this instructor: the demo roster — the same one
+        // the course counts come from, so every screen agrees.
+        if ($rows->isEmpty() && \App\QSpark\Models\FacultyStudentCache::getInstructorStudents($instructorId, $semester)->isEmpty()) {
+            return \App\QSpark\Support\DemoFacultyContent::studentRows((string) $semester);
+        }
 
         return $rows->map(fn ($r) => (object) [
             'student_id' => $r->student_id,

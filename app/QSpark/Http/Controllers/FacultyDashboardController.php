@@ -30,6 +30,9 @@ class FacultyDashboardController extends Controller
 
         // Use cached data instead of direct Oracle queries
         // Get faculty courses from cache
+        if (config('app.demo_mode')) {
+            \App\QSpark\Support\DemoFacultyContent::ensureCaches((string) $instructorId, (string) $currentSemester);
+        }
         $facultyCoursesRaw = FacultyCourseCache::getInstructorCourses($instructorId, $currentSemester);
 
         // Get faculty students from cache
@@ -124,31 +127,34 @@ class FacultyDashboardController extends Controller
         // Get top performing students from Oracle
         $topStudents = $topStudentsFromOracle;
 
-        // DEMO OVERRIDE: Top 3 students per Master Data Sheet (no duplicates)
-        // Always use demo data to ensure no duplicates
-        $topStudents = collect([
-            (object) [
-                'student_id' => '441001001',
-                'student_name' => 'نهى محمد سعيد',
-                'last_recorded_gpa' => 4.9,
-                'course_code' => 'ITBS207',
-                'course_name' => 'مقدمة في علوم البيانات',
-            ],
-            (object) [
-                'student_id' => '441001002',
-                'student_name' => 'شهد خالد',
-                'last_recorded_gpa' => 4.85,
-                'course_code' => 'ITBS207',
-                'course_name' => 'مقدمة في علوم البيانات',
-            ],
-            (object) [
-                'student_id' => '441001003',
-                'student_name' => 'ريم عبدالله',
-                'last_recorded_gpa' => 4.8,
-                'course_code' => 'ITBS207',
-                'course_name' => 'مقدمة في علوم البيانات',
-            ],
-        ]);
+        // The roster's own top three (one row per student). The sample names
+        // below stand in only when the instructor has no roster at all.
+        $topStudents = collect($topStudentsFromOracle)->unique('student_id')->take(3)->values();
+        if ($topStudents->isEmpty()) {
+            $topStudents = collect([
+                (object) [
+                    'student_id' => '441001001',
+                    'student_name' => 'نهى محمد سعيد',
+                    'last_recorded_gpa' => 4.9,
+                    'course_code' => 'ITBS207',
+                    'course_name' => 'مقدمة في علوم البيانات',
+                ],
+                (object) [
+                    'student_id' => '441001002',
+                    'student_name' => 'شهد خالد',
+                    'last_recorded_gpa' => 4.85,
+                    'course_code' => 'ITBS207',
+                    'course_name' => 'مقدمة في علوم البيانات',
+                ],
+                (object) [
+                    'student_id' => '441001003',
+                    'student_name' => 'ريم عبدالله',
+                    'last_recorded_gpa' => 4.8,
+                    'course_code' => 'ITBS207',
+                    'course_name' => 'مقدمة في علوم البيانات',
+                ],
+            ]);
+        }
 
         // Calculate GPA distribution from ALL students (not just top 10)
         $gpaDistribution = [
@@ -341,6 +347,16 @@ class FacultyDashboardController extends Controller
 
         // Demo fallback: 5,724 questions per Master Data Sheet (318 quizzes × 18 questions)
         // Time saved: 5,724 × 3.5 min = 20,034 min = 334 hours
+        if ($totalQuestionsGenerated == 0 && config('app.demo_mode')) {
+            // Demo: the figure is the question bank the course pages show —
+            // every course's bank is filled first so the two always agree.
+            $codes = collect($facultyCourses)->pluck('course_code')->filter()->unique()->values();
+            foreach ($codes as $code) {
+                \App\QSpark\Support\DemoFacultyContent::ensureQuestions((string) $code, (string) $instructorId);
+            }
+            $totalQuestionsGenerated = QuizQuestion::whereIn('course_code', $codes)->count();
+            $timeSavedByAI = round($totalQuestionsGenerated * 3.5 / 60, 1); // hours
+        }
         if ($totalQuestionsGenerated == 0) {
             $totalQuestionsGenerated = 5724;
             $timeSavedByAI = 334; // hours
@@ -372,6 +388,15 @@ class FacultyDashboardController extends Controller
                 $engagementScore = 50 + (($totalQuestionsGenerated - 1000) / 4000) * 30;
             } else {
                 $engagementScore = ($totalQuestionsGenerated / 1000) * 50;
+            }
+
+            // Demo: the volume scale above is built for thousands of questions.
+            // Here engagement reads the instructor's use of their own bank —
+            // how much of it they have already reviewed and exported.
+            if (config('app.demo_mode') && $totalQuestionsGenerated < 1000) {
+                $codes = collect($facultyCourses)->pluck('course_code')->filter()->unique()->values();
+                $exported = QuizQuestion::whereIn('course_code', $codes)->whereNotNull('exported_at')->count();
+                $engagementScore = 55 + 45 * ($exported / max(1, $totalQuestionsGenerated));
             }
 
             $engagementScore = round($engagementScore);
@@ -411,6 +436,26 @@ class FacultyDashboardController extends Controller
         // Get instructor's courses from Oracle
         $sisService = new SISService;
         $instructorCourses = $sisService->getFacultyInstructorData($instructorId);
+
+        // Demo: two units of the instructor's own courses, with affected counts
+        // that fit inside those courses' rosters.
+        if (config('app.demo_mode')) {
+            $semester = $sisService->getCurrentSemester();
+            $sizes = collect($sisService->getFacultyCourses($instructorId, $semester))->pluck('student_count', 'course_code');
+            $areas = [
+                ['ACCT201', 'ACCT201 — Chapter 3: Adjusting Entries and Accruals', 45, 0.57],
+                ['ACCT305', 'ACCT305 — Chapter 2: Cost-Volume-Profit Analysis', 38, 0.5],
+            ];
+            $out = [];
+            foreach ($areas as [$code, $area, $rate, $share]) {
+                if (isset($sizes[$code])) {
+                    $out[] = ['area' => $area, 'error_rate' => $rate, 'students_affected' => max(1, (int) round($sizes[$code] * $share))];
+                }
+            }
+            if ($out !== []) {
+                return $out;
+            }
+        }
 
         // For now, return sample data
         // In production, this would analyze student performance data
@@ -564,6 +609,9 @@ class FacultyDashboardController extends Controller
 
         // Build both distributions from the same cached roster the dashboard
         // uses, so the report totals always equal the dashboard's total students.
+        if (config('app.demo_mode')) {
+            \App\QSpark\Support\DemoFacultyContent::ensureCaches((string) $instructorId, (string) $currentSemester);
+        }
         $studentsWithGpa = FacultyStudentCache::getAllWithGPA($instructorId, $currentSemester);
         $studentsWithAttendance = FacultyStudentCache::getWithAttendance($instructorId, $currentSemester);
 
