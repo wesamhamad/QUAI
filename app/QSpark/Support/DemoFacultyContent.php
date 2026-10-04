@@ -1,0 +1,211 @@
+<?php
+
+namespace App\QSpark\Support;
+
+use App\QSpark\Models\QuizQuestion;
+
+/**
+ * The demo faculty member's teaching load: the courses, their Blackboard
+ * shells and materials, and the AI-generated question bank per course.
+ *
+ * One source for the seeder (DemoDataSeeder) and for the runtime fallbacks:
+ * when the cache tables hold nothing for the signed-in demo instructor, the
+ * faculty screens still open on this catalog instead of an empty page, and a
+ * course whose bank is empty is filled on first visit so its questions can be
+ * edited, exported and deleted like real ones. Everything here is invented.
+ */
+final class DemoFacultyContent
+{
+    /** @return array<int, array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string}> [course_no, code, name, section, activity_code, activity_name] */
+    public static function catalog(): array
+    {
+        return [
+            ['CRS-101', 'ACCT201', 'Financial Accounting',  '01', 'LEC', 'Lecture'],
+            ['CRS-102', 'ACCT305', 'Managerial Accounting', '01', 'LEC', 'Lecture'],
+            ['CRS-103', 'ACCT410', 'Auditing Principles',   '02', 'LEC', 'Lecture'],
+            ['CRS-104', 'ACCT420', 'Taxation',              '01', 'LAB', 'Lab'],
+        ];
+    }
+
+    /** Course rows in the shape SISService returns, for an instructor with no cached rows. */
+    public static function courseRows(string $semester): array
+    {
+        $counts = [8, 6, 6, 5];
+
+        return array_map(fn (array $c, int $i) => (object) [
+            'course_no' => $c[0], 'course_code' => $c[1], 'course_name' => $c[2], 'section' => $c[3],
+            'activity_code' => $c[4], 'activity_name' => $c[5], 'semester' => $semester,
+            'student_count' => $counts[$i] ?? 5, 'campus_name' => 'Main Campus',
+        ], self::catalog(), array_keys(self::catalog()));
+    }
+
+    /** The Blackboard shell matched to a course — what qu-api's /courses/blackboard adds per row. */
+    public static function blackboardFor(object $course): array
+    {
+        return [
+            'id' => '_demo'.preg_replace('/\D/', '', (string) $course->course_no).'_1',
+            'uuid' => md5('bb-'.$course->course_code),
+            'externalId' => $course->course_code.'_'.($course->section ?? '01').'_'.($course->semester ?? ''),
+            'courseId' => $course->course_code.'-'.($course->section ?? '01'),
+            'name' => $course->course_name,
+        ];
+    }
+
+    public static function isDemoBlackboardId(string $id): bool
+    {
+        return str_starts_with($id, '_demo');
+    }
+
+    /**
+     * The course's top-level Blackboard contents: lecture slides per chapter,
+     * the syllabus and one assignment — the Blackboard Learn `contents` shape.
+     *
+     * @return array{results: array<int, array<string, mixed>>}
+     */
+    public static function contents(string $blackboardId): array
+    {
+        $file = fn (string $id, string $title, string $name) => [
+            'id' => $blackboardId.'_'.$id, 'title' => $title, 'hasChildren' => false,
+            'contentHandler' => ['id' => 'resource/x-bb-file', 'file' => ['fileName' => $name, 'mimeType' => 'application/pdf']],
+            'availability' => ['available' => 'Yes'],
+        ];
+
+        return ['results' => [
+            $file('syllabus', 'Course Syllabus', 'syllabus.pdf'),
+            $file('ch1', 'Chapter 1 — Lecture Slides', 'chapter-01.pdf'),
+            $file('ch2', 'Chapter 2 — Lecture Slides', 'chapter-02.pdf'),
+            $file('ch3', 'Chapter 3 — Lecture Slides', 'chapter-03.pdf'),
+            $file('rev', 'Midterm Review Sheet', 'midterm-review.pdf'),
+            ['id' => $blackboardId.'_asg1', 'title' => 'Assignment 1', 'hasChildren' => false, 'contentHandler' => ['id' => 'resource/x-bb-assignment'], 'availability' => ['available' => 'Yes']],
+        ]];
+    }
+
+    /**
+     * 15 AI-generated questions per course (5 easy, 5 medium, 5 hard).
+     *
+     * @return array<string, array{course_id: string, attachment_key: string, topic: string, questions: array<int, array{0: string, 1: array<int, string>, 2: int, 3: string}>}>
+     */
+    public static function questionBanks(): array
+    {
+        return [
+            'ACCT201' => [
+                'course_id' => 'CRS-101',
+                'attachment_key' => 'demo-attachment-acct201-ch1',
+                'topic' => 'Financial Accounting Fundamentals',
+                'questions' => [
+                    ['Financial accounting primarily serves which group of users?', ['Internal managers', 'External users such as investors and creditors', 'Production supervisors', 'Marketing staff'], 1, 'easy'],
+                    ['Which equation underlies the balance sheet?', ['Assets = Liabilities − Equity', 'Assets = Liabilities + Equity', 'Assets + Liabilities = Equity', 'Assets × Liabilities = Equity'], 1, 'easy'],
+                    ['Which financial statement reports a company\'s position at a point in time?', ['Income statement', 'Balance sheet', 'Cash flow statement', 'Statement of retained earnings'], 1, 'easy'],
+                    ['Revenue minus expenses equals:', ['Gross assets', 'Net income', 'Total equity', 'Retained cash'], 1, 'easy'],
+                    ['Which of the following is a current asset?', ['Land', 'Accounts receivable', 'Goodwill', 'Long-term debt'], 1, 'easy'],
+                    ['A debit entry increases which type of account?', ['Liability', 'Revenue', 'Owner\'s equity', 'Expense'], 3, 'medium'],
+                    ['Under accrual accounting, revenue is recognised when:', ['Cash is received', 'It is earned', 'The invoice is paid', 'The fiscal year ends'], 1, 'medium'],
+                    ['Depreciation expense is best described as:', ['A cash outflow each period', 'The allocation of an asset\'s cost over its useful life', 'A reduction in the asset\'s market value', 'A liability owed to suppliers'], 1, 'medium'],
+                    ['Which account normally carries a credit balance?', ['Cash', 'Equipment', 'Sales revenue', 'Prepaid rent'], 2, 'medium'],
+                    ['An adjusting entry for accrued salaries will:', ['Debit cash and credit salaries', 'Debit salaries expense and credit salaries payable', 'Debit salaries payable and credit cash', 'Have no effect on the income statement'], 1, 'medium'],
+                    ['IFRS stands for:', ['Internal Financial Reporting Standards', 'International Financial Reporting Standards', 'Indexed Financial Reporting System', 'Integrated Fiscal Reporting Standards'], 1, 'hard'],
+                    ['Under the lower-of-cost-or-net-realisable-value rule, inventory is reported at:', ['Always historical cost', 'The lower of cost or net realisable value', 'Always selling price', 'Replacement cost only'], 1, 'hard'],
+                    ['A company collects cash in advance for services. The entry recorded is:', ['Debit cash, credit service revenue', 'Debit cash, credit unearned revenue', 'Debit unearned revenue, credit cash', 'Debit accounts receivable, credit revenue'], 1, 'hard'],
+                    ['Which inventory method generally yields the highest net income when prices are rising?', ['LIFO', 'FIFO', 'Weighted average', 'Specific identification'], 1, 'hard'],
+                    ['The matching principle requires that:', ['Assets are matched with liabilities', 'Expenses are recognised in the same period as the revenues they help generate', 'Cash inflows match cash outflows', 'Revenues are deferred until cash is collected'], 1, 'hard'],
+                ],
+            ],
+            'ACCT305' => [
+                'course_id' => 'CRS-102',
+                'attachment_key' => 'demo-attachment-acct305-ch1',
+                'topic' => 'Managerial Accounting & Cost Analysis',
+                'questions' => [
+                    ['Managerial accounting information is prepared primarily for:', ['External investors', 'Internal managers and decision-makers', 'Tax authorities', 'External auditors'], 1, 'easy'],
+                    ['Which of the following is a variable cost?', ['Factory rent', 'Direct materials', 'Straight-line depreciation', 'Salaried supervisor pay'], 1, 'easy'],
+                    ['The contribution margin is calculated as:', ['Sales minus fixed costs', 'Sales minus variable costs', 'Sales minus total costs', 'Fixed costs minus variable costs'], 1, 'easy'],
+                    ['A cost that stays constant in total as activity changes is a:', ['Variable cost', 'Fixed cost', 'Mixed cost', 'Step cost'], 1, 'easy'],
+                    ['Which of these is a product cost in a manufacturing firm?', ['Sales commissions', 'Direct labour', 'Office utilities', 'Advertising'], 1, 'easy'],
+                    ['The break-even point in units equals:', ['Fixed costs ÷ contribution margin per unit', 'Fixed costs ÷ sales price', 'Variable costs ÷ contribution margin', 'Total costs ÷ sales price'], 0, 'medium'],
+                    ['In a contribution-margin income statement, costs are classified by:', ['Function', 'Behaviour (variable vs fixed)', 'Department', 'Product line'], 1, 'medium'],
+                    ['A favourable direct materials price variance means:', ['Actual price was higher than standard', 'Actual price was lower than standard', 'More material was used than expected', 'Less material was used than expected'], 1, 'medium'],
+                    ['Which costing method assigns only variable manufacturing costs to products?', ['Absorption costing', 'Variable (direct) costing', 'Job-order costing', 'Process costing'], 1, 'medium'],
+                    ['A relevant cost for a decision is one that:', ['Has already been incurred', 'Differs between alternatives', 'Is always fixed', 'Is recorded in the general ledger'], 1, 'medium'],
+                    ['A sunk cost is best described as:', ['A future cost that differs between alternatives', 'A past cost that cannot be changed by any current decision', 'An opportunity cost of the next best alternative', 'A variable cost per unit'], 1, 'hard'],
+                    ['Under activity-based costing, overhead is allocated using:', ['A single plant-wide rate', 'Multiple cost drivers linked to activities', 'Direct labour hours only', 'Sales revenue'], 1, 'hard'],
+                    ['With idle capacity, a special order priced above its variable cost should generally be:', ['Rejected, because it lowers the average price', 'Accepted, because it increases total contribution margin', 'Rejected, because fixed costs are not covered', 'Accepted only if it covers full absorption cost'], 1, 'hard'],
+                    ['The high-low method is used to:', ['Set selling prices', 'Separate a mixed cost into fixed and variable components', 'Allocate joint costs', 'Compute the break-even point'], 1, 'hard'],
+                    ['In make-or-buy decisions, avoidable fixed costs are:', ['Always irrelevant', 'Relevant because they change with the decision', 'Treated the same as sunk costs', 'Ignored because they are fixed'], 1, 'hard'],
+                ],
+            ],
+            'ACCT410' => [
+                'course_id' => 'CRS-103',
+                'attachment_key' => 'demo-attachment-acct410-ch1',
+                'topic' => 'Auditing Principles & Assurance',
+                'questions' => [
+                    ['The primary purpose of a financial statement audit is to:', ['Detect every fraud', 'Express an opinion on whether the statements are fairly presented', 'Prepare the company\'s financial statements', 'Guarantee future profitability'], 1, 'easy'],
+                    ['An audit opinion stating the financial statements are fairly presented is called:', ['A qualified opinion', 'An unqualified (unmodified) opinion', 'An adverse opinion', 'A disclaimer of opinion'], 1, 'easy'],
+                    ['Auditor independence means the auditor must be:', ['An employee of the client', 'Free from conflicts that impair objectivity', 'A major shareholder of the client', 'Related to client management'], 1, 'easy'],
+                    ['Audit evidence is gathered to support the:', ['Client\'s marketing claims', 'Auditor\'s opinion', 'Company\'s tax return only', 'Board of directors\' salaries'], 1, 'easy'],
+                    ['Which document outlines the scope and terms of an audit?', ['The management letter', 'The engagement letter', 'The audit report', 'The trial balance'], 1, 'easy'],
+                    ['Inherent risk refers to:', ['The risk controls fail to catch a misstatement', 'The susceptibility of an assertion to misstatement before considering controls', 'The risk the auditor fails to detect a misstatement', 'The risk of issuing the wrong report type'], 1, 'medium'],
+                    ['Which assertion relates to whether recorded assets actually exist?', ['Completeness', 'Existence', 'Valuation', 'Cut-off'], 1, 'medium'],
+                    ['Tests of controls are performed to:', ['Detect all fraud', 'Evaluate the operating effectiveness of internal controls', 'Confirm account balances directly', 'Prepare adjusting entries'], 1, 'medium'],
+                    ['Materiality in auditing is based on:', ['Only the size of an item', 'Whether an omission or misstatement could influence users\' decisions', 'The client\'s preference', 'The audit fee'], 1, 'medium'],
+                    ['Confirming accounts receivable balances with customers is an example of:', ['A test of controls', 'A substantive procedure', 'An analytical-only procedure', 'A management estimate'], 1, 'medium'],
+                    ['Audit risk is the risk that the auditor:', ['Loses the client', 'Issues an unmodified opinion on materially misstated statements', 'Spends too much time on the engagement', 'Fails to collect the audit fee'], 1, 'hard'],
+                    ['When internal controls are assessed as strong, the auditor may:', ['Eliminate all substantive testing', 'Reduce the extent of substantive procedures', 'Increase detection risk to zero', 'Skip the engagement letter'], 1, 'hard'],
+                    ['An adverse opinion is issued when:', ['There is a minor scope limitation', 'The financial statements are materially and pervasively misstated', 'The auditor lacks independence only', 'The client changes accounting estimates'], 1, 'hard'],
+                    ['Professional scepticism requires the auditor to:', ['Assume management is always honest', 'Maintain a questioning mind and critically assess evidence', 'Rely solely on prior-year working papers', 'Accept client explanations without corroboration'], 1, 'hard'],
+                    ['Analytical procedures are required during which audit phases?', ['Planning and final review', 'Only during fieldwork', 'Only after the report is issued', 'They are never required'], 0, 'hard'],
+                ],
+            ],
+            'ACCT420' => [
+                'course_id' => 'CRS-104',
+                'attachment_key' => 'demo-attachment-acct420-ch1',
+                'topic' => 'Principles of Taxation',
+                'questions' => [
+                    ['A tax levied directly on an individual\'s or company\'s income is a:', ['Indirect tax', 'Direct tax', 'Excise tax', 'Tariff'], 1, 'easy'],
+                    ['Value Added Tax (VAT) is an example of a(n):', ['Direct tax on profits', 'Indirect tax on consumption', 'Tax on land only', 'Payroll tax'], 1, 'easy'],
+                    ['Taxable income is generally calculated as:', ['Gross income minus allowable deductions', 'Gross income plus deductions', 'Total assets minus liabilities', 'Revenue minus dividends'], 0, 'easy'],
+                    ['A tax deduction reduces:', ['The tax rate', 'Taxable income', 'The tax credit', 'Gross revenue only'], 1, 'easy'],
+                    ['The party legally responsible for remitting a tax to the authority is the:', ['Tax consultant', 'Taxpayer', 'Auditor', 'Shareholder'], 1, 'easy'],
+                    ['A progressive tax system is one where the tax rate:', ['Decreases as income rises', 'Increases as income rises', 'Stays the same at all income levels', 'Applies only to corporations'], 1, 'medium'],
+                    ['A tax credit differs from a tax deduction because a credit:', ['Reduces taxable income', 'Reduces the tax liability directly', 'Increases gross income', 'Only applies to companies'], 1, 'medium'],
+                    ['Zakat in Saudi Arabia is best described as:', ['A consumption tax on goods', 'A religiously mandated levy on qualifying wealth', 'A customs duty', 'A payroll contribution'], 1, 'medium'],
+                    ['Withholding tax is typically:', ['Paid only at year-end by the taxpayer', 'Deducted at source from a payment', 'A refund of overpaid VAT', 'A penalty for late filing'], 1, 'medium'],
+                    ['Double taxation refers to:', ['Filing two tax returns', 'The same income being taxed twice (e.g. corporate profit then dividends)', 'Paying tax in advance', 'A penalty equal to twice the tax'], 1, 'medium'],
+                    ['A tax base is best defined as:', ['The rate applied to income', 'The amount or value on which a tax is calculated', 'The deadline for filing', 'The penalty for evasion'], 1, 'hard'],
+                    ['Tax avoidance differs from tax evasion in that avoidance is:', ['Illegal concealment of income', 'The legal arrangement of affairs to minimise tax', 'Always penalised by fines', 'A form of withholding tax'], 1, 'hard'],
+                    ['Under the standard VAT mechanism, a registered business remits:', ['All output VAT collected with no offset', 'Output VAT collected minus input VAT paid', 'Only input VAT', 'A flat fee regardless of sales'], 1, 'hard'],
+                    ['A permanent difference between accounting and taxable income:', ['Reverses in a future period', 'Never reverses in future periods', 'Always creates a deferred tax asset', 'Is the same as a temporary difference'], 1, 'hard'],
+                    ['The principle of tax neutrality suggests that taxes should:', ['Heavily favour one industry', 'Minimise distortion of economic decisions', 'Always be progressive', 'Be collected only from corporations'], 1, 'hard'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Make sure a demo course has its bank, and that part of it reads as
+     * already exported: the faculty page separates «new» from «exported», and
+     * a bank with nothing exported hides half of the feature.
+     */
+    public static function ensureQuestions(string $courseCode, ?string $instructorId = null, ?string $studentId = null): void
+    {
+        $bank = self::questionBanks()[$courseCode] ?? null;
+        if ($bank === null) {
+            return;
+        }
+        if (! QuizQuestion::where('course_code', $courseCode)->exists()) {
+            foreach ($bank['questions'] as $k => [$q, $opts, $correct, $diff]) {
+                QuizQuestion::query()->insert([
+                    'attachment_key' => $bank['attachment_key'], 'question_hash' => md5("{$courseCode}|{$q}"),
+                    'course_code' => $courseCode, 'course_id' => $bank['course_id'], 'question' => $q,
+                    'options' => json_encode($opts), 'correct_index' => $correct, 'difficulty' => $diff,
+                    'type' => 'enemy', 'language' => 'en', 'student_id' => $studentId, 'topic' => $bank['topic'],
+                    'created_at' => now()->subDays(20 - $k), 'updated_at' => now()->subDays(20 - $k),
+                ]);
+            }
+        }
+        if (! QuizQuestion::where('course_code', $courseCode)->whereNotNull('exported_at')->exists()) {
+            $by = $instructorId ?: 'E10001';
+            $first = QuizQuestion::where('course_code', $courseCode)->orderBy('id')->limit(6)->pluck('id');
+            QuizQuestion::whereIn('id', $first)->update(['exported_at' => now()->subDays(6), 'exported_by' => $by]);
+            QuizQuestion::whereIn('id', $first->take(2))->update(['edited_at' => now()->subDays(7), 'edited_by' => $by]);
+        }
+    }
+}

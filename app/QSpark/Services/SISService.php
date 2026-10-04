@@ -671,8 +671,11 @@ class SISService
         }
 
         if (config('app.demo_mode')) {
+            // Each demo course is matched to a Blackboard shell, as qu-api's
+            // /courses/blackboard does for a live instructor.
             return array_map(function ($row) {
-                $row->blackboard = null;
+                $row->campus_name = $row->campus_name ?? 'Main Campus';
+                $row->blackboard = \App\QSpark\Support\DemoFacultyContent::blackboardFor($row);
 
                 return $row;
             }, $this->demoFacultyCourses($instructorId, $semester));
@@ -760,6 +763,12 @@ class SISService
     {
         $semester = $semester ?: '462';
         $rows = \App\QSpark\Models\FacultyCourseCache::getInstructorCourses($instructorId, $semester);
+
+        // Nothing cached for this instructor (the seed was never run for them):
+        // open on the demo catalog rather than on an empty page.
+        if ($rows->isEmpty()) {
+            return \App\QSpark\Support\DemoFacultyContent::courseRows((string) $semester);
+        }
 
         return $rows->map(fn ($r) => (object) [
             'course_no' => $r->course_no,

@@ -875,6 +875,24 @@ class FacultyDashboardController extends Controller
      */
     private function getBlackboardCourseAttachments($blackboardId, $token)
     {
+        // Demo mode: the demo shells carry bundled contents — no Blackboard client is built.
+        if (config('app.demo_mode') && \App\QSpark\Support\DemoFacultyContent::isDemoBlackboardId((string) $blackboardId)) {
+            $attachments = [];
+            foreach (\App\QSpark\Support\DemoFacultyContent::contents((string) $blackboardId)['results'] as $content) {
+                if (isset($content['contentHandler']['file'])) {
+                    $attachments[] = [
+                        'contentId' => $content['id'],
+                        'contentTitle' => $content['title'],
+                        'fileName' => $content['contentHandler']['file']['fileName'],
+                        'mimeType' => $content['contentHandler']['file']['mimeType'],
+                        'downloadUrl' => '#',
+                    ];
+                }
+            }
+
+            return $attachments;
+        }
+
         try {
             $cacheKey = "bb_faculty_attachments_{$blackboardId}_simple";
 
@@ -1071,6 +1089,12 @@ class FacultyDashboardController extends Controller
             $contents = $this->getBlackboardCourseContents($blackboardData['id'], $token);
         }
 
+        // Demo mode: a course opened for the first time gets its question bank,
+        // with part of it already exported, so every action on the page works.
+        if (config('app.demo_mode')) {
+            \App\QSpark\Support\DemoFacultyContent::ensureQuestions($courseCode, (string) $instructorId);
+        }
+
         // Get question stats first (before pagination)
         $allQuestions = QuizQuestion::where('course_code', $courseCode);
         $questionStats = [
@@ -1105,6 +1129,10 @@ class FacultyDashboardController extends Controller
      */
     private function getBlackboardCourseContents($blackboardId, $token)
     {
+        if (config('app.demo_mode') && \App\QSpark\Support\DemoFacultyContent::isDemoBlackboardId((string) $blackboardId)) {
+            return \App\QSpark\Support\DemoFacultyContent::contents((string) $blackboardId)['results'];
+        }
+
         try {
             $cacheKey = "bb_faculty_contents_{$blackboardId}_direct";
 

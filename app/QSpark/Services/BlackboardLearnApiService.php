@@ -447,6 +447,11 @@ class BlackboardLearnApiService
      */
     public function getCourseContents(string $courseId, array $params = []): ?array
     {
+        // Demo mode: the demo instructor's Blackboard shells carry bundled contents.
+        if (config('app.demo_mode') && \App\QSpark\Support\DemoFacultyContent::isDemoBlackboardId($courseId)) {
+            return \App\QSpark\Support\DemoFacultyContent::contents($courseId);
+        }
+
         return $this->request('GET', "/v1/courses/{$courseId}/contents", $params);
     }
 

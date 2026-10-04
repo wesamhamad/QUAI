@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
     saveBtn.innerHTML = '<span class="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> {{ __('messages.saving') }}';
 
     try {
-      const response = await fetch('/faculty/questions/{{ $question->id }}', {
+      const response = await fetch('{{ route('qspark.faculty.questions.update', $question->id) }}', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

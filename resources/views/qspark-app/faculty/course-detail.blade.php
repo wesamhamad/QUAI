@@ -252,7 +252,7 @@
             btn.innerHTML = '<span class="animate-spin inline-block">⏳</span> {{ __('messages.generating_questions') }}';
 
             try {
-              const response = await fetch('/faculty/generate-questions', {
+              const response = await fetch('{{ route('qspark.faculty.generate-questions') }}', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -670,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function() {
     this.textContent = '{{ __('messages.deleting') }}';
 
     try {
-      const response = await fetch(`/faculty/questions/${questionId}`, {
+      const response = await fetch(`{{ url('qspark/faculty/questions') }}/${questionId}`, {
         method: 'DELETE',
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -723,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
       this.innerHTML = '<span class="animate-spin">⏳</span> {{ __('messages.exporting') }}';
 
       try {
-        const response = await fetch(`/faculty/courses/${courseCode}/questions/export`, {
+        const response = await fetch(`{{ url('qspark/faculty/courses') }}/${courseCode}/questions/export`, {
           method: 'GET',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

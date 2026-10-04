@@ -1044,6 +1044,11 @@ class CoursesController extends Controller
      */
     public function downloadBlackboardAttachment($externalId, $contentId, $attachmentId)
     {
+        // Demo mode: the demo instructor's Blackboard shells hold no real files.
+        if (config('app.demo_mode') && \App\QSpark\Support\DemoFacultyContent::isDemoBlackboardId((string) $externalId)) {
+            return response('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><body style="font-family:sans-serif;padding:3rem;text-align:center;color:#374151"><h2>ملف توضيحي</h2><p>هذا مقرر تجريبي — لا ملف حقيقي خلف هذا الرابط في النسخة التوضيحية.</p><p style="direction:ltr">Demo course material — no real file behind this link.</p></body></html>');
+        }
+
         $token = session('qspark_token');
 
         if (! $token) {
