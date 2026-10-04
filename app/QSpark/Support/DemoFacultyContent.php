@@ -169,9 +169,16 @@ final class DemoFacultyContent
      *
      * @return array<string, array<int, string>> course code => chapter titles (1-based order)
      */
-    public static function chapters(): array
+    public static function chapters(?string $locale = null): array
     {
-        return [
+        $ar = ($locale ?? app()->getLocale()) === 'ar';
+
+        return $ar ? [
+            'ACCT201' => ['المعادلة المحاسبية والقوائم المالية', 'تسجيل العمليات: المدين والدائن', 'قيود التسوية والاستحقاقات'],
+            'ACCT305' => ['مفاهيم التكاليف وتصنيفاتها', 'تحليل التكلفة والحجم والربح', 'الموازنات وتحليل الانحرافات'],
+            'ACCT410' => ['معايير المراجعة وأخلاقيات المهنة', 'أدلة المراجعة والتوثيق', 'الرقابة الداخلية وتقييم المخاطر'],
+            'ACCT420' => ['مبادئ الضرائب', 'ضريبة القيمة المضافة', 'الزكاة وضريبة دخل الشركات'],
+        ] : [
             'ACCT201' => ['The Accounting Equation and Financial Statements', 'Recording Transactions: Debits and Credits', 'Adjusting Entries and Accruals'],
             'ACCT305' => ['Cost Concepts and Classifications', 'Cost-Volume-Profit Analysis', 'Budgeting and Variance Analysis'],
             'ACCT410' => ['Audit Standards and Professional Ethics', 'Audit Evidence and Documentation', 'Internal Control and Risk Assessment'],
@@ -197,8 +204,9 @@ final class DemoFacultyContent
     public static function chapterLabel(string $courseCode, int $chapter): string
     {
         $title = self::chapters()[$courseCode][$chapter - 1] ?? null;
+        $word = app()->getLocale() === 'ar' ? 'الفصل' : 'Chapter';
 
-        return $courseCode.' — Chapter '.$chapter.($title ? ': '.$title : '');
+        return $courseCode.' — '.$word.' '.$chapter.($title ? ': '.$title : '');
     }
 
     /**
@@ -209,30 +217,61 @@ final class DemoFacultyContent
      */
     public static function remedialPlan(string $area): array
     {
-        preg_match('/^(\S+)\s+—\s+Chapter\s+(\d+)(?::\s*(.+))?$/u', trim($area), $m);
+        // The unit label arrives in whichever language the dashboard drew it in.
+        preg_match('/^(\S+)\s+—\s+(?:Chapter|الفصل)\s+(\d+)(?::\s*(.+))?$/u', trim($area), $m);
         $code = $m[1] ?? '';
         $n = (int) ($m[2] ?? 0);
-        $title = $m[3] ?? (self::chapters()[$code][$n - 1] ?? $area);
-        $chapter = $n > 0 ? "الفصل {$n} «{$title}»" : "«{$title}»";
+        $ar = app()->getLocale() === 'ar';
+        // Always the reader's language, whatever language the label was sent in.
+        $title = self::chapters()[$code][$n - 1] ?? ($m[3] ?? $area);
+
+        if ($ar) {
+            $chapter = $n > 0 ? "الفصل {$n} «{$title}»" : "«{$title}»";
+
+            return [
+                'teaching_methods' => [
+                    "إعادة شرح {$chapter} بمثال محلول خطوة بخطوة قبل الانتقال للفصل التالي",
+                    "مراجعة شرائح {$chapter} المرفوعة على Blackboard في أول عشر دقائق من المحاضرة القادمة",
+                    'ربط كل مفهوم بحالة عملية قصيرة من بيئة الأعمال المحلية',
+                ],
+                'activities' => [
+                    "تمرين صفّي في مجموعات صغيرة على مسائل {$chapter}",
+                    "جلسة تدريس بالأقران يقودها الطلاب الأعلى أداءً في {$code}",
+                    'ورقة عمل متدرجة الصعوبة تُسلَّم قبل الاختبار القصير',
+                ],
+                'assessments' => [
+                    "اختبار قصير من بنك أسئلة {$code} على QSpark يبدأ بالمستوى السهل",
+                    'إعادة القياس بعد أسبوعين على الأسئلة التي أخطأ فيها الطلاب',
+                ],
+                'resources' => [
+                    "شرائح {$chapter} وورقة المراجعة النصفية على Blackboard",
+                    "أسئلة {$code} المصدَّرة من QSpark كمراجعة منزلية",
+                ],
+                'youtube_videos' => [],
+                'online_platforms' => [],
+            ];
+        }
+
+        $chapter = $n > 0 ? "Chapter {$n} “{$title}”" : "“{$title}”";
 
         return [
             'teaching_methods' => [
-                "إعادة شرح {$chapter} بمثال محلول خطوة بخطوة قبل الانتقال للفصل التالي",
-                "مراجعة شرائح {$chapter} المرفوعة على Blackboard في أول عشر دقائق من المحاضرة القادمة",
-                'ربط كل مفهوم بحالة عملية قصيرة من بيئة الأعمال المحلية',
+                "Re-teach {$chapter} with one fully worked example before moving to the next chapter",
+                "Open the next lecture with a ten-minute review of the {$chapter} slides on Blackboard",
+                'Tie each concept to a short practical case from the local business environment',
             ],
             'activities' => [
-                "تمرين صفّي في مجموعات صغيرة على مسائل {$chapter}",
-                "جلسة تدريس بالأقران يقودها الطلاب الأعلى أداءً في {$code}",
-                'ورقة عمل متدرجة الصعوبة تُسلَّم قبل الاختبار القصير',
+                "In-class small-group exercise on {$chapter} problems",
+                "Peer-tutoring session led by the top-performing students in {$code}",
+                'A graded-difficulty worksheet handed in before the quiz',
             ],
             'assessments' => [
-                "اختبار قصير من بنك أسئلة {$code} على QSpark يبدأ بالمستوى السهل",
-                'إعادة القياس بعد أسبوعين على الأسئلة التي أخطأ فيها الطلاب',
+                "A short quiz from the {$code} question bank on QSpark, starting at the easy level",
+                'Re-measure after two weeks on the questions students got wrong',
             ],
             'resources' => [
-                "شرائح {$chapter} وورقة المراجعة النصفية على Blackboard",
-                "أسئلة {$code} المصدَّرة من QSpark كمراجعة منزلية",
+                "The {$chapter} slides and the midterm review sheet on Blackboard",
+                "The {$code} questions exported from QSpark as take-home review",
             ],
             'youtube_videos' => [],
             'online_platforms' => [],
@@ -269,13 +308,14 @@ final class DemoFacultyContent
         $code = self::courseCodeForShell($blackboardId);
         $chapters = $code !== null ? (self::chapters()[$code] ?? []) : [];
 
-        $results = [$file('syllabus', 'Course Syllabus', 'syllabus.pdf')];
+        $ar = app()->getLocale() === 'ar';
+        $results = [$file('syllabus', $ar ? 'خطة المقرر' : 'Course Syllabus', 'syllabus.pdf')];
         foreach ($chapters ?: ['', '', ''] as $i => $title) {
             $n = $i + 1;
-            $results[] = $file('ch'.$n, 'Chapter '.$n.($title !== '' ? ': '.$title : '').' — Lecture Slides', sprintf('chapter-%02d.pdf', $n));
+            $results[] = $file('ch'.$n, ($ar ? 'الفصل ' : 'Chapter ').$n.($title !== '' ? ': '.$title : '').($ar ? ' — شرائح المحاضرة' : ' — Lecture Slides'), sprintf('chapter-%02d.pdf', $n));
         }
-        $results[] = $file('rev', 'Midterm Review Sheet', 'midterm-review.pdf');
-        $results[] = ['id' => $blackboardId.'_asg1', 'title' => 'Assignment 1', 'hasChildren' => false, 'contentHandler' => ['id' => 'resource/x-bb-assignment'], 'availability' => ['available' => 'Yes']];
+        $results[] = $file('rev', $ar ? 'ورقة مراجعة منتصف الفصل' : 'Midterm Review Sheet', 'midterm-review.pdf');
+        $results[] = ['id' => $blackboardId.'_asg1', 'title' => $ar ? 'الواجب 1' : 'Assignment 1', 'hasChildren' => false, 'contentHandler' => ['id' => 'resource/x-bb-assignment'], 'availability' => ['available' => 'Yes']];
 
         return ['results' => $results];
     }
