@@ -163,8 +163,99 @@ final class DemoFacultyContent
     }
 
     /**
-     * The course's top-level Blackboard contents: lecture slides per chapter,
-     * the syllabus and one assignment — the Blackboard Learn `contents` shape.
+     * The chapters each course's Blackboard shell carries. The course page
+     * lists them as lecture slides and the dashboard's remedial-plan units
+     * are taken from the same list, so the two can never name different chapters.
+     *
+     * @return array<string, array<int, string>> course code => chapter titles (1-based order)
+     */
+    public static function chapters(): array
+    {
+        return [
+            'ACCT201' => ['The Accounting Equation and Financial Statements', 'Recording Transactions: Debits and Credits', 'Adjusting Entries and Accruals'],
+            'ACCT305' => ['Cost Concepts and Classifications', 'Cost-Volume-Profit Analysis', 'Budgeting and Variance Analysis'],
+            'ACCT410' => ['Audit Standards and Professional Ethics', 'Audit Evidence and Documentation', 'Internal Control and Risk Assessment'],
+            'ACCT420' => ['Principles of Taxation', 'Value Added Tax (VAT)', 'Zakat and Corporate Income Tax'],
+        ];
+    }
+
+    /**
+     * The units students miss most — one chapter of each of two courses, with
+     * the share of that course's roster it affects.
+     *
+     * @return array<int, array{course_code: string, chapter: int, error_rate: int, share: float}>
+     */
+    public static function weakChapters(): array
+    {
+        return [
+            ['course_code' => 'ACCT201', 'chapter' => 3, 'error_rate' => 45, 'share' => 0.57],
+            ['course_code' => 'ACCT305', 'chapter' => 2, 'error_rate' => 38, 'share' => 0.5],
+        ];
+    }
+
+    /** «ACCT201 — Chapter 3: Adjusting Entries and Accruals» — the same words the course page shows. */
+    public static function chapterLabel(string $courseCode, int $chapter): string
+    {
+        $title = self::chapters()[$courseCode][$chapter - 1] ?? null;
+
+        return $courseCode.' — Chapter '.$chapter.($title ? ': '.$title : '');
+    }
+
+    /**
+     * The remedial plan for one weak unit, written around that chapter: its
+     * own slides on Blackboard and the course's question bank on QSpark.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public static function remedialPlan(string $area): array
+    {
+        preg_match('/^(\S+)\s+—\s+Chapter\s+(\d+)(?::\s*(.+))?$/u', trim($area), $m);
+        $code = $m[1] ?? '';
+        $n = (int) ($m[2] ?? 0);
+        $title = $m[3] ?? (self::chapters()[$code][$n - 1] ?? $area);
+        $chapter = $n > 0 ? "الفصل {$n} «{$title}»" : "«{$title}»";
+
+        return [
+            'teaching_methods' => [
+                "إعادة شرح {$chapter} بمثال محلول خطوة بخطوة قبل الانتقال للفصل التالي",
+                "مراجعة شرائح {$chapter} المرفوعة على Blackboard في أول عشر دقائق من المحاضرة القادمة",
+                'ربط كل مفهوم بحالة عملية قصيرة من بيئة الأعمال المحلية',
+            ],
+            'activities' => [
+                "تمرين صفّي في مجموعات صغيرة على مسائل {$chapter}",
+                "جلسة تدريس بالأقران يقودها الطلاب الأعلى أداءً في {$code}",
+                'ورقة عمل متدرجة الصعوبة تُسلَّم قبل الاختبار القصير',
+            ],
+            'assessments' => [
+                "اختبار قصير من بنك أسئلة {$code} على QSpark يبدأ بالمستوى السهل",
+                'إعادة القياس بعد أسبوعين على الأسئلة التي أخطأ فيها الطلاب',
+            ],
+            'resources' => [
+                "شرائح {$chapter} وورقة المراجعة النصفية على Blackboard",
+                "أسئلة {$code} المصدَّرة من QSpark كمراجعة منزلية",
+            ],
+            'youtube_videos' => [],
+            'online_platforms' => [],
+        ];
+    }
+
+    /** The course a demo Blackboard shell id belongs to (`_demo101_1` → ACCT201). */
+    private static function courseCodeForShell(string $blackboardId): ?string
+    {
+        $digits = preg_replace('/\D/', '', explode('_', ltrim($blackboardId, '_'))[0] ?? '');
+        foreach (self::catalog() as $c) {
+            if (preg_replace('/\D/', '', $c[0]) === $digits) {
+                return $c[1];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The course's top-level Blackboard contents: the syllabus, lecture slides
+     * per chapter, a review sheet and one assignment — the Blackboard Learn
+     * `contents` shape.
      *
      * @return array{results: array<int, array<string, mixed>>}
      */
@@ -175,15 +266,18 @@ final class DemoFacultyContent
             'contentHandler' => ['id' => 'resource/x-bb-file', 'file' => ['fileName' => $name, 'mimeType' => 'application/pdf']],
             'availability' => ['available' => 'Yes'],
         ];
+        $code = self::courseCodeForShell($blackboardId);
+        $chapters = $code !== null ? (self::chapters()[$code] ?? []) : [];
 
-        return ['results' => [
-            $file('syllabus', 'Course Syllabus', 'syllabus.pdf'),
-            $file('ch1', 'Chapter 1 — Lecture Slides', 'chapter-01.pdf'),
-            $file('ch2', 'Chapter 2 — Lecture Slides', 'chapter-02.pdf'),
-            $file('ch3', 'Chapter 3 — Lecture Slides', 'chapter-03.pdf'),
-            $file('rev', 'Midterm Review Sheet', 'midterm-review.pdf'),
-            ['id' => $blackboardId.'_asg1', 'title' => 'Assignment 1', 'hasChildren' => false, 'contentHandler' => ['id' => 'resource/x-bb-assignment'], 'availability' => ['available' => 'Yes']],
-        ]];
+        $results = [$file('syllabus', 'Course Syllabus', 'syllabus.pdf')];
+        foreach ($chapters ?: ['', '', ''] as $i => $title) {
+            $n = $i + 1;
+            $results[] = $file('ch'.$n, 'Chapter '.$n.($title !== '' ? ': '.$title : '').' — Lecture Slides', sprintf('chapter-%02d.pdf', $n));
+        }
+        $results[] = $file('rev', 'Midterm Review Sheet', 'midterm-review.pdf');
+        $results[] = ['id' => $blackboardId.'_asg1', 'title' => 'Assignment 1', 'hasChildren' => false, 'contentHandler' => ['id' => 'resource/x-bb-assignment'], 'availability' => ['available' => 'Yes']];
+
+        return ['results' => $results];
     }
 
     /**

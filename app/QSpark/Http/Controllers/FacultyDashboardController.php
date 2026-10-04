@@ -442,14 +442,15 @@ class FacultyDashboardController extends Controller
         if (config('app.demo_mode')) {
             $semester = $sisService->getCurrentSemester();
             $sizes = collect($sisService->getFacultyCourses($instructorId, $semester))->pluck('student_count', 'course_code');
-            $areas = [
-                ['ACCT201', 'ACCT201 — Chapter 3: Adjusting Entries and Accruals', 45, 0.57],
-                ['ACCT305', 'ACCT305 — Chapter 2: Cost-Volume-Profit Analysis', 38, 0.5],
-            ];
             $out = [];
-            foreach ($areas as [$code, $area, $rate, $share]) {
-                if (isset($sizes[$code])) {
-                    $out[] = ['area' => $area, 'error_rate' => $rate, 'students_affected' => max(1, (int) round($sizes[$code] * $share))];
+            foreach (\App\QSpark\Support\DemoFacultyContent::weakChapters() as $w) {
+                if (isset($sizes[$w['course_code']])) {
+                    $out[] = [
+                        // The chapter title is read from the course's own contents list.
+                        'area' => \App\QSpark\Support\DemoFacultyContent::chapterLabel($w['course_code'], $w['chapter']),
+                        'error_rate' => $w['error_rate'],
+                        'students_affected' => max(1, (int) round($sizes[$w['course_code']] * $w['share'])),
+                    ];
                 }
             }
             if ($out !== []) {
@@ -651,6 +652,14 @@ class FacultyDashboardController extends Controller
         $area = $request->input('area');
         $errorRate = $request->input('error_rate');
         $studentsAffected = $request->input('students_affected');
+
+        // Demo mode: no model call — the plan is written around the chapter itself.
+        if (config('app.demo_mode')) {
+            return response()->json([
+                'success' => true,
+                'suggestions' => \App\QSpark\Support\DemoFacultyContent::remedialPlan((string) $area),
+            ]);
+        }
 
         try {
             $geminiApiKey = config('services.gemini.api_key');
