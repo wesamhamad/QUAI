@@ -132,7 +132,9 @@
               <button
                 class="quiz-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 hover:to-dga-primary-700 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
                 data-quiz-url="{{ $file['generateQuizUrl'] }}"
-                data-course-code="{{ $code }}">
+                data-course-code="{{ $code }}"
+                data-content-title="{{ $file['contentTitle'] ?? '' }}"
+                data-file-name="{{ $file['fileName'] ?? '' }}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3,3V21H21V3M19,19H5V5H19M17,7H7V9H17M17,11H7V13H17M13,15H7V17H13"/></svg>
                 <span>{{ __('messages.quiz') }}</span>
               </button>
@@ -350,6 +352,17 @@
     return [];
   }
 
+  // A file the screener ruled out: grey the card, drop its quiz/export
+  // buttons, and say why — the same state the server renders on reload.
+  function markHiddenCard(card, reason) {
+    card.classList.add('opacity-70');
+    card.querySelectorAll('.quiz-btn, .export-btn').forEach(b => b.remove());
+    const h = card.querySelector('h3');
+    if (h && !card.querySelector('.hidden-badge')) {
+      h.insertAdjacentHTML('afterend', `<span class="hidden-badge inline-flex items-center gap-1 mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">${@json(__('messages.quiz_file_hidden_badge'))}</span><p class="mt-1 text-xs text-slate-600">${reason || ''}</p>`);
+    }
+  }
+
   async function startQuiz(btn) {
     if (!btn || btn.disabled) return;
 
@@ -524,13 +537,15 @@
 
       const requestData = {
         quiz_url: quizUrl,
-        course_code: courseCode
+        course_code: courseCode,
+        content_title: btn.getAttribute('data-content-title') || '',
+        file_name: btn.getAttribute('data-file-name') || ''
       };
 
       console.log('Making POST request to server-side quiz generation controller...');
       console.log('Request data:', requestData);
 
-      const response = await fetch('/quiz/generate-from-file', {
+      const response = await fetch('{{ route('qspark.quiz.generate.file') }}', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -556,6 +571,22 @@
         } catch (parseError) {
           console.error('Failed to parse error response:', parseError);
           errorData = { message: `Server error: ${response.status} ${response.statusText}` };
+        }
+
+        // The screener said this file is not a chapter: mark the card
+        // hidden, explain, and stop — no quiz is built from it.
+        if (errorData && errorData.hidden) {
+          const card = btn.closest('.group');
+          btn.disabled = false;
+          btn.innerHTML = original;
+          if (card) markHiddenCard(card, errorData.reason || errorData.message);
+          Swal.fire({
+            icon: 'info',
+            title: errorData.message || @json(__('messages.quiz_file_not_chapter')),
+            text: errorData.reason || '',
+            confirmButtonColor: '#25935F'
+          });
+          return;
         }
 
         console.error('Parsed error data:', errorData);
@@ -831,8 +862,10 @@
           const titleIsMeaningful = rawTitle && !placeholderTitles.includes(rawTitle);
           const name = titleIsMeaningful ? rawTitle : (fileName || 'Unknown File');
           const showSubtitle = fileName && fileName !== name;
+          const hidden = !!(file.screening && file.screening.chapter === false);
+          const esc = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
           html += `
-            <div class="group rounded-2xl p-5 border ${colors[0]} shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="group rounded-2xl p-5 border ${colors[0]} shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${hidden ? 'opacity-70' : ''}">
               <div class="flex items-start gap-4">
                 <div class="shrink-0 p-3 rounded-xl text-white shadow-lg bg-gradient-to-br ${colors[1]}">
                   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>
@@ -840,11 +873,12 @@
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-slate-800 truncate text-base">${name}</h3>
                   ${showSubtitle ? `<p class="text-xs text-slate-500 mt-0.5">${fileName}</p>` : ''}
+                  ${hidden ? `<span class="hidden-badge inline-flex items-center gap-1 mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800" title="{{ __('messages.quiz_file_hidden_hint') }}">{{ __('messages.quiz_file_hidden_badge') }}</span><p class="mt-1 text-xs text-slate-600">${esc(file.screening.reason || '')}</p>` : ''}
                 </div>
               </div>
               <div class="flex gap-2 mt-4">
-                ${file.generateQuizUrl ? `<button class="quiz-btn flex-1 text-center py-2 px-3 rounded-lg bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 hover:to-dga-primary-700 text-white text-sm font-medium shadow hover:shadow-lg transition" data-quiz-url="${file.generateQuizUrl}" data-course-code="${courseCode}">{{ __('messages.quiz') }}</button>` : ''}
-                ${file.generateQuizUrl ? `<button class="export-btn text-center py-2 px-3 rounded-lg bg-dga-primary-700 hover:bg-dga-primary-800 text-white text-sm font-medium shadow hover:shadow-lg transition" data-quiz-url="${file.generateQuizUrl}" data-course-code="${courseCode}" title="{{ __('messages.export_quiz') }}"><svg class="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/></svg></button>` : ''}
+                ${hidden ? '' : file.generateQuizUrl ? `<button class="quiz-btn flex-1 text-center py-2 px-3 rounded-lg bg-gradient-to-r from-dga-primary-500 to-dga-primary-600 hover:to-dga-primary-700 text-white text-sm font-medium shadow hover:shadow-lg transition" data-quiz-url="${file.generateQuizUrl}" data-course-code="${courseCode}" data-content-title="${esc(file.contentTitle || '')}" data-file-name="${esc(file.fileName || '')}">{{ __('messages.quiz') }}</button>` : ''}
+                ${hidden ? '' : file.generateQuizUrl ? `<button class="export-btn text-center py-2 px-3 rounded-lg bg-dga-primary-700 hover:bg-dga-primary-800 text-white text-sm font-medium shadow hover:shadow-lg transition" data-quiz-url="${file.generateQuizUrl}" data-course-code="${courseCode}" title="{{ __('messages.export_quiz') }}"><svg class="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/></svg></button>` : ''}
                 ${file.downloadUrl ? `<button class="download-btn flex-1 text-center py-2 px-3 rounded-lg bg-gradient-to-r ${colors[1]} text-white text-sm font-medium shadow hover:brightness-110 hover:shadow-lg transition" data-download-url="${file.downloadUrl}" data-file-name="${file.fileName || 'file'}">{{ __('messages.download') }}</button>` : ''}
               </div>
             </div>`;

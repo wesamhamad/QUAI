@@ -4091,14 +4091,14 @@
                     },
                     {
                         "id": "_4649513_1",
-                        "title": "كامل الضريبة دكتور حسين النافعابي.pdf",
+                        "title": "كامل الضريبة - ملخص المقرر.pdf",
                         "position": 3,
                         "type": "file",
                         "body": null,
                         "contentHandler": {
                             "id": "resource/x-bb-file",
                             "file": {
-                                "fileName": "كامل الضريبة دكتور حسين النافعابي.pdf",
+                                "fileName": "كامل الضريبة - ملخص المقرر.pdf",
                                 "mimeType": "application/pdf"
                             },
                             "url": null

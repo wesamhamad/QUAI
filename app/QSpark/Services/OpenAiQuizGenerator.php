@@ -22,6 +22,11 @@ class OpenAiQuizGenerator
     public static function fromConfig(): self
     {
         $key = (string) config('services.openai.api_key');
+        // Demo mode never calls OpenAI (generateFromSlideUrl serves the bundled
+        // bank), so a missing key must not stop the demo quiz from starting.
+        if ($key === '' && config('app.demo_mode')) {
+            return new self(apiKey: 'demo', model: 'demo');
+        }
         if ($key === '') {
             throw new \RuntimeException('OPENAI_API_KEY is not set');
         }
