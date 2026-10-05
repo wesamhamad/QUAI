@@ -42,29 +42,6 @@ class QuizController extends Controller
         try {
             $attachmentKey = $this->extractAttachmentKeyFromUrl($quizUrl);
 
-            // Screen the file first: a grade sheet, the syllabus or an
-            // announcement is not a chapter, and the student is told why
-            // instead of being handed a quiz about nothing. Decided once per
-            // file and remembered, so the second click is instant.
-            if ($attachmentKey) {
-                $screening = app(\App\QSpark\Services\QuizContentScreener::class)->screen(
-                    $attachmentKey,
-                    (string) $request->input('content_title', ''),
-                    (string) $request->input('file_name', ''),
-                    (string) $courseCode,
-                );
-                if (! $screening['chapter']) {
-                    $reason = app()->getLocale() === 'en' ? ($screening['reason_en'] ?: $screening['reason']) : $screening['reason'];
-
-                    return response()->json([
-                        'success' => false,
-                        'hidden' => true,
-                        'message' => __('messages.quiz_file_not_chapter'),
-                        'reason' => $reason,
-                    ], 422);
-                }
-            }
-
             Log::info('QUIZ: checking for cached questions', ['attachment_key' => $attachmentKey, 'course' => $courseCode]);
 
             // STEP 0: cache hit on this exact attachment

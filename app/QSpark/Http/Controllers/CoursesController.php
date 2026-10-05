@@ -696,16 +696,6 @@ class CoursesController extends Controller
                 $copy = $item;
                 unset($copy['children']);
                 $copy['hasChildren'] = ! empty($children);
-                // A classic file node (resource/x-bb-file) is itself the
-                // attachment: expose it as one so the course page can list
-                // it and the quiz launcher can key questions to it.
-                if (empty($copy['files']) && isset($item['contentHandler']['file']) && ! empty($item['id'])) {
-                    $copy['files'] = [[
-                        'attachmentId' => $item['id'],
-                        'name' => $item['contentHandler']['file']['fileName'] ?? $item['title'] ?? 'file',
-                        'mimeType' => $item['contentHandler']['file']['mimeType'] ?? null,
-                    ]];
-                }
                 $flat[] = $copy;
                 if (! empty($children)) {
                     $walk($children);
@@ -759,22 +749,11 @@ class CoursesController extends Controller
                     $downloadUrl = $file['downloadUrl'] ?? null;
                 }
 
-                // What the screener decided about this file the first time a
-                // student asked for a quiz on it — null until then.
-                $screening = null;
-                if ($attachmentId) {
-                    $screening = app(\App\QSpark\Services\QuizContentScreener::class)->verdict("{$externalId}_{$contentId}_{$attachmentId}");
-                }
-
                 $files[] = [
                     'contentTitle' => $contentTitle,
                     'fileName' => $fileName,
                     'downloadUrl' => $downloadUrl,
                     'generateQuizUrl' => $generateQuizUrl,
-                    'screening' => $screening === null ? null : [
-                        'chapter' => (bool) $screening['chapter'],
-                        'reason' => app()->getLocale() === 'en' ? ($screening['reason_en'] ?: $screening['reason']) : $screening['reason'],
-                    ],
                     'contentId' => $contentId,
                     'attachmentId' => $attachmentId,
                     'size' => $file['size'] ?? null,
